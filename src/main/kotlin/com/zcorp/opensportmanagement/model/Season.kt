@@ -1,19 +1,16 @@
 package com.zcorp.opensportmanagement.model
 
-import java.time.ZonedDateTime
-import javax.persistence.Entity
-import javax.persistence.GeneratedValue
-import javax.persistence.Id
-import javax.persistence.Table
-
-enum class Status {
-    CURRENT, CLOSED
-}
+import java.time.LocalDate
+import javax.persistence.*
 
 @Entity
 @Table(name = "season")
 data class Season(val name: String,
-                  val from: ZonedDateTime,
-                  val to: ZonedDateTime,
-                  val status: Status,
+                  @Convert(converter = LocalDateAttributeConverter::class) val fromDate: LocalDate,
+                  @Convert(converter = LocalDateAttributeConverter::class) val toDate: LocalDate,
+                  @Enumerated(EnumType.STRING) val status: Status,
                   @Id @GeneratedValue val id: Int = -1)
+
+enum class Status {
+    CURRENT, CLOSED
+}

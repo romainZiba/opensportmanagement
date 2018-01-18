@@ -1,6 +1,5 @@
 package com.zcorp.opensportmanagement.model
 
-import java.util.stream.Collectors
 import javax.persistence.*
 
 @Entity

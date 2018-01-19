@@ -8,7 +8,7 @@ data class Team(@Column(unique = true) val name: String,
                 val sport: Sport,
                 val genderKind: Gender,
                 val ageGroup: AgeGroup,
-                @ManyToOne val stadiums: Stadium,
+                @ManyToOne val stadium: Stadium?,
                 @OneToMany(fetch = FetchType.EAGER) val events: Set<Event>,
                 @Id @GeneratedValue val id: Int = -1) {
     fun toDto(): TeamDto = TeamDto(
@@ -20,6 +20,8 @@ data class Team(@Column(unique = true) val name: String,
             events = this.events.map { it.toDto() }.toSet()
     )
 }
+
+fun fromDto(teamDto: TeamDto): Team = Team(teamDto.name, teamDto.sport, teamDto.genderKind, teamDto.ageGroup, null, emptySet())
 
 class TeamDto(val id: Int,
               val name: String,

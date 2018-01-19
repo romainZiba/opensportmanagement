@@ -5,5 +5,5 @@ import org.springframework.data.repository.CrudRepository
 
 interface TeamRepository : CrudRepository<Team, Int> {
 
-    fun findByName(name: String): Team
+    fun findByName(name: String): Team?
 }

@@ -1,5 +1,6 @@
 package com.zcorp.opensportmanagement.model
 
+import com.fasterxml.jackson.annotation.JsonManagedReference
 import javax.persistence.*
 
 @Entity
@@ -9,26 +10,37 @@ data class Team(@Column(unique = true) val name: String,
                 val genderKind: Gender,
                 val ageGroup: AgeGroup,
                 @ManyToOne val stadium: Stadium?,
-                @OneToMany(fetch = FetchType.EAGER) val events: Set<Event>,
+                @OneToMany(mappedBy = "team") @JsonManagedReference val seasons: MutableSet<Season>,
+                @OneToMany(mappedBy = "team") @JsonManagedReference val events: MutableSet<OtherEvent>,
                 @Id @GeneratedValue val id: Int = -1) {
-    fun toDto(): TeamDto = TeamDto(
-            id = this.id,
-            name = this.name,
-            sport = this.sport,
-            genderKind = this.genderKind,
-            ageGroup = this.ageGroup,
-            events = this.events.map { it.toDto() }.toSet()
-    )
+
+    override fun toString(): String {
+        return "Team(name='$name', sport=$sport, genderKind=$genderKind, ageGroup=$ageGroup, stadium=$stadium, id=$id)"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other != null) {
+            if (other is Team) {
+                return other.id == this.id
+            }
+        }
+        return false
+    }
+
+    override fun hashCode(): Int {
+        return id
+    }
+
+    //    fun addMatch(match: Match, championshipName: String) {
+//        seasons.filter { it.status.equals(Status.CURRENT) }.first().championships
+//                .filter { it.name.equals(championshipName) }.first().matches.add(match)
+//    }
+//
+//    fun addEvent(event: Event) {
+//        events.add(event)
+//
+//    }
 }
-
-fun fromDto(teamDto: TeamDto): Team = Team(teamDto.name, teamDto.sport, teamDto.genderKind, teamDto.ageGroup, null, emptySet())
-
-class TeamDto(val id: Int,
-              val name: String,
-              val sport: Sport,
-              val genderKind: Gender,
-              val ageGroup: AgeGroup,
-              val events: Set<EventDto>)
 
 enum class Sport {
     BASKETBALL, HANDBALL, FOOTBALL, OTHER

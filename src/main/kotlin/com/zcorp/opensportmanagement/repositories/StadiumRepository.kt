@@ -1,7 +1,6 @@
-package com.zcorp.opensportmanagement.services
+package com.zcorp.opensportmanagement.repositories
 
 import com.zcorp.opensportmanagement.model.Stadium
-import com.zcorp.opensportmanagement.model.Team
 import org.springframework.data.repository.CrudRepository
 
 interface StadiumRepository : CrudRepository<Stadium, Int> {

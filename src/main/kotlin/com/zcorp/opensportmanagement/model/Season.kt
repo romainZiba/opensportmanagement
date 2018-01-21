@@ -6,13 +6,15 @@ import java.time.LocalDate
 import javax.persistence.*
 
 @Entity
-@Table(name = "season")
-data class Season(@Column(unique = true) val name: String,
+@Table(
+        name = "season",
+        uniqueConstraints = arrayOf(UniqueConstraint(columnNames = arrayOf("name", "team_id"))))
+data class Season(@Column(name = "name") val name: String,
                   @Convert(converter = LocalDateAttributeConverter::class) val fromDate: LocalDate,
                   @Convert(converter = LocalDateAttributeConverter::class) val toDate: LocalDate,
                   @Enumerated(EnumType.STRING) val status: Status,
                   @OneToMany(mappedBy = "season") @JsonManagedReference val championships: MutableSet<Championship>,
-                  @ManyToOne @JsonBackReference val team: Team,
+                  @ManyToOne @JsonBackReference @JoinColumn(name = "team_id") val team: Team,
                   @Id @GeneratedValue val id: Int = -1) {
 
     override fun toString(): String {

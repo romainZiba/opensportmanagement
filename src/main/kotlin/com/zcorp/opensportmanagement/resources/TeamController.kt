@@ -33,7 +33,7 @@ class TeamController(private val teamRepository: TeamRepository,
     @PostMapping("/teams")
     fun createTeam(@RequestBody teamDto: TeamDto): ResponseEntity<Team> {
         if (teamRepository.findByName(teamDto.name) == null) {
-            val team = Team(teamDto.name, teamDto.sport, teamDto.genderKind, teamDto.ageGroup, teamDto.stadium,
+            val team = Team(teamDto.name, teamDto.sport, teamDto.genderKind, teamDto.ageGroup, mutableSetOf(),
                     mutableSetOf(), mutableSetOf(), mutableSetOf())
             var teamSaved = teamRepository.save(team)
             return ResponseEntity(teamSaved, HttpStatus.CREATED)
@@ -65,12 +65,12 @@ class TeamController(private val teamRepository: TeamRepository,
         if (team != null) {
             val season = seasonRepository.findOne(seasonId)
             if (season != null) {
-                if (championshipRepository.findByName(championshipDto.name) == null) {
+                if (season.championships.map { it.name }.contains(championshipDto.name)) {
+                    throw EntityAlreadyExistsException("Championship " + championshipDto.name + " already exists")
+                } else {
                     val championship = Championship(championshipDto.name, season, mutableSetOf())
                     val championshipSaved = championshipRepository.save(championship)
                     return ResponseEntity(championshipSaved, HttpStatus.CREATED)
-                } else {
-                    throw EntityAlreadyExistsException("Championship " + championshipDto.name + " already exists")
                 }
             } else {
                 throw EntityNotFoundException("Season $seasonId does not exist")
@@ -84,12 +84,12 @@ class TeamController(private val teamRepository: TeamRepository,
                        @RequestBody opponentDto: OpponentDto): ResponseEntity<Opponent> {
         val team = teamRepository.findOne(teamId)
         if (team != null) {
-            if (opponentRepository.findByName(opponentDto.name) == null) {
+            if (team.opponents.map { it.name }.contains(opponentDto.name)) {
+                throw EntityAlreadyExistsException("Opponent " + opponentDto.name + " already exists")
+            } else {
                 val opponent = Opponent(opponentDto.name, opponentDto.phoneNumber, opponentDto.email, team)
                 var opponentSaved = opponentRepository.save(opponent)
                 return ResponseEntity(opponentSaved, HttpStatus.CREATED)
-            } else {
-                throw EntityAlreadyExistsException("Opponent " + opponentDto.name + " already exists")
             }
         }
         throw EntityNotFoundException("Team $teamId does not exist")

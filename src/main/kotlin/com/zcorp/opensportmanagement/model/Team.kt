@@ -9,14 +9,14 @@ data class Team(@Column(unique = true) val name: String,
                 val sport: Sport,
                 val genderKind: Gender,
                 val ageGroup: AgeGroup,
-                @ManyToOne val stadium: Stadium?,
+                @OneToMany(mappedBy = "team") @JsonManagedReference  val stadiums: MutableSet<Stadium>,
                 @OneToMany(mappedBy = "team") @JsonManagedReference val seasons: MutableSet<Season>,
                 @OneToMany(mappedBy = "team") @JsonManagedReference val events: MutableSet<OtherEvent>,
                 @OneToMany(mappedBy = "team") @JsonManagedReference val opponents: MutableSet<Opponent>,
                 @Id @GeneratedValue val id: Int = -1) {
 
     override fun toString(): String {
-        return "Team(name='$name', sport=$sport, genderKind=$genderKind, ageGroup=$ageGroup, stadium=$stadium, id=$id)"
+        return "Team(name='$name', sport=$sport, genderKind=$genderKind, ageGroup=$ageGroup, id=$id)"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -33,7 +33,7 @@ data class Team(@Column(unique = true) val name: String,
     }
 }
 
-class TeamDto(val name: String, val sport: Sport, val genderKind: Gender, val ageGroup: AgeGroup, val stadium: Stadium?)
+class TeamDto(val name: String, val sport: Sport, val genderKind: Gender, val ageGroup: AgeGroup)
 
 enum class Sport {
     BASKETBALL, HANDBALL, FOOTBALL, OTHER

@@ -10,3 +10,5 @@ data class Championship(@Column(unique = true) val name: String,
                         @ManyToOne @JsonBackReference val season: Season,
                         @OneToMany(mappedBy = "championship") @JsonManagedReference val matches: MutableSet<Match>,
                         @Id @GeneratedValue val id: Int = -1)
+
+class ChampionshipDto(val name: String)

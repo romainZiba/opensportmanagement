@@ -55,28 +55,28 @@ class TeamController(private val teamRepository: TeamRepository,
         }
         throw EntityNotFoundException("Team $teamId does not exist")
     }
-//
-//    @PostMapping("/teams/{teamId}/seasons/{seasonId}/championships")
-//    fun createChampionship(@NotNull @PathParam("teamId") teamId: Int,
-//                           @NotNull @PathParam("seasonId") seasonId: Int,
-//                           @RequestBody championship: Championship): ResponseEntity<Championship> {
-//        val team = teamRepository.findOne(teamId)
-//        if (team != null) {
-//            val season = seasonRepository.findOne(seasonId)
-//            if (season != null) {
-//                if (championshipRepository.findByName(championship.name) == null) {
-//                    season.championships.add(championship)
-//                    teamRepository.save(team)
-//                    return ResponseEntity(championshipSaved, HttpStatus.CREATED)
-//                } else {
-//                    throw EntityAlreadyExistsException("Championship " + championship.name + " already exists")
-//                }
-//            } else {
-//                throw EntityNotFoundException("Season $seasonId does not exist")
-//            }
-//        }
-//        throw EntityNotFoundException("Team $teamId does not exist")
-//    }
+
+    @PostMapping("/teams/{teamId}/seasons/{seasonId}/championships")
+    fun createChampionship(@NotNull @PathVariable("teamId") teamId: Int,
+                           @NotNull @PathVariable("seasonId") seasonId: Int,
+                           @RequestBody championshipDto: ChampionshipDto): ResponseEntity<Championship> {
+        val team = teamRepository.findOne(teamId)
+        if (team != null) {
+            val season = seasonRepository.findOne(seasonId)
+            if (season != null) {
+                if (championshipRepository.findByName(championshipDto.name) == null) {
+                    val championship = Championship(championshipDto.name, season, mutableSetOf())
+                    val championshipSaved = championshipRepository.save(championship)
+                    return ResponseEntity(championshipSaved, HttpStatus.CREATED)
+                } else {
+                    throw EntityAlreadyExistsException("Championship " + championshipDto.name + " already exists")
+                }
+            } else {
+                throw EntityNotFoundException("Season $seasonId does not exist")
+            }
+        }
+        throw EntityNotFoundException("Team $teamId does not exist")
+    }
 //
 //    @PostMapping("/teams/{teamId}/opponents")
 //    fun createOpponent(@NotNull @PathParam("teamId") teamId: Int,

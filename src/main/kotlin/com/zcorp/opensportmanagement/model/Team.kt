@@ -12,6 +12,7 @@ data class Team(@Column(unique = true) val name: String,
                 @ManyToOne val stadium: Stadium?,
                 @OneToMany(mappedBy = "team") @JsonManagedReference val seasons: MutableSet<Season>,
                 @OneToMany(mappedBy = "team") @JsonManagedReference val events: MutableSet<OtherEvent>,
+                @OneToMany(mappedBy = "team") @JsonManagedReference val opponents: MutableSet<Opponent>,
                 @Id @GeneratedValue val id: Int = -1) {
 
     override fun toString(): String {
@@ -30,17 +31,9 @@ data class Team(@Column(unique = true) val name: String,
     override fun hashCode(): Int {
         return id
     }
-
-    //    fun addMatch(match: Match, championshipName: String) {
-//        seasons.filter { it.status.equals(Status.CURRENT) }.first().championships
-//                .filter { it.name.equals(championshipName) }.first().matches.add(match)
-//    }
-//
-//    fun addEvent(event: Event) {
-//        events.add(event)
-//
-//    }
 }
+
+class TeamDto(val name: String, val sport: Sport, val genderKind: Gender, val ageGroup: AgeGroup, val stadium: Stadium?)
 
 enum class Sport {
     BASKETBALL, HANDBALL, FOOTBALL, OTHER

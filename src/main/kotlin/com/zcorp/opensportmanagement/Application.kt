@@ -21,16 +21,16 @@ class Application {
              stadiumRepository: StadiumRepository,
              eventRepository: EventRepository,
              opponentRepository: OpponentRepository,
-             contactRepository: ContactRepository,
              seasonRepository: SeasonRepository,
              championshipRepository: ChampionshipRepository) = CommandLineRunner {
         // save entities
         val stadium = stadiumRepository.save(Stadium("LE stade", "2 allée", "Toulouse"))
-        val contact = contactRepository.save(Contact("0159756563", "testmail@gmail.com"))
-        val opponent = opponentRepository.save(Opponent("TCMS2", contact))
 
         val team = teamRepository.save(Team("MyTeam", Sport.BASKETBALL, Gender.BOTH, AgeGroup.ADULTS, stadium,
-                mutableSetOf(), mutableSetOf()))
+                mutableSetOf(), mutableSetOf(), mutableSetOf()))
+
+        val opponent = opponentRepository.save(Opponent("TCMS2", "0159756563", "testmail@gmail.com", team))
+
         val season = seasonRepository.save(Season("2017-2018",
                 LocalDate.of(2017, Month.SEPTEMBER, 1),
                 LocalDate.of(2018, Month.JULY, 31),

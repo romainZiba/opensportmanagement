@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import javax.validation.constraints.NotNull
-import javax.websocket.server.PathParam
 
 @RestController
 class TeamController(private val teamRepository: TeamRepository,
@@ -32,12 +31,14 @@ class TeamController(private val teamRepository: TeamRepository,
     }
 
     @PostMapping("/teams")
-    fun createTeam(@RequestBody team: Team): ResponseEntity<Team> {
-        if (teamRepository.findByName(team.name) == null) {
+    fun createTeam(@RequestBody teamDto: TeamDto): ResponseEntity<Team> {
+        if (teamRepository.findByName(teamDto.name) == null) {
+            val team = Team(teamDto.name, teamDto.sport, teamDto.genderKind, teamDto.ageGroup, teamDto.stadium,
+                    mutableSetOf(), mutableSetOf(), mutableSetOf())
             var teamSaved = teamRepository.save(team)
             return ResponseEntity(teamSaved, HttpStatus.CREATED)
         }
-        throw EntityAlreadyExistsException("Team " + team.name + " already exists")
+        throw EntityAlreadyExistsException("Team " + teamDto.name + " already exists")
     }
 
     @PostMapping("/teams/{teamId}/seasons")
@@ -77,21 +78,23 @@ class TeamController(private val teamRepository: TeamRepository,
         }
         throw EntityNotFoundException("Team $teamId does not exist")
     }
-//
-//    @PostMapping("/teams/{teamId}/opponents")
-//    fun createOpponent(@NotNull @PathParam("teamId") teamId: Int,
-//                       @RequestBody opponent: Opponent): ResponseEntity<Opponent> {
-//        if (teamRepository.findOne(teamId) != null) {
-//            if (opponentRepository.findByName(opponent.name) == null) {
-//                var opponentSaved = opponentRepository.save(opponent)
-//                return ResponseEntity(opponentSaved, HttpStatus.CREATED)
-//            } else {
-//                throw EntityAlreadyExistsException("Opponent " + opponent.name + " already exists")
-//            }
-//        }
-//        throw EntityNotFoundException("Team $teamId does not exist")
-//    }
-//
+
+    @PostMapping("/teams/{teamId}/opponents")
+    fun createOpponent(@NotNull @PathVariable("teamId") teamId: Int,
+                       @RequestBody opponentDto: OpponentDto): ResponseEntity<Opponent> {
+        val team = teamRepository.findOne(teamId)
+        if (team != null) {
+            if (opponentRepository.findByName(opponentDto.name) == null) {
+                val opponent = Opponent(opponentDto.name, opponentDto.phoneNumber, opponentDto.email, team)
+                var opponentSaved = opponentRepository.save(opponent)
+                return ResponseEntity(opponentSaved, HttpStatus.CREATED)
+            } else {
+                throw EntityAlreadyExistsException("Opponent " + opponentDto.name + " already exists")
+            }
+        }
+        throw EntityNotFoundException("Team $teamId does not exist")
+    }
+
 //    @PostMapping("/teams/{teamId}/seasons/{seasonId}/championships/{championshipId}/events")
 //    fun createChampionshipEvent(@NotNull @PathParam("teamId") teamId: Int,
 //                                @NotNull @PathParam("seasonId") seasonId: Int,

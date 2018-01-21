@@ -33,6 +33,8 @@ data class Season(@Column(unique = true) val name: String,
     }
 }
 
+class SeasonDto(val name: String, val fromDate: LocalDate, val toDate: LocalDate, val status: Status)
+
 enum class Status {
-    CURRENT, CLOSED
+    CURRENT, PREVIOUS, NEXT
 }

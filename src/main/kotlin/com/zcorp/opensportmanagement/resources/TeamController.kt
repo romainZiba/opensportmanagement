@@ -40,22 +40,21 @@ class TeamController(private val teamRepository: TeamRepository,
         throw EntityAlreadyExistsException("Team " + team.name + " already exists")
     }
 
-//    @PostMapping("/teams/{teamId}/seasons")
-//    fun createSeason(@NotNull @PathVariable("teamId") teamId: Int,
-//                     @RequestBody seasonDto: SeasonDto): ResponseEntity<Season> {
-//        val team: Team? = teamRepository.findOne(teamId)
-//        if (team != null) {
-//            if (team.seasons.map { it.name }.contains(seasonDto.name)) {
-//                throw EntityAlreadyExistsException("Season " + seasonDto.name + " already exists")
-//            } else {
-//                val season: Season = fromDto(seasonDto)
-//                team.seasons.add(season)
-//                teamRepository.save(team)
-//                return ResponseEntity(season, HttpStatus.CREATED)
-//            }
-//        }
-//        throw EntityNotFoundException("Team $teamId does not exist")
-//    }
+    @PostMapping("/teams/{teamId}/seasons")
+    fun createSeason(@NotNull @PathVariable("teamId") teamId: Int,
+                     @RequestBody seasonDto: SeasonDto): ResponseEntity<Season> {
+        val team: Team? = teamRepository.findOne(teamId)
+        if (team != null) {
+            if (team.seasons.map { it.name }.contains(seasonDto.name)) {
+                throw EntityAlreadyExistsException("Season " + seasonDto.name + " already exists")
+            } else {
+                val season = Season(seasonDto.name, seasonDto.fromDate, seasonDto.toDate, seasonDto.status, mutableSetOf(), team)
+                val seasonSaved = seasonRepository.save(season)
+                return ResponseEntity(seasonSaved, HttpStatus.CREATED)
+            }
+        }
+        throw EntityNotFoundException("Team $teamId does not exist")
+    }
 //
 //    @PostMapping("/teams/{teamId}/seasons/{seasonId}/championships")
 //    fun createChampionship(@NotNull @PathParam("teamId") teamId: Int,

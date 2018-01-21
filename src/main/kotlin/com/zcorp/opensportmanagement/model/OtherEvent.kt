@@ -30,4 +30,10 @@ class OtherEvent : Event {
                 team: Team) :
             super(name, description, reccurenceDays, recurrenceFromDate, recurrenceToDate, recurrenceFromTime,
                     recurrenceToTime, place, team)
+
+    override fun toString(): String {
+        return "OtherEvent() ${super.toString()}"
+    }
+
+
 }

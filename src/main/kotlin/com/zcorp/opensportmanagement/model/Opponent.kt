@@ -11,6 +11,10 @@ data class Opponent(@Column(name = "name") val name: String,
                     val phoneNumber: String,
                     val email: String,
                     @ManyToOne @JsonBackReference @JoinColumn(name = "team_id") val team: Team,
-                    @Id @GeneratedValue val id: Int = -1)
+                    @Id @GeneratedValue val id: Int = -1) {
+    override fun toString(): String {
+        return "Opponent(name='$name', phoneNumber='$phoneNumber', email='$email', id=$id)"
+    }
+}
 
 class OpponentDto(val name: String, val phoneNumber: String, val email: String)

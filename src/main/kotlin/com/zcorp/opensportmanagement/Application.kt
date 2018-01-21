@@ -7,26 +7,32 @@ import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.context.annotation.Bean
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
 
 @SpringBootApplication
-class Application {
+open class Application {
 
     private val LOG = LoggerFactory.getLogger(Application::class.java)
 
     @Bean
-    fun init(teamRepository: TeamRepository,
-             stadiumRepository: StadiumRepository,
-             eventRepository: EventRepository,
-             opponentRepository: OpponentRepository,
-             seasonRepository: SeasonRepository,
-             championshipRepository: ChampionshipRepository) = CommandLineRunner {
+    open fun bCryptPasswordEncoder(): BCryptPasswordEncoder {
+        return BCryptPasswordEncoder()
+    }
+
+    @Bean
+    open fun init(teamRepository: TeamRepository,
+                  stadiumRepository: StadiumRepository,
+                  eventRepository: EventRepository,
+                  opponentRepository: OpponentRepository,
+                  seasonRepository: SeasonRepository,
+                  championshipRepository: ChampionshipRepository) = CommandLineRunner {
         // save entities
 
         val team = teamRepository.save(Team("MyTeam", Sport.BASKETBALL, Gender.BOTH, AgeGroup.ADULTS, mutableSetOf(),
-                mutableSetOf(), mutableSetOf(), mutableSetOf()))
+                mutableSetOf(), mutableSetOf(), mutableSetOf(), mutableSetOf()))
 
         val stadium = stadiumRepository.save(Stadium("LE stade", "2 allée", "Toulouse", team))
 

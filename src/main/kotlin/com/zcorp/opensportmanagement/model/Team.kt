@@ -9,27 +9,15 @@ data class Team(@Column(unique = true) val name: String,
                 val sport: Sport,
                 val genderKind: Gender,
                 val ageGroup: AgeGroup,
-                @OneToMany(mappedBy = "team") @JsonManagedReference  val stadiums: MutableSet<Stadium>,
+                @OneToMany(mappedBy = "team") @JsonManagedReference val stadiums: MutableSet<Stadium>,
                 @OneToMany(mappedBy = "team") @JsonManagedReference val seasons: MutableSet<Season>,
                 @OneToMany(mappedBy = "team") @JsonManagedReference val events: MutableSet<OtherEvent>,
                 @OneToMany(mappedBy = "team") @JsonManagedReference val opponents: MutableSet<Opponent>,
+                @ManyToMany val members: MutableSet<User>,
                 @Id @GeneratedValue val id: Int = -1) {
 
     override fun toString(): String {
         return "Team(name='$name', sport=$sport, genderKind=$genderKind, ageGroup=$ageGroup, id=$id)"
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (other != null) {
-            if (other is Team) {
-                return other.id == this.id
-            }
-        }
-        return false
-    }
-
-    override fun hashCode(): Int {
-        return id
     }
 }
 

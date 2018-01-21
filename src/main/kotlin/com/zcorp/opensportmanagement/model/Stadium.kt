@@ -12,4 +12,9 @@ data class Stadium(@Column(name = "name") @NotNull val name: String,
                    val address: String,
                    val city: String,
                    @ManyToOne @JsonBackReference @JoinColumn(name = "team_id") val team: Team,
-                   @Id @GeneratedValue val id: Int = -1)
+                   @Id @GeneratedValue val id: Int = -1) {
+
+    override fun toString(): String {
+        return "Stadium(name='$name', address='$address', city='$city', id=$id)"
+    }
+}

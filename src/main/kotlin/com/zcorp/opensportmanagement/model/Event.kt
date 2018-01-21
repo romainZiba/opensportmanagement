@@ -75,8 +75,10 @@ abstract class Event() {
     }
 
     override fun toString(): String {
-        return "Event(name='$name', description='$description', recurrent=$recurrent, fromDateTime=$fromDateTime, toDateTime=$toDateTime, reccurenceDays=$reccurenceDays, recurrenceFromDate=$recurrenceFromDate, recurrenceToDate=$recurrenceToDate, recurrenceFromTime=$recurrenceFromTime, recurrenceToTime=$recurrenceToTime, stadium=$stadium, place=$place, team=$team, id=$id)"
+        return "Event(name='$name', description='$description', id=$id)"
     }
+
+
 }
 
 const val championship = "CHAMPIONSHIP"

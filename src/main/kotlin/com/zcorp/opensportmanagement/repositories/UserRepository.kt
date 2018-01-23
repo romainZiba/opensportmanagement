@@ -1,8 +1,8 @@
 package com.zcorp.opensportmanagement.repositories
 
-import com.zcorp.opensportmanagement.model.ApplicationUser
+import com.zcorp.opensportmanagement.model.User
 import org.springframework.data.repository.CrudRepository
 
-interface UserRepository : CrudRepository<ApplicationUser, Int> {
-    fun findByUserName(userName: String): ApplicationUser?
+interface UserRepository : CrudRepository<User, Int> {
+    fun findByUserName(userName: String): User?
 }

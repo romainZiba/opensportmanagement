@@ -1,6 +1,6 @@
 package com.zcorp.opensportmanagement.security
 
-import com.zcorp.opensportmanagement.model.ApplicationUser
+import com.zcorp.opensportmanagement.model.User
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import org.apache.log4j.Logger
@@ -20,7 +20,7 @@ internal object JWTUtils {
 
     private val logger = Logger.getLogger(JWTUtils::class.java)
 
-    fun ApplicationUser.createJwt(): String {
+    fun User.createJwt(): String {
         val claims = HashMap<String, Any>()
         claims.put("role", this.role)
         return Jwts.builder()
@@ -30,7 +30,7 @@ internal object JWTUtils {
                 .signWith(SignatureAlgorithm.HS256, secret).compact()
     }
 
-    fun addAuthentication(response: HttpServletResponse, user: ApplicationUser) {
+    fun addAuthentication(response: HttpServletResponse, user: User) {
         val jwt = user.createJwt()
         response.setHeader("Access-Control-Allow-Origin", "http://localhost:3000")
         response.writer.write(jwt)

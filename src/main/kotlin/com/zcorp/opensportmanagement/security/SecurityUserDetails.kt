@@ -1,11 +1,11 @@
 package com.zcorp.opensportmanagement.security
 
-import com.zcorp.opensportmanagement.model.ApplicationUser
+import com.zcorp.opensportmanagement.model.User
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 
-class SecurityUserDetails(val user: ApplicationUser) : UserDetails {
+class SecurityUserDetails(val user: User) : UserDetails {
     override fun getAuthorities(): MutableCollection<out GrantedAuthority> = mutableListOf(SimpleGrantedAuthority(user.role.toString()))
 
     override fun getPassword(): String = user.password

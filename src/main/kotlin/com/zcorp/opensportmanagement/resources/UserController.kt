@@ -3,7 +3,7 @@ package com.zcorp.opensportmanagement.resources
 
 import com.zcorp.opensportmanagement.EntityAlreadyExistsException
 import com.zcorp.opensportmanagement.EntityNotFoundException
-import com.zcorp.opensportmanagement.model.ApplicationUser
+import com.zcorp.opensportmanagement.model.User
 import com.zcorp.opensportmanagement.repositories.UserRepository
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -24,13 +24,13 @@ class UserController(private val userRepository: UserRepository,
     fun test(principal: Principal?) = principal?.name ?: "You are not logged in"
 
     @PostMapping("/users/sign-up")
-    fun createTeam(@Valid @RequestBody applicationUser: ApplicationUser): ResponseEntity<ApplicationUser> {
-        if (userRepository.findByUserName(applicationUser.userName) == null) {
-            applicationUser.password = bCryptPasswordEncoder.encode(applicationUser.password)
-            val userSaved = userRepository.save(applicationUser)
+    fun createTeam(@Valid @RequestBody user: User): ResponseEntity<User> {
+        if (userRepository.findByUserName(user.userName) == null) {
+            user.password = bCryptPasswordEncoder.encode(user.password)
+            val userSaved = userRepository.save(user)
             return ResponseEntity(userSaved, HttpStatus.CREATED)
         }
-        throw EntityAlreadyExistsException("ApplicationUser " + applicationUser.userName + " already exists")
+        throw EntityAlreadyExistsException("User " + user.userName + " already exists")
     }
 
     /** Handle the error */

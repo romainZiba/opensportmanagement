@@ -6,7 +6,7 @@ import javax.persistence.*
 @Table(name = "user")
 data class User(val firstName: String,
                 val lastName: String,
-                @Column(unique = true) val userName: String,
+                @Column(unique = true) val username: String,
                 var password: String,
                 val email: String,
                 val phoneNumber: String?,

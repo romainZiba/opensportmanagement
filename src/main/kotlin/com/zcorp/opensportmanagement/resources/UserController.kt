@@ -25,12 +25,12 @@ class UserController(private val userRepository: UserRepository,
 
     @PostMapping("/users/sign-up")
     fun createTeam(@Valid @RequestBody user: User): ResponseEntity<User> {
-        if (userRepository.findByUserName(user.userName) == null) {
+        if (userRepository.findByUsername(user.username) == null) {
             user.password = bCryptPasswordEncoder.encode(user.password)
             val userSaved = userRepository.save(user)
             return ResponseEntity(userSaved, HttpStatus.CREATED)
         }
-        throw EntityAlreadyExistsException("User " + user.userName + " already exists")
+        throw EntityAlreadyExistsException("User " + user.username + " already exists")
     }
 
     /** Handle the error */

@@ -1,6 +1,6 @@
 package com.zcorp.opensportmanagement.model
 
-import com.fasterxml.jackson.annotation.JsonBackReference
+import com.fasterxml.jackson.annotation.JsonIgnore
 import javax.persistence.*
 import javax.validation.constraints.NotNull
 
@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull
 data class Stadium(@Column(name = "name") @NotNull val name: String,
                    val address: String,
                    val city: String,
-                   @ManyToOne @JsonBackReference @JoinColumn(name = "team_id") val team: Team,
+                   @ManyToOne @JoinColumn(name = "team_id") @JsonIgnore val team: Team,
                    @Id @GeneratedValue val id: Int = -1) {
 
     override fun toString(): String {

@@ -16,8 +16,8 @@ class Match : Event {
 
     @ManyToOne val opponent: Opponent
     @ManyToOne @JsonBackReference val championship: Championship
-    @ManyToMany val presentPlayers: MutableSet<User>
-    @ManyToMany val notPresentPlayers: MutableSet<User>
+    @ManyToMany val presentPlayers: MutableSet<ApplicationUser>
+    @ManyToMany val notPresentPlayers: MutableSet<ApplicationUser>
 
 
     constructor(name: String, description: String, fromDateTime: LocalDateTime, toDateTime: LocalDateTime, stadium: Stadium,
@@ -60,7 +60,7 @@ class Match : Event {
         this.notPresentPlayers = mutableSetOf()
     }
 
-    fun parcipate(player: User, present: Boolean) {
+    fun parcipate(player: ApplicationUser, present: Boolean) {
         if (present) {
             if (presentPlayers.size < MAX_PLAYERS) {
                 presentPlayers.add(player)

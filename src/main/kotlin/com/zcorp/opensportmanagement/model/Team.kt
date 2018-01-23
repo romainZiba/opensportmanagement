@@ -13,7 +13,7 @@ data class Team(@Column(unique = true) val name: String,
                 @OneToMany(mappedBy = "team") @JsonManagedReference val seasons: MutableSet<Season>,
                 @OneToMany(mappedBy = "team") @JsonManagedReference val events: MutableSet<OtherEvent>,
                 @OneToMany(mappedBy = "team") @JsonManagedReference val opponents: MutableSet<Opponent>,
-                @ManyToMany val members: MutableSet<User>,
+                @ManyToMany val members: MutableSet<ApplicationUser>,
                 @Id @GeneratedValue val id: Int = -1) {
 
     override fun toString(): String {

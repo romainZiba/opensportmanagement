@@ -1,5 +1,6 @@
 package com.zcorp.opensportmanagement.model
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import javax.persistence.*
 
 @Entity
@@ -15,9 +16,9 @@ data class User(val firstName: String,
                 val licenseNumber: Number?,
                 @Id @GeneratedValue val id: Int = -1) {
 
-//    @ManyToMany
-//    @JsonBackReference
-//    val teams: MutableSet<Team> = mutableSetOf()
+    @ManyToMany(mappedBy = "members")
+    @JsonIgnore
+    val teams: MutableSet<Team> = mutableSetOf()
 
     override fun equals(other: Any?): Boolean {
         if (other != null) {
@@ -35,11 +36,12 @@ data class User(val firstName: String,
     }
 
     fun toDto(): UserDto {
-        return UserDto(firstName, lastName, username, email, phoneNumber, admin, licenseNumber)
+        return UserDto(firstName, lastName, username, email, phoneNumber, admin, licenseNumber, teams.map { it.toDto() }.toSet())
     }
 }
 
-class UserDto(firstName: String, lastName: String, username: String, email: String, phoneNumber: String?, admin: Boolean?, licenseNumber: Number?)
+class UserDto(firstName: String, lastName: String, username: String, email: String, phoneNumber: String?,
+              admin: Boolean?, licenseNumber: Number?, teamsDto: Set<TeamDto>)
 
 enum class Role {
     PLAYER, COACH, PLAYER_COACH

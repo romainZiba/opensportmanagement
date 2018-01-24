@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.context.annotation.Bean
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
@@ -25,6 +26,7 @@ open class Application {
     }
 
     @Bean
+    @Transactional
     open fun init(teamRepository: TeamRepository,
                   stadiumRepository: StadiumRepository,
                   eventRepository: EventRepository,
@@ -34,8 +36,11 @@ open class Application {
                   userRepository: UserRepository) = CommandLineRunner {
         // save entities
 
-        val team = teamRepository.save(Team("MyTeam", Sport.BASKETBALL, Gender.BOTH, AgeGroup.ADULTS, mutableSetOf(),
-                mutableSetOf(), mutableSetOf(), mutableSetOf(), mutableSetOf()))
+        var myTeam = teamRepository.save(Team("MyTeam", Sport.BASKETBALL, Gender.BOTH, AgeGroup.ADULTS, mutableSetOf(),
+                mutableSetOf(), mutableSetOf(), mutableSetOf()))
+
+        var otherTeam = teamRepository.save(Team("OtherTeam", Sport.BASKETBALL, Gender.BOTH, AgeGroup.ADULTS, mutableSetOf(),
+                mutableSetOf(), mutableSetOf(), mutableSetOf()))
 
         val user = userRepository.save(User("Bob", "Bobby", "bb", bCryptPasswordEncoder().encode("bb"),
                 "bb@caramail.com", "", false, Role.PLAYER, 88839))
@@ -44,29 +49,33 @@ open class Application {
                 bCryptPasswordEncoder().encode("bbb"), "bbb@caramail.com",
                 "", false, Role.PLAYER, 88840))
 
-        val stadium = stadiumRepository.save(Stadium("LE stade", "2 allée", "Toulouse", team))
+        myTeam.addMember(user)
 
-        val opponent = opponentRepository.save(Opponent("TCMS2", "0159756563", "testmail@gmail.com", team))
+        myTeam = teamRepository.save(myTeam)
+
+        val stadium = stadiumRepository.save(Stadium("LE stade", "2 allée", "Toulouse", myTeam))
+
+        val opponent = opponentRepository.save(Opponent("TCMS2", "0159756563", "testmail@gmail.com", myTeam))
 
         val season = seasonRepository.save(Season("2017-2018",
                 LocalDate.of(2017, Month.SEPTEMBER, 1),
                 LocalDate.of(2018, Month.JULY, 31),
                 Status.CURRENT,
                 mutableSetOf(),
-                team
+                myTeam
         ))
         val championship = championshipRepository.save(Championship("Championnat 2017-2018", season, mutableSetOf()))
         val match = eventRepository.save(Match("Match de championnat", "Super match",
                 LocalDateTime.of(2018, 1, 1, 10, 0, 0),
                 LocalDateTime.of(2018, 1, 1, 12, 0, 0),
-                stadium, opponent, team, championship))
+                stadium, opponent, myTeam, championship))
         val event = eventRepository.save(OtherEvent(
                 "Apéro",
                 "Apéro avec les potes",
                 LocalDateTime.of(2017, 1, 1, 10, 0, 0),
                 LocalDateTime.of(2017, 1, 1, 12, 0, 0),
                 "2 des champs",
-                team))
+                myTeam))
 
 
         // fetch all teams
@@ -76,7 +85,7 @@ open class Application {
         LOG.info("")
 
 
-        // fetch team by
+        // fetch myTeam by
         LOG.info("Team found with findByLastName('MyTeam'):")
         LOG.info("--------------------------------------------")
         LOG.info(teamRepository.findByName("MyTeam").toString())

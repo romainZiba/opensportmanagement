@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter
 import java.io.IOException
@@ -15,6 +16,7 @@ import javax.servlet.FilterChain
 import javax.servlet.ServletException
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
+import kotlin.collections.ArrayList
 
 
 class JWTAuthorizationFilter(authManager: AuthenticationManager) : BasicAuthenticationFilter(authManager) {
@@ -62,8 +64,12 @@ class JWTAuthorizationFilter(authManager: AuthenticationManager) : BasicAuthenti
                         .parseClaimsJws(token!!.replace(TOKEN_PREFIX, ""))
                         .body
                         .subject
+                var teamNames: MutableList<String> = Jwts.parser()
+                        .setSigningKey(SECRET)
+                        .parseClaimsJws(token!!.replace(TOKEN_PREFIX, ""))
+                        .body[TEAM_NAMES] as MutableList<String>
                 return if (user != null) {
-                    UsernamePasswordAuthenticationToken(user, null, ArrayList<GrantedAuthority>())
+                    UsernamePasswordAuthenticationToken(user, null, teamNames.mapTo(ArrayList<GrantedAuthority>()) { SimpleGrantedAuthority(it) })
                 } else null
             } catch (e: ExpiredJwtException) {
                 LOG.error("Token expired ", e)

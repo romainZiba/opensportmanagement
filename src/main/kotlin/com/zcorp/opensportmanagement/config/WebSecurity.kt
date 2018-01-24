@@ -24,14 +24,19 @@ open class WebSecurity(val userDetailsService: UserDetailsService) : WebSecurity
     }
 
     override fun configure(http: HttpSecurity) {
-        http.csrf().disable().authorizeRequests()
+        http.csrf().disable()
+                .authorizeRequests()
                 .antMatchers(HttpMethod.POST, SIGN_UP_URL).permitAll()
+                .antMatchers("/").permitAll()
+                .antMatchers("/console/*").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .addFilter(JWTAuthenticationFilter(authenticationManager()))
                 .addFilter(JWTAuthorizationFilter(authenticationManager()))
                 // this disables session creation on Spring Security
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        http.headers().frameOptions().disable()
+
     }
 
     override fun configure(auth: AuthenticationManagerBuilder?) {

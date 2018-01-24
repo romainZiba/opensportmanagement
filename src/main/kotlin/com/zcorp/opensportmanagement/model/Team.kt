@@ -13,11 +13,22 @@ data class Team(@Column(unique = true) val name: String,
                 @OneToMany(mappedBy = "team") @JsonManagedReference val seasons: MutableSet<Season>,
                 @OneToMany(mappedBy = "team") @JsonManagedReference val events: MutableSet<OtherEvent>,
                 @OneToMany(mappedBy = "team") @JsonManagedReference val opponents: MutableSet<Opponent>,
-                @ManyToMany @JsonManagedReference val members: MutableSet<User>,
                 @Id @GeneratedValue val id: Int = -1) {
+
+    @ManyToMany(cascade = [(CascadeType.ALL)])
+    @JsonManagedReference
+    val members: MutableSet<User> = mutableSetOf()
 
     override fun toString(): String {
         return "Team(name='$name', sport=$sport, genderKind=$genderKind, ageGroup=$ageGroup, id=$id)"
+    }
+
+    fun toDto(): TeamDto {
+        return TeamDto(name, sport, genderKind, ageGroup)
+    }
+
+    fun addMember(user: User) {
+        this.members.add(user)
     }
 }
 

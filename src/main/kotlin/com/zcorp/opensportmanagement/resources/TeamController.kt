@@ -4,19 +4,26 @@ package com.zcorp.opensportmanagement.resources
 import com.zcorp.opensportmanagement.EntityAlreadyExistsException
 import com.zcorp.opensportmanagement.EntityNotFoundException
 import com.zcorp.opensportmanagement.model.*
-import com.zcorp.opensportmanagement.repositories.*
+import com.zcorp.opensportmanagement.repositories.OpponentRepository
+import com.zcorp.opensportmanagement.repositories.SeasonRepository
+import com.zcorp.opensportmanagement.repositories.TeamRepository
+import com.zcorp.opensportmanagement.repositories.UserRepository
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 import javax.validation.constraints.NotNull
 
 @RestController
 class TeamController(private val teamRepository: TeamRepository,
-                 private val seasonRepository: SeasonRepository,
-                 private val opponentRepository: OpponentRepository) {
+                     private val seasonRepository: SeasonRepository,
+                     private val opponentRepository: OpponentRepository,
+                     private val userRepository: UserRepository) {
 
     @GetMapping("/teams")
-    fun findAll() = teamRepository.findAll()
+    fun findAll(authentication: Authentication) = teamRepository.findByNames(authentication.authorities.map {it.authority})
+//            teamRepository.findAll()
+//            .filter { authentication.authorities.map { it.authority }.contains(it.name) }
 
     @GetMapping("/teams/{name}")
     fun findByName(@PathVariable name: String): Team {
@@ -28,11 +35,23 @@ class TeamController(private val teamRepository: TeamRepository,
         }
     }
 
+    @PutMapping("/teams/{id}/join")
+    fun joinTeam(@PathVariable id: Int, authentication: Authentication): Team {
+        val team = teamRepository.findOne(id)
+        if (team == null) {
+            throw EntityNotFoundException("Team $id does not exist")
+        } else {
+            val user = userRepository.findByUsername(authentication.name)
+            team.members.add(user!!)
+            return team
+        }
+    }
+
     @PostMapping("/teams")
     fun createTeam(@RequestBody teamDto: TeamDto): ResponseEntity<Team> {
         if (teamRepository.findByName(teamDto.name) == null) {
             val team = Team(teamDto.name, teamDto.sport, teamDto.genderKind, teamDto.ageGroup, mutableSetOf(),
-                    mutableSetOf(), mutableSetOf(), mutableSetOf(), mutableSetOf())
+                    mutableSetOf(), mutableSetOf(), mutableSetOf())
             val teamSaved = teamRepository.save(team)
             return ResponseEntity(teamSaved, HttpStatus.CREATED)
         }

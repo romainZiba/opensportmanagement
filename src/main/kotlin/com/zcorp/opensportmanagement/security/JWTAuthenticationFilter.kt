@@ -48,7 +48,11 @@ class JWTAuthenticationFilter(authManager: AuthenticationManager) : UsernamePass
                                           chain: FilterChain,
                                           auth: Authentication) {
 
+        var claims: MutableMap<String, Any> = mutableMapOf()
+        claims[TEAM_NAMES] = auth.authorities.map { it.authority }
+
         val token = Jwts.builder()
+                .setClaims(claims)
                 .setSubject((auth.principal as User).username)
                 .setExpiration(Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS512, SECRET)

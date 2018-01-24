@@ -24,7 +24,7 @@ class UserController(private val userRepository: UserRepository,
     fun test(principal: Principal?) = principal?.name ?: "You are not logged in"
 
     @PostMapping("/users/sign-up")
-    fun createTeam(@Valid @RequestBody user: User): ResponseEntity<User> {
+    fun createUser(@Valid @RequestBody user: User): ResponseEntity<User> {
         if (userRepository.findByUsername(user.username) == null) {
             user.password = bCryptPasswordEncoder.encode(user.password)
             val userSaved = userRepository.save(user)

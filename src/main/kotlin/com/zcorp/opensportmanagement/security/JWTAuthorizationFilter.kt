@@ -1,6 +1,9 @@
 package com.zcorp.opensportmanagement.security
 
+import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.SignatureAlgorithm
+import org.slf4j.LoggerFactory
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.GrantedAuthority
@@ -16,6 +19,9 @@ import javax.servlet.http.HttpServletResponse
 
 class JWTAuthorizationFilter(authManager: AuthenticationManager) : BasicAuthenticationFilter(authManager) {
 
+    private val LOG = LoggerFactory.getLogger(JWTAuthorizationFilter::class.java)
+
+
     @Throws(IOException::class, ServletException::class)
     override fun doFilterInternal(req: HttpServletRequest,
                                   res: HttpServletResponse,
@@ -29,6 +35,19 @@ class JWTAuthorizationFilter(authManager: AuthenticationManager) : BasicAuthenti
 
         val authentication = getAuthentication(req)
 
+        if (authentication == null) {
+            chain.doFilter(req, res)
+            return
+        }
+
+        // User is authorized. Refresh the access token
+        val token = Jwts.builder()
+                .setSubject((authentication.principal.toString()))
+                .setExpiration(Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .signWith(SignatureAlgorithm.HS512, SECRET)
+                .compact()
+        res.addHeader(HEADER_STRING, TOKEN_PREFIX + token)
+
         SecurityContextHolder.getContext().authentication = authentication
         chain.doFilter(req, res)
     }
@@ -37,15 +56,19 @@ class JWTAuthorizationFilter(authManager: AuthenticationManager) : BasicAuthenti
         val token = request.getHeader(HEADER_STRING)
         if (token != null) {
             // parse the token.
-            val user = Jwts.parser()
-                    .setSigningKey(SECRET)
-                    .parseClaimsJws(token!!.replace(TOKEN_PREFIX, ""))
-                    .body
-                    .subject
+            try {
+                val user = Jwts.parser()
+                        .setSigningKey(SECRET)
+                        .parseClaimsJws(token!!.replace(TOKEN_PREFIX, ""))
+                        .body
+                        .subject
+                return if (user != null) {
+                    UsernamePasswordAuthenticationToken(user, null, ArrayList<GrantedAuthority>())
+                } else null
+            } catch (e: ExpiredJwtException) {
+                LOG.error("Token expired ", e)
+            }
 
-            return if (user != null) {
-                UsernamePasswordAuthenticationToken(user, null, ArrayList<GrantedAuthority>())
-            } else null
         }
         return null
     }

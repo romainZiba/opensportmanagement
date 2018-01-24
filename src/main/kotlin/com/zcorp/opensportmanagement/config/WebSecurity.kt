@@ -4,6 +4,7 @@ import com.zcorp.opensportmanagement.security.JWTAuthenticationFilter
 import com.zcorp.opensportmanagement.security.JWTAuthorizationFilter
 import com.zcorp.opensportmanagement.security.SIGN_UP_URL
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -12,17 +13,18 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-import org.springframework.web.cors.CorsConfiguration
-import org.springframework.web.cors.CorsConfigurationSource
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
-
+@Configuration
 @EnableWebSecurity
-open class WebSecurity(private val userDetailsService: UserDetailsService, private val bCryptPasswordEncoder: BCryptPasswordEncoder) : WebSecurityConfigurerAdapter() {
+open class WebSecurity(val userDetailsService: UserDetailsService) : WebSecurityConfigurerAdapter() {
 
-    @Throws(Exception::class)
+    @Bean
+    open fun bCryptPasswordEncoder(): BCryptPasswordEncoder {
+        return BCryptPasswordEncoder()
+    }
+
     override fun configure(http: HttpSecurity) {
-        http.cors().and().csrf().disable().authorizeRequests()
+        http.csrf().disable().authorizeRequests()
                 .antMatchers(HttpMethod.POST, SIGN_UP_URL).permitAll()
                 .anyRequest().authenticated()
                 .and()
@@ -32,15 +34,7 @@ open class WebSecurity(private val userDetailsService: UserDetailsService, priva
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
     }
 
-    @Throws(Exception::class)
-    public override fun configure(auth: AuthenticationManagerBuilder?) {
-        auth!!.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder)
-    }
-
-    @Bean
-    internal open fun corsConfigurationSource(): CorsConfigurationSource {
-        val source = UrlBasedCorsConfigurationSource()
-        source.registerCorsConfiguration("/**", CorsConfiguration().applyPermitDefaultValues())
-        return source
+    override fun configure(auth: AuthenticationManagerBuilder?) {
+        auth!!.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder())
     }
 }

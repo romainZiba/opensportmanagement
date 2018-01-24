@@ -20,6 +20,18 @@ data class Season(@Column(name = "name") val name: String,
     override fun toString(): String {
         return "Season(name='$name')"
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (other != null) {
+            return other is Season && other.name.equals(name) && other.team.equals(team)
+        }
+        return false
+
+    }
+
+    override fun hashCode(): Int {
+        return id
+    }
 }
 
 class SeasonDto(val name: String, val fromDate: LocalDate, val toDate: LocalDate, val status: Status)

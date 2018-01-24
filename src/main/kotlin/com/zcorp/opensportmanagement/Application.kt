@@ -30,11 +30,19 @@ open class Application {
                   eventRepository: EventRepository,
                   opponentRepository: OpponentRepository,
                   seasonRepository: SeasonRepository,
-                  championshipRepository: ChampionshipRepository) = CommandLineRunner {
+                  championshipRepository: ChampionshipRepository,
+                  userRepository: UserRepository) = CommandLineRunner {
         // save entities
 
         val team = teamRepository.save(Team("MyTeam", Sport.BASKETBALL, Gender.BOTH, AgeGroup.ADULTS, mutableSetOf(),
                 mutableSetOf(), mutableSetOf(), mutableSetOf(), mutableSetOf()))
+
+        val user = userRepository.save(User("Bob", "Bobby", "bb", bCryptPasswordEncoder().encode("bb"),
+                "bb@caramail.com", "", false, Role.PLAYER, 88839))
+
+        val user2 = userRepository.save(User("Bobb", "Bobbybob", "bbb",
+                bCryptPasswordEncoder().encode("bbb"), "bbb@caramail.com",
+                "", false, Role.PLAYER, 88840))
 
         val stadium = stadiumRepository.save(Stadium("LE stade", "2 allée", "Toulouse", team))
 

@@ -15,15 +15,25 @@ abstract class Event() {
     var recurrent: Boolean = false
     var fromDateTime: LocalDateTime? = null
     var toDateTime: LocalDateTime? = null
-    @ElementCollection(fetch = FetchType.EAGER) var reccurenceDays: MutableSet<DayOfWeek> = mutableSetOf()
+    @ElementCollection var reccurenceDays: MutableSet<DayOfWeek> = mutableSetOf()
     var recurrenceFromDate: LocalDate? = null
     var recurrenceToDate: LocalDate? = null
     var recurrenceFromTime: LocalTime? = null
     var recurrenceToTime: LocalTime? = null
-    @ManyToOne var stadium: Stadium? = null
+
+    @ManyToOne
+    var stadium: Stadium? = null
+
     var place: String? = null
-    @ManyToOne @JsonBackReference var team: Team? = null
-    @Id @GeneratedValue var id: Int = -1
+
+    @ManyToOne
+    @JoinColumn(name = "team_id")
+    @JsonBackReference
+    var team: Team? = null
+
+    @GeneratedValue
+    @Id
+    var id: Int = -1
 
     constructor(name: String, description: String, fromDateTime: LocalDateTime, toDateTime: LocalDateTime, stadium: Stadium,
                 team: Team) : this() {

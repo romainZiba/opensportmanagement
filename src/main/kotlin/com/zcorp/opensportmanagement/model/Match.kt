@@ -19,7 +19,6 @@ class Match : Event {
     @ManyToMany val presentPlayers: MutableSet<User>
     @ManyToMany val notPresentPlayers: MutableSet<User>
 
-
     constructor(name: String, description: String, fromDateTime: LocalDateTime, toDateTime: LocalDateTime, stadium: Stadium,
                 opponent: Opponent, team: Team, championship: Championship) :
             super(name, description, fromDateTime, toDateTime, stadium, team) {

@@ -1,6 +1,6 @@
 package com.zcorp.opensportmanagement.model
 
-import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonBackReference
 import javax.persistence.*
 import javax.validation.constraints.NotNull
 
@@ -11,10 +11,21 @@ import javax.validation.constraints.NotNull
 data class Stadium(@Column(name = "name") @NotNull val name: String,
                    val address: String,
                    val city: String,
-                   @ManyToOne @JoinColumn(name = "team_id") @JsonIgnore val team: Team,
+                   @ManyToOne @JoinColumn(name = "team_id") @JsonBackReference val team: Team,
                    @Id @GeneratedValue val id: Int = -1) {
 
     override fun toString(): String {
         return "Stadium(name='$name', address='$address', city='$city', id=$id)"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other != null) {
+            return other is Stadium && other.name.equals(name) && other.team.equals(team)
+        }
+        return false
+    }
+
+    override fun hashCode(): Int {
+        return id
     }
 }

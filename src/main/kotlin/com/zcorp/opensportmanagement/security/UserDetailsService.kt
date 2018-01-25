@@ -19,7 +19,7 @@ open class UserDetailsServiceImpl(val userRepository: UserRepository) : UserDeta
         val user = userRepository.findByUsername(username) ?: throw UsernameNotFoundException(username)
         return User(user.username,
                 user.password,
-                user.teams.mapTo(LinkedList<GrantedAuthority>()) { SimpleGrantedAuthority(it.name) }
+                user.memberOf.mapTo(LinkedList<GrantedAuthority>()) { SimpleGrantedAuthority(it.team.name) }
         )
     }
 }

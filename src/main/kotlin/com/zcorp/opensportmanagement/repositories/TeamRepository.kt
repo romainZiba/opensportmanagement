@@ -19,5 +19,4 @@ class TeamRepositoryImpl(@PersistenceContext val em: EntityManager) {
         q.setParameter("names", names)
         return q.resultList
     }
-
 }

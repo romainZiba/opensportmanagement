@@ -33,49 +33,56 @@ open class Application {
                   opponentRepository: OpponentRepository,
                   seasonRepository: SeasonRepository,
                   championshipRepository: ChampionshipRepository,
-                  userRepository: UserRepository) = CommandLineRunner {
+                  userRepository: UserRepository,
+                  teamMemberRepository: TeamMemberRepository) = CommandLineRunner {
         // save entities
 
-        var myTeam = teamRepository.save(Team("MyTeam", Sport.BASKETBALL, Gender.BOTH, AgeGroup.ADULTS, mutableSetOf(),
-                mutableSetOf(), mutableSetOf(), mutableSetOf()))
+        var team1 = teamRepository.save(Team("TEAM 1", Sport.BASKETBALL, Gender.BOTH, AgeGroup.ADULTS))
 
-        var otherTeam = teamRepository.save(Team("OtherTeam", Sport.BASKETBALL, Gender.BOTH, AgeGroup.ADULTS, mutableSetOf(),
-                mutableSetOf(), mutableSetOf(), mutableSetOf()))
+        var team2 = teamRepository.save(Team("TEAM 2", Sport.BASKETBALL, Gender.BOTH, AgeGroup.ADULTS))
 
-        val user = userRepository.save(User("Bob", "Bobby", "bb", bCryptPasswordEncoder().encode("bb"),
-                "bb@caramail.com", "", false, Role.PLAYER, 88839))
+        val coachTeam1 = userRepository.save(User("Coach", "Rock", "CR", bCryptPasswordEncoder().encode("CR"),
+                "CR@caramail.com", ""))
+        val playerTeam1 = userRepository.save(User("Player", "Wow", "PW", bCryptPasswordEncoder().encode("PW"),
+                "PW@caramail.com", ""))
 
-        val user2 = userRepository.save(User("Bobb", "Bobbybob", "bbb",
+        val playerCoachTeam2 = userRepository.save(User("Bobb", "Bobbybob", "bbb",
                 bCryptPasswordEncoder().encode("bbb"), "bbb@caramail.com",
-                "", false, Role.PLAYER, 88840))
+                ""))
 
-        myTeam.addMember(user)
+        val teamMember1 = teamMemberRepository.save(TeamMember(coachTeam1, true, Role.COACH, 120404, team1))
+        val teamMember2 = teamMemberRepository.save(TeamMember(playerTeam1, true, Role.PLAYER, 120405, team1))
+        val teamMember3 = teamMemberRepository.save(TeamMember(playerCoachTeam2, true, Role.PLAYER_COACH, 120406, team2))
 
-        myTeam = teamRepository.save(myTeam)
+        team1.addMember(teamMember1)
+        team1.addMember(teamMember2)
+        team2.addMember(teamMember3)
+        team1 = teamRepository.save(team1)
+        team2 = teamRepository.save(team2)
 
-        val stadium = stadiumRepository.save(Stadium("LE stade", "2 allée", "Toulouse", myTeam))
+        val stadium = stadiumRepository.save(Stadium("LE stade", "2 allée", "Toulouse", team1))
 
-        val opponent = opponentRepository.save(Opponent("TCMS2", "0159756563", "testmail@gmail.com", myTeam))
+        val opponent = opponentRepository.save(Opponent("TCMS2", "0159756563", "testmail@gmail.com", team1))
 
         val season = seasonRepository.save(Season("2017-2018",
                 LocalDate.of(2017, Month.SEPTEMBER, 1),
                 LocalDate.of(2018, Month.JULY, 31),
                 Status.CURRENT,
                 mutableSetOf(),
-                myTeam
+                team1
         ))
         val championship = championshipRepository.save(Championship("Championnat 2017-2018", season, mutableSetOf()))
         val match = eventRepository.save(Match("Match de championnat", "Super match",
                 LocalDateTime.of(2018, 1, 1, 10, 0, 0),
                 LocalDateTime.of(2018, 1, 1, 12, 0, 0),
-                stadium, opponent, myTeam, championship))
+                stadium, opponent, team1, championship))
         val event = eventRepository.save(OtherEvent(
                 "Apéro",
                 "Apéro avec les potes",
                 LocalDateTime.of(2017, 1, 1, 10, 0, 0),
                 LocalDateTime.of(2017, 1, 1, 12, 0, 0),
                 "2 des champs",
-                myTeam))
+                team1))
 
 
         // fetch all teams
@@ -85,10 +92,10 @@ open class Application {
         LOG.info("")
 
 
-        // fetch myTeam by
-        LOG.info("Team found with findByLastName('MyTeam'):")
+        // fetch team1 by
+        LOG.info("Team found with findByLastName('TEAM 1'):")
         LOG.info("--------------------------------------------")
-        LOG.info(teamRepository.findByName("MyTeam").toString())
+        LOG.info(teamRepository.findByName("TEAM 1").toString())
         LOG.info("")
     }
 

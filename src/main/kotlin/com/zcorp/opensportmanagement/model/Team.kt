@@ -9,15 +9,27 @@ data class Team(@Column(unique = true) val name: String,
                 val sport: Sport,
                 val genderKind: Gender,
                 val ageGroup: AgeGroup,
-                @OneToMany(mappedBy = "team") @JsonManagedReference val stadiums: MutableSet<Stadium>,
-                @OneToMany(mappedBy = "team") @JsonManagedReference val seasons: MutableSet<Season>,
-                @OneToMany(mappedBy = "team") @JsonManagedReference val events: MutableSet<OtherEvent>,
-                @OneToMany(mappedBy = "team") @JsonManagedReference val opponents: MutableSet<Opponent>,
                 @Id @GeneratedValue val id: Int = -1) {
 
-    @ManyToMany(cascade = [(CascadeType.ALL)])
+    @OneToMany(mappedBy = "team", cascade = [(CascadeType.ALL)])
     @JsonManagedReference
-    val members: MutableSet<User> = mutableSetOf()
+    val members: MutableSet<TeamMember> = mutableSetOf()
+
+    @OneToMany(mappedBy = "team")
+    @JsonManagedReference
+    val stadiums: MutableSet<Stadium> = mutableSetOf()
+
+    @OneToMany(mappedBy = "team")
+    @JsonManagedReference
+    val seasons: MutableSet<Season> = mutableSetOf()
+
+    @OneToMany(mappedBy = "team")
+    @JsonManagedReference
+    val events: MutableSet<OtherEvent> = mutableSetOf()
+
+    @OneToMany(mappedBy = "team")
+    @JsonManagedReference
+    val opponents: MutableSet<Opponent> = mutableSetOf()
 
     override fun toString(): String {
         return "Team(name='$name', sport=$sport, genderKind=$genderKind, ageGroup=$ageGroup, id=$id)"
@@ -27,8 +39,8 @@ data class Team(@Column(unique = true) val name: String,
         return TeamDto(name, sport, genderKind, ageGroup)
     }
 
-    fun addMember(user: User) {
-        this.members.add(user)
+    fun addMember(member: TeamMember) {
+        this.members.add(member)
     }
 }
 

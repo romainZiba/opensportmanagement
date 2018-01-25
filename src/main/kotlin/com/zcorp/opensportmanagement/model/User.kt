@@ -39,6 +39,6 @@ data class User(val firstName: String,
     }
 }
 
-class UserDto(firstName: String, lastName: String, username: String, email: String, phoneNumber: String?,
-              teamsDto: Set<TeamDto>)
+class UserDto(val firstName: String, val lastName: String, val username: String, val email: String, val phoneNumber: String?,
+              val teamsDto: Set<TeamDto>)
 

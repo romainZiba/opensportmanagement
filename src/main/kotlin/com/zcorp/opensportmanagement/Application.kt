@@ -83,20 +83,6 @@ open class Application {
                 LocalDateTime.of(2017, 1, 1, 12, 0, 0),
                 "2 des champs",
                 team1))
-
-
-        // fetch all teams
-        LOG.info("Teams found with findAll():")
-        LOG.info("-------------------------------")
-        teamRepository.findAll().forEach { LOG.info(it.toString()) }
-        LOG.info("")
-
-
-        // fetch team1 by
-        LOG.info("Team found with findByLastName('TEAM 1'):")
-        LOG.info("--------------------------------------------")
-        LOG.info(teamRepository.findByName("TEAM 1").toString())
-        LOG.info("")
     }
 
 }

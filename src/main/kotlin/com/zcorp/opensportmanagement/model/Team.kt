@@ -5,7 +5,7 @@ import javax.persistence.*
 
 @Entity
 @Table(name = "team")
-data class Team(@Column(unique = true) val name: String,
+data class Team(val name: String,
                 val sport: Sport,
                 val genderKind: Gender,
                 val ageGroup: AgeGroup,

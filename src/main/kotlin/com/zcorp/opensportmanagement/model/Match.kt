@@ -59,7 +59,7 @@ class Match : Event {
         this.notPresentPlayers = mutableSetOf()
     }
 
-    fun parcipate(player: User, present: Boolean) {
+    fun parcipate(player: User, present: Boolean): Match {
         if (present) {
             if (presentPlayers.size < MAX_PLAYERS) {
                 presentPlayers.add(player)
@@ -69,6 +69,7 @@ class Match : Event {
             presentPlayers.remove(player)
             notPresentPlayers.add(player)
         }
+        return this
     }
 
     

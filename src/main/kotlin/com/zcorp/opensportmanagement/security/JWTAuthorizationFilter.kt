@@ -64,12 +64,12 @@ class JWTAuthorizationFilter(authManager: AuthenticationManager) : BasicAuthenti
                         .parseClaimsJws(token!!.replace(TOKEN_PREFIX, ""))
                         .body
                         .subject
-                var teamNames: MutableList<String> = Jwts.parser()
+                var teams: MutableList<String> = Jwts.parser()
                         .setSigningKey(SECRET)
                         .parseClaimsJws(token!!.replace(TOKEN_PREFIX, ""))
-                        .body[TEAM_NAMES] as MutableList<String>
+                        .body[TEAMS] as MutableList<String>
                 return if (user != null) {
-                    UsernamePasswordAuthenticationToken(user, null, teamNames.mapTo(ArrayList<GrantedAuthority>()) { SimpleGrantedAuthority(it) })
+                    UsernamePasswordAuthenticationToken(user, null, teams.mapTo(ArrayList<GrantedAuthority>()) { SimpleGrantedAuthority(it) })
                 } else null
             } catch (e: ExpiredJwtException) {
                 LOG.error("Token expired ", e)

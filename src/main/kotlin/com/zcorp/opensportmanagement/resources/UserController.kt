@@ -10,19 +10,12 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.web.bind.annotation.*
-import java.security.Principal
 import javax.validation.Valid
 
 
 @RestController
 class UserController(private val userRepository: UserRepository,
                      private val bCryptPasswordEncoder: BCryptPasswordEncoder) {
-
-    @GetMapping("/users")
-    fun findAll() = userRepository.findAll().map { it.toDto() }
-
-    @GetMapping("/user/")
-    fun test(principal: Principal?) = principal?.name ?: "You are not logged in"
 
     @PostMapping("/users/sign-up")
     fun createUser(@Valid @RequestBody user: User): ResponseEntity<UserDto> {

@@ -49,7 +49,7 @@ class JWTAuthenticationFilter(authManager: AuthenticationManager) : UsernamePass
                                           auth: Authentication) {
 
         var claims: MutableMap<String, Any> = mutableMapOf()
-        claims[TEAM_NAMES] = auth.authorities.map { it.authority }
+        claims[TEAMS] = auth.authorities.map { it.authority }
         claims[ADMIN] = auth
 
         val token = Jwts.builder()

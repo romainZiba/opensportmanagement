@@ -10,8 +10,13 @@ import javax.persistence.*
         uniqueConstraints = arrayOf(UniqueConstraint(columnNames = arrayOf("name", "season_id"))))
 data class Championship(@Column(name = "name") val name: String,
                         @ManyToOne @JsonBackReference @JoinColumn(name = "season_id") val season: Season,
-                        @OneToMany(mappedBy = "championship") @JsonManagedReference val matches: MutableSet<Match>,
                         @Id @GeneratedValue val id: Int = -1) {
+
+    @OneToMany(mappedBy = "championship")
+    @JsonManagedReference
+    val matches: MutableSet<Match> = mutableSetOf()
+
+
     override fun toString(): String {
         return "Championship(name='$name', id=$id)"
     }

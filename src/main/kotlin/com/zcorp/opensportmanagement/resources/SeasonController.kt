@@ -2,36 +2,72 @@ package com.zcorp.opensportmanagement.resources
 
 import com.zcorp.opensportmanagement.EntityAlreadyExistsException
 import com.zcorp.opensportmanagement.EntityNotFoundException
-import com.zcorp.opensportmanagement.model.Championship
-import com.zcorp.opensportmanagement.model.ChampionshipDto
-import com.zcorp.opensportmanagement.repositories.ChampionshipRepository
+import com.zcorp.opensportmanagement.UserForbiddenException
+import com.zcorp.opensportmanagement.model.Season
+import com.zcorp.opensportmanagement.model.SeasonDto
+import com.zcorp.opensportmanagement.model.Team
 import com.zcorp.opensportmanagement.repositories.SeasonRepository
+import com.zcorp.opensportmanagement.repositories.TeamRepository
+import com.zcorp.opensportmanagement.security.AccessController
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 import javax.validation.constraints.NotNull
 
 @RestController
 class SeasonController(private val seasonRepository: SeasonRepository,
-                       private val championshipRepository: ChampionshipRepository) {
+                       private val accessController: AccessController,
+                       private val teamRepository: TeamRepository) {
 
-    @GetMapping("/seasons")
-    fun findAll() = seasonRepository.findAll()
 
-    @PostMapping("/seasons/{seasonId}/championships")
-    fun createChampionship(@NotNull @PathVariable("seasonId") seasonId: Int,
-                           @RequestBody championshipDto: ChampionshipDto): ResponseEntity<Championship> {
-        val season = seasonRepository.findOne(seasonId)
-        if (season != null) {
-            if (season.championships.map { it.name }.contains(championshipDto.name)) {
-                throw EntityAlreadyExistsException("Championship " + championshipDto.name + " already exists")
+    @PostMapping("/teams/{teamId}/seasons")
+    fun createSeason(@NotNull @PathVariable("teamId") teamId: Int,
+                     @RequestBody seasonDto: SeasonDto,
+                     authentication: Authentication): ResponseEntity<Season> {
+        if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
+            val team: Team = teamRepository.findOne(teamId)
+                    ?: throw EntityNotFoundException("Team $teamId does not exist")
+            if (team.seasons.map { it.name }.contains(seasonDto.name)) {
+                throw EntityAlreadyExistsException("Season " + seasonDto.name + " already exists")
             } else {
-                val championship = Championship(championshipDto.name, season, mutableSetOf())
-                val championshipSaved = championshipRepository.save(championship)
-                return ResponseEntity(championshipSaved, HttpStatus.CREATED)
+                val season = Season(seasonDto.name, seasonDto.fromDate, seasonDto.toDate, seasonDto.status, mutableSetOf(), team)
+                val seasonSaved = seasonRepository.save(season)
+                return ResponseEntity(seasonSaved, HttpStatus.CREATED)
             }
-        } else {
-            throw EntityNotFoundException("Season $seasonId does not exist")
+        }
+        throw UserForbiddenException()
+    }
+
+    @GetMapping("/teams/{teamId}/seasons")
+    fun getSeasons(@PathVariable("teamId") teamId: Int,
+                   authentication: Authentication): MutableSet<Season> {
+        if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
+            val team: Team = teamRepository.findOne(teamId)
+                    ?: throw EntityNotFoundException("Team $teamId does not exist")
+            return team.seasons
+        }
+        throw UserForbiddenException()
+    }
+
+    @GetMapping("/teams/{teamId}/seasons/{seasonId}")
+    fun getSeason(@PathVariable("teamId") teamId: Int,
+                  @PathVariable("seasonId") seasonId: Int,
+                  authentication: Authentication): Season {
+        if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
+            val team: Team = teamRepository.findOne(teamId)
+                    ?: throw EntityNotFoundException("Team $teamId does not exist")
+            return team.seasons.filter { it.id == seasonId }.first()
+        }
+        throw UserForbiddenException()
+    }
+
+    @DeleteMapping("/teams/{teamId}/seasons/{seasonId}")
+    fun deleteSeason(@PathVariable("teamId") teamId: Int,
+                   @PathVariable("seasonId") seasonId: Int,
+                   authentication: Authentication) {
+        if (accessController.isTeamAdmin(authentication, teamId)) {
+            seasonRepository.delete(seasonId)
         }
     }
 }

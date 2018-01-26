@@ -50,9 +50,15 @@ open class Application {
                 bCryptPasswordEncoder().encode("bbb"), "bbb@caramail.com",
                 ""))
 
-        val teamMember1 = teamMemberRepository.save(TeamMember(coachTeam1, true, Role.COACH, 120404, team1))
-        val teamMember2 = teamMemberRepository.save(TeamMember(playerTeam1, true, Role.PLAYER, 120405, team1))
-        val teamMember3 = teamMemberRepository.save(TeamMember(playerCoachTeam2, true, Role.PLAYER_COACH, 120406, team2))
+        val teamMember1 = teamMemberRepository.save(
+                TeamMember(coachTeam1, true, mutableSetOf(Role.COACH, Role.ADMIN), 120404, team1)
+        )
+        val teamMember2 = teamMemberRepository.save(
+                TeamMember(playerTeam1, true, mutableSetOf(Role.PLAYER), 120405, team1)
+        )
+        val teamMember3 = teamMemberRepository.save(
+                TeamMember(playerCoachTeam2, true, mutableSetOf(Role.PLAYER, Role.COACH), 120406, team2)
+        )
 
         team1.addMember(teamMember1)
         team1.addMember(teamMember2)
@@ -71,7 +77,7 @@ open class Application {
                 mutableSetOf(),
                 team1
         ))
-        val championship = championshipRepository.save(Championship("Championnat 2017-2018", season, mutableSetOf()))
+        val championship = championshipRepository.save(Championship("Championnat 2017-2018", season))
         val match = eventRepository.save(Match("Match de championnat", "Super match",
                 LocalDateTime.of(2018, 1, 1, 10, 0, 0),
                 LocalDateTime.of(2018, 1, 1, 12, 0, 0),

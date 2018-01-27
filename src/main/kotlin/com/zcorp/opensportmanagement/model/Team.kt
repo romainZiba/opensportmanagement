@@ -38,10 +38,6 @@ data class Team(val name: String,
     fun toDto(): TeamDto {
         return TeamDto(name, sport, genderKind, ageGroup)
     }
-
-    fun addMember(member: TeamMember) {
-        this.members.add(member)
-    }
 }
 
 class TeamDto(val name: String, val sport: Sport, val genderKind: Gender, val ageGroup: AgeGroup)

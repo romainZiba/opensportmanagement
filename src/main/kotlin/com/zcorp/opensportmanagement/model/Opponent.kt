@@ -6,7 +6,7 @@ import javax.persistence.*
 @Entity
 @Table(
         name = "opponent",
-        uniqueConstraints = arrayOf(UniqueConstraint(columnNames = arrayOf("name", "team_id"))))
+        uniqueConstraints = [(UniqueConstraint(columnNames = arrayOf("name", "team_id")))])
 data class Opponent(@Column(name = "name") val name: String,
                     val phoneNumber: String,
                     val email: String,

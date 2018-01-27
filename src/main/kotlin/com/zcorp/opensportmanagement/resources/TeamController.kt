@@ -1,6 +1,5 @@
 package com.zcorp.opensportmanagement.resources
 
-
 import com.zcorp.opensportmanagement.EntityAlreadyExistsException
 import com.zcorp.opensportmanagement.EntityNotFoundException
 import com.zcorp.opensportmanagement.UserAlreadyMemberException
@@ -13,6 +12,7 @@ import com.zcorp.opensportmanagement.repositories.TeamRepository
 import com.zcorp.opensportmanagement.repositories.UserRepository
 import com.zcorp.opensportmanagement.security.AccessController
 import org.springframework.data.rest.webmvc.RepositoryRestController
+import org.springframework.hateoas.Resource
 import org.springframework.hateoas.Resources
 import org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo
 import org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn
@@ -26,14 +26,21 @@ open class TeamController(private val teamRepository: TeamRepository,
                           private val userRepository: UserRepository,
                           private val accessController: AccessController) {
 
-    @PostMapping("/teams")
-    fun createTeam(@RequestBody teamDto: TeamDto): ResponseEntity<Team> {
+    @RequestMapping("/teams", method = [RequestMethod.POST])
+    open fun createTeam(@RequestBody teamDto: TeamDto,
+                        authentication: Authentication): ResponseEntity<Resource<Team>> {
         val team = Team(teamDto.name, teamDto.sport, teamDto.genderKind, teamDto.ageGroup)
+        val user = userRepository.findByUsername(authentication.name)
+                ?: throw EntityNotFoundException("User ${authentication.name} does not exist")
+        val teamMember = TeamMember(user, mutableSetOf(Role.ADMIN), team)
+        team.members.add(teamMember)
         val teamSaved = teamRepository.save(team)
-        return ResponseEntity(teamSaved, HttpStatus.CREATED)
+        val resource = Resource<Team>(teamSaved)
+        resource.add(linkTo(methodOn(TeamController::class.java).createTeam(teamDto, authentication)).withSelfRel())
+        return ResponseEntity(resource, HttpStatus.CREATED)
     }
 
-    @RequestMapping("/teams", method = arrayOf(RequestMethod.GET))
+    @RequestMapping("/teams", method = [RequestMethod.GET])
     open fun getTeams(authentication: Authentication): ResponseEntity<Resources<Team>> {
         val teams = teamRepository.findByIds(accessController.getUserTeamIds(authentication))
         val resources = Resources<Team>(teams)
@@ -41,29 +48,28 @@ open class TeamController(private val teamRepository: TeamRepository,
         return ResponseEntity.ok(resources)
     }
 
-    @GetMapping("/teams/{teamId}")
-    fun getTeam(@PathVariable teamId: Int, authentication: Authentication): Team {
+    @RequestMapping("/teams/{teamId}", method = [RequestMethod.GET])
+    open fun getTeam(@PathVariable teamId: Int, authentication: Authentication): ResponseEntity<Resource<Team>> {
         if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
-            return teamRepository.findOne(teamId)
+            return ResponseEntity.ok(Resource(teamRepository.findOne(teamId)))
         }
         throw UserForbiddenException()
     }
 
-    @PutMapping("/teams/{teamId}/join")
-    fun joinTeam(@PathVariable teamId: Int, authentication: Authentication): Team {
+    @RequestMapping("/teams/{teamId}/join", method = [RequestMethod.PUT])
+    open fun joinTeam(@PathVariable teamId: Int, authentication: Authentication): ResponseEntity<Resource<Team>> {
         if (accessController.getUserTeamIds(authentication).contains(teamId)) {
             throw UserAlreadyMemberException()
         }
         val team = teamRepository.findOne(teamId) ?: throw EntityNotFoundException("Team $teamId does not exist")
         val user = userRepository.findByUsername(authentication.name)
-        val teamMember = TeamMember(user!!, false, mutableSetOf(Role.PLAYER), null, team)
+        val teamMember = TeamMember(user!!, mutableSetOf(Role.PLAYER), team)
         team.members.add(teamMember)
-        teamRepository.save(team)
-        return team
+        return ResponseEntity.ok(Resource(teamRepository.save(team)))
     }
 
-    @DeleteMapping("/teams/{teamId}")
-    fun deleteTeam(@PathVariable teamId: Int, authentication: Authentication) {
+    @RequestMapping("/teams/{teamId}", method = [RequestMethod.DELETE])
+    open fun deleteTeam(@PathVariable teamId: Int, authentication: Authentication) {
         if (accessController.isTeamAdmin(authentication, teamId)) {
             teamRepository.delete(teamId)
         }

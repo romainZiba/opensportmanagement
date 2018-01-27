@@ -7,11 +7,11 @@ import javax.persistence.*
 @Table(name = "team_member")
 data class TeamMember(
         @ManyToOne @JsonBackReference(value = "memberOf") val user: User,
-        val admin: Boolean?,
         @ElementCollection val roles: MutableSet<Role>,
-        val licenseNumber: Number?,
         @ManyToOne @JsonBackReference val team: Team,
         @Id @GeneratedValue val id: Int = -1) {
+
+    var licenseNumber: String? = null
 
     override fun equals(other: Any?): Boolean {
         if (other != null) {
@@ -25,7 +25,7 @@ data class TeamMember(
     }
 
     override fun toString(): String {
-        return "TeamMember(user='$user', admin='$admin', roles='$roles')"
+        return "TeamMember(user='$user', roles='$roles')"
     }
 }
 

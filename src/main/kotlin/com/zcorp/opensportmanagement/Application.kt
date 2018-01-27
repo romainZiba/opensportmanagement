@@ -51,18 +51,20 @@ open class Application {
                 ""))
 
         val teamMember1 = teamMemberRepository.save(
-                TeamMember(coachTeam1, true, mutableSetOf(Role.COACH, Role.ADMIN), 120404, team1)
+                TeamMember(coachTeam1, mutableSetOf(Role.COACH, Role.ADMIN), team1)
         )
+        teamMember1.licenseNumber = "12345"
         val teamMember2 = teamMemberRepository.save(
-                TeamMember(playerTeam1, true, mutableSetOf(Role.PLAYER), 120405, team1)
+                TeamMember(playerTeam1, mutableSetOf(Role.PLAYER), team1)
         )
         val teamMember3 = teamMemberRepository.save(
-                TeamMember(playerCoachTeam2, true, mutableSetOf(Role.PLAYER, Role.COACH), 120406, team2)
+                TeamMember(playerCoachTeam2, mutableSetOf(Role.PLAYER, Role.COACH), team2)
         )
+        teamMember3.licenseNumber = "255069690"
 
-        team1.addMember(teamMember1)
-        team1.addMember(teamMember2)
-        team2.addMember(teamMember3)
+        team1.members.add(teamMember1)
+        team1.members.add(teamMember2)
+        team2.members.add(teamMember3)
         team1 = teamRepository.save(team1)
         team2 = teamRepository.save(team2)
 

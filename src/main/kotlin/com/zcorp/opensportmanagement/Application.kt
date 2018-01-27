@@ -41,7 +41,7 @@ open class Application {
 
         var team2 = teamRepository.save(Team("TEAM 2", Sport.BASKETBALL, Gender.BOTH, AgeGroup.ADULTS))
 
-        val coachTeam1 = userRepository.save(User("Coach", "Rock", "CR", bCryptPasswordEncoder().encode("CR"),
+        val coachTeam1_2 = userRepository.save(User("Coach", "Rock", "CR", bCryptPasswordEncoder().encode("CR"),
                 "CR@caramail.com", ""))
         val playerTeam1 = userRepository.save(User("Player", "Wow", "PW", bCryptPasswordEncoder().encode("PW"),
                 "PW@caramail.com", ""))
@@ -50,10 +50,14 @@ open class Application {
                 bCryptPasswordEncoder().encode("bbb"), "bbb@caramail.com",
                 ""))
 
-        val teamMember1 = teamMemberRepository.save(
-                TeamMember(coachTeam1, mutableSetOf(Role.COACH, Role.ADMIN), team1)
+        val teamMember1_1 = teamMemberRepository.save(
+                TeamMember(coachTeam1_2, mutableSetOf(Role.COACH, Role.ADMIN), team1)
         )
-        teamMember1.licenseNumber = "12345"
+        val teamMember1_2 = teamMemberRepository.save(
+                TeamMember(coachTeam1_2, mutableSetOf(Role.COACH, Role.ADMIN), team2)
+        )
+        teamMember1_1.licenseNumber = "12345"
+        teamMember1_2.licenseNumber = "12345"
         val teamMember2 = teamMemberRepository.save(
                 TeamMember(playerTeam1, mutableSetOf(Role.PLAYER), team1)
         )
@@ -62,9 +66,6 @@ open class Application {
         )
         teamMember3.licenseNumber = "255069690"
 
-        team1.members.add(teamMember1)
-        team1.members.add(teamMember2)
-        team2.members.add(teamMember3)
         team1 = teamRepository.save(team1)
         team2 = teamRepository.save(team2)
 

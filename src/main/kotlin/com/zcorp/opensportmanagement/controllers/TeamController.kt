@@ -4,16 +4,12 @@ import com.zcorp.opensportmanagement.EntityAlreadyExistsException
 import com.zcorp.opensportmanagement.EntityNotFoundException
 import com.zcorp.opensportmanagement.UserAlreadyMemberException
 import com.zcorp.opensportmanagement.UserForbiddenException
-import com.zcorp.opensportmanagement.model.Role
-import com.zcorp.opensportmanagement.model.Team
-import com.zcorp.opensportmanagement.model.TeamDto
-import com.zcorp.opensportmanagement.model.TeamMember
+import com.zcorp.opensportmanagement.model.*
 import com.zcorp.opensportmanagement.repositories.TeamRepository
 import com.zcorp.opensportmanagement.repositories.UserRepository
 import com.zcorp.opensportmanagement.security.AccessController
 import org.springframework.data.rest.webmvc.RepositoryRestController
 import org.springframework.hateoas.Resource
-import org.springframework.hateoas.Resources
 import org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo
 import org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn
 import org.springframework.http.HttpStatus
@@ -41,17 +37,15 @@ open class TeamController(private val teamRepository: TeamRepository,
     }
 
     @RequestMapping("/teams", method = [RequestMethod.GET])
-    open fun getTeams(authentication: Authentication): ResponseEntity<Resources<Team>> {
+    open fun getTeams(authentication: Authentication): ResponseEntity<List<TeamResource>> {
         val teams = teamRepository.findByIds(accessController.getUserTeamIds(authentication))
-        val resources = Resources<Team>(teams)
-        resources.add(linkTo(methodOn(TeamController::class.java).getTeams(authentication)).withSelfRel())
-        return ResponseEntity.ok(resources)
+        return ResponseEntity.ok(teams.map { team -> TeamResource(team) })
     }
 
     @RequestMapping("/teams/{teamId}", method = [RequestMethod.GET])
-    open fun getTeam(@PathVariable teamId: Int, authentication: Authentication): ResponseEntity<Resource<Team>> {
+    open fun getTeam(@PathVariable teamId: Int, authentication: Authentication): ResponseEntity<TeamResource> {
         if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
-            return ResponseEntity.ok(Resource(teamRepository.findOne(teamId)))
+            return ResponseEntity.ok(TeamResource(teamRepository.findOne(teamId)))
         }
         throw UserForbiddenException()
     }

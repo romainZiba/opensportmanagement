@@ -1,6 +1,13 @@
 package com.zcorp.opensportmanagement.model
 
 import com.fasterxml.jackson.annotation.JsonManagedReference
+import com.zcorp.opensportmanagement.controllers.OpponentController
+import com.zcorp.opensportmanagement.controllers.SeasonController
+import com.zcorp.opensportmanagement.controllers.TeamController
+import org.springframework.hateoas.ResourceSupport
+import org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo
+import org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import javax.persistence.*
 
 @Entity
@@ -41,6 +48,17 @@ data class Team(val name: String,
 }
 
 class TeamDto(val name: String, val sport: Sport, val genderKind: Gender, val ageGroup: AgeGroup)
+
+
+// Resource with self links
+class TeamResource(val id: Int, val name: String, val sport: Sport, val genderKind: Gender, val ageGroup: AgeGroup) : ResourceSupport() {
+    constructor(t: Team) : this(t.id, t.name, t.sport, t.genderKind, t.ageGroup)
+
+    init {
+        add(linkTo(methodOn(TeamController::class.java).getTeam(id, UsernamePasswordAuthenticationToken(null, null))).withSelfRel())
+        add(linkTo(methodOn(SeasonController::class.java).getSeasons(id, UsernamePasswordAuthenticationToken(null, null))).withRel("seasons"))
+    }
+}
 
 enum class Sport {
     BASKETBALL, HANDBALL, FOOTBALL, OTHER

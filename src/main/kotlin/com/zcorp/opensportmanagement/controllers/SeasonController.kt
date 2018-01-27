@@ -1,4 +1,4 @@
-package com.zcorp.opensportmanagement.resources
+package com.zcorp.opensportmanagement.controllers
 
 import com.zcorp.opensportmanagement.EntityAlreadyExistsException
 import com.zcorp.opensportmanagement.EntityNotFoundException
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*
 import javax.validation.constraints.NotNull
 
 @RestController
-class SeasonController(private val seasonRepository: SeasonRepository,
+open class SeasonController(private val seasonRepository: SeasonRepository,
                        private val accessController: AccessController,
                        private val teamRepository: TeamRepository) {
 
@@ -40,7 +40,7 @@ class SeasonController(private val seasonRepository: SeasonRepository,
     }
 
     @GetMapping("/teams/{teamId}/seasons")
-    fun getSeasons(@PathVariable("teamId") teamId: Int,
+    open fun getSeasons(@PathVariable("teamId") teamId: Int,
                    authentication: Authentication): MutableSet<Season> {
         if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
             val team: Team = teamRepository.findOne(teamId)

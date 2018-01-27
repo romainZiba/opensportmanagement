@@ -1,18 +1,14 @@
-package com.zcorp.opensportmanagement.resources
+package com.zcorp.opensportmanagement.controllers
 
-import com.zcorp.opensportmanagement.EntityNotFoundException
 import com.zcorp.opensportmanagement.UserForbiddenException
 import com.zcorp.opensportmanagement.model.*
 import com.zcorp.opensportmanagement.repositories.*
 import com.zcorp.opensportmanagement.security.AccessController
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
-import javax.validation.constraints.NotNull
 
 @RestController
 class ChampionshipController(private val championshipRepository: ChampionshipRepository,

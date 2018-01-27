@@ -1,4 +1,4 @@
-package com.zcorp.opensportmanagement.resources
+package com.zcorp.opensportmanagement.controllers
 
 import com.zcorp.opensportmanagement.EntityNotFoundException
 import com.zcorp.opensportmanagement.UserForbiddenException

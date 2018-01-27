@@ -6,7 +6,7 @@ import javax.persistence.*
 @Entity
 @Table(
         name = "opponent",
-        uniqueConstraints = [(UniqueConstraint(columnNames = arrayOf("name", "team_id")))])
+        uniqueConstraints = arrayOf(UniqueConstraint(columnNames = arrayOf("name", "team_id"))))
 data class Opponent(@Column(name = "name") val name: String,
                     val phoneNumber: String,
                     val email: String,
@@ -17,15 +17,22 @@ data class Opponent(@Column(name = "name") val name: String,
         return "Opponent(name='$name', phoneNumber='$phoneNumber', email='$email', id=$id)"
     }
 
-    override fun hashCode(): Int {
-        return id
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Opponent
+
+        if (name != other.name) return false
+        if (team != other.team) return false
+
+        return true
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (other != null) {
-            return other is Opponent && other.name.equals(name) && other.team.equals(team)
-        }
-        return false
+    override fun hashCode(): Int {
+        var result = name.hashCode()
+        result = 31 * result + team.hashCode()
+        return result
     }
 }
 

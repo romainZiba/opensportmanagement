@@ -56,10 +56,9 @@ open class SeasonController(private val seasonRepository: SeasonRepository,
     fun getSeason(@PathVariable("teamId") teamId: Int,
                   @PathVariable("seasonId") seasonId: Int,
                   authentication: Authentication): SeasonResource {
-        if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
-            val team: Team = teamRepository.findOne(teamId)
-                    ?: throw EntityNotFoundException("Team $teamId does not exist")
-            return SeasonResource(team.seasons.filter { it.id == seasonId }.first())
+        val season = seasonRepository.findOne(seasonId) ?: throw UserForbiddenException()
+        if (accessController.isUserAllowedToAccessTeam(authentication, season.team.id)) {
+            return SeasonResource(season)
         }
         throw UserForbiddenException()
     }
@@ -68,7 +67,8 @@ open class SeasonController(private val seasonRepository: SeasonRepository,
     fun deleteSeason(@PathVariable("teamId") teamId: Int,
                      @PathVariable("seasonId") seasonId: Int,
                      authentication: Authentication) {
-        if (accessController.isTeamAdmin(authentication, teamId)) {
+        val season = seasonRepository.findOne(seasonId) ?: throw UserForbiddenException()
+        if (accessController.isTeamAdmin(authentication, season.team.id)) {
             seasonRepository.delete(seasonId)
         }
     }

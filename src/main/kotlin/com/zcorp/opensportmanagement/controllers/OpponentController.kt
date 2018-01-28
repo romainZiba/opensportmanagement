@@ -58,4 +58,16 @@ open class OpponentController(private val opponentRepository: OpponentRepository
         }
         throw UserForbiddenException()
     }
+
+    @RequestMapping("/teams/{teamId}/opponents/{opponentId}", method = [RequestMethod.DELETE])
+    open fun deleteChampionship(@PathVariable("teamId") teamId: Int,
+                                @PathVariable("opponentId") opponentId: Int,
+                                authentication: Authentication): ResponseEntity<Any> {
+        val opponent = opponentRepository.findOne(opponentId) ?: throw UserForbiddenException()
+        if (accessController.isTeamAdmin(authentication, opponent.team.id)) {
+            opponentRepository.delete(opponentId)
+            return ResponseEntity.noContent().build()
+        }
+        throw UserForbiddenException()
+    }
 }

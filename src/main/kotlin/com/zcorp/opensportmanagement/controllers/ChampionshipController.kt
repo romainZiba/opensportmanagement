@@ -45,8 +45,7 @@ open class ChampionshipController(private val championshipRepository: Championsh
     }
 
     @RequestMapping("/seasons/{seasonId}/championships/{championshipId}", method = [RequestMethod.GET])
-    open fun getChampionship(@PathVariable("seasonId") seasonId: Int,
-                             @PathVariable("championshipId") championshipId: Int,
+    open fun getChampionship(@PathVariable("championshipId") championshipId: Int,
                              authentication: Authentication): ResponseEntity<ChampionshipResource> {
         val championship = championshipRepository.findOne(championshipId) ?: throw UserForbiddenException()
         if (accessController.isUserAllowedToAccessTeam(authentication, championship.season.team.id)) {
@@ -55,7 +54,7 @@ open class ChampionshipController(private val championshipRepository: Championsh
         throw UserForbiddenException()
     }
 
-    @RequestMapping("/championships/{championshipId}", method = [RequestMethod.DELETE])
+    @RequestMapping("/seasons/{seasonId}/championships/{championshipId}", method = [RequestMethod.DELETE])
     open fun deleteChampionship(@PathVariable("championshipId") championshipId: Int,
                                 authentication: Authentication): ResponseEntity<Any> {
         val championship = championshipRepository.findOne(championshipId) ?: throw UserForbiddenException()

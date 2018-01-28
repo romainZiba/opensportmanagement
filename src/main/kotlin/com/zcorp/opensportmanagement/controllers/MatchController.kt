@@ -86,4 +86,15 @@ open class MatchController(private val teamMemberRepository: TeamMemberRepositor
         }
         throw EntityNotFoundException("Match not found")
     }
+
+    @RequestMapping("/matches/{matchId}", method = [RequestMethod.DELETE])
+    open fun deleteChampionship(@PathVariable("matchId") matchId: Int,
+                                authentication: Authentication): ResponseEntity<Any> {
+        val match = matchRepository.findOne(matchId) ?: throw UserForbiddenException()
+        if (accessController.isTeamAdmin(authentication, match.championship.season.team.id)) {
+            matchRepository.delete(matchId)
+            return ResponseEntity.noContent().build()
+        }
+        throw UserForbiddenException()
+    }
 }

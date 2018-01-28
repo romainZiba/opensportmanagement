@@ -40,6 +40,11 @@ class OtherEvent : Event {
     }
 }
 
+class OtherEventDto(val name: String, val description: String, val fromDateTime: LocalDateTime?, val toDateTime: LocalDateTime?,
+                    val stadium: Stadium?, val place: String?, val reccurenceDays: MutableSet<DayOfWeek>?,
+                    val recurrenceFromDate: LocalDate?, val recurrenceToDate: LocalDate?, val recurrenceFromTime: LocalTime?,
+                    val recurrenceToTime: LocalTime?)
+
 // Resource with self links
 class EventResource(val name: String, val description: String, val teamId: Int) : ResourceSupport() {
     constructor(e: Event) : this(e.name, e.description, e.team!!.id)

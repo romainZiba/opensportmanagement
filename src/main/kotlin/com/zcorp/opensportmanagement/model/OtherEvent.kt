@@ -1,5 +1,9 @@
 package com.zcorp.opensportmanagement.model
 
+import com.zcorp.opensportmanagement.controllers.EventController
+import org.springframework.hateoas.ResourceSupport
+import org.springframework.hateoas.mvc.ControllerLinkBuilder
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -34,6 +38,13 @@ class OtherEvent : Event {
     override fun toString(): String {
         return "OtherEvent() ${super.toString()}"
     }
+}
 
+// Resource with self links
+class EventResource(val name: String, val description: String, val teamId: Int) : ResourceSupport() {
+    constructor(e: Event) : this(e.name, e.description, e.team!!.id)
 
+    init {
+        add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(EventController::class.java).getEvents(teamId, UsernamePasswordAuthenticationToken(null, null))).withSelfRel())
+    }
 }

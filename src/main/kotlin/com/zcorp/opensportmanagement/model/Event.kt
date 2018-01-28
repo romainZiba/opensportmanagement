@@ -15,7 +15,8 @@ abstract class Event() {
     var recurrent: Boolean = false
     var fromDateTime: LocalDateTime? = null
     var toDateTime: LocalDateTime? = null
-    @ElementCollection var reccurenceDays: MutableSet<DayOfWeek> = mutableSetOf()
+    @ElementCollection
+    var reccurenceDays: MutableSet<DayOfWeek> = mutableSetOf()
     var recurrenceFromDate: LocalDate? = null
     var recurrenceToDate: LocalDate? = null
     var recurrenceFromTime: LocalTime? = null
@@ -87,8 +88,6 @@ abstract class Event() {
     override fun toString(): String {
         return "Event(name='$name', description='$description', id=$id)"
     }
-
-
 }
 
 const val championship = "CHAMPIONSHIP"

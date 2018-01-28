@@ -41,33 +41,24 @@ open class Application {
 
         var team2 = teamRepository.save(Team("TEAM 2", Sport.BASKETBALL, Gender.BOTH, AgeGroup.ADULTS))
 
-        val coachTeam1_2 = userRepository.save(User("Coach", "Rock", "CR", bCryptPasswordEncoder().encode("CR"),
+        val userTeam1_2 = userRepository.save(User("CR", "Coach", "Rock", bCryptPasswordEncoder().encode("CR"),
                 "CR@caramail.com", ""))
-        val playerTeam1 = userRepository.save(User("Player", "Wow", "PW", bCryptPasswordEncoder().encode("PW"),
+        val userTeam1 = userRepository.save(User("PW", "Player", "Wow", bCryptPasswordEncoder().encode("PW"),
                 "PW@caramail.com", ""))
 
-        val playerCoachTeam2 = userRepository.save(User("Bobb", "Bobbybob", "bbb",
+        val userTeam2 = userRepository.save(User("bbb", "Bobb", "Bobbybob",
                 bCryptPasswordEncoder().encode("bbb"), "bbb@caramail.com",
                 ""))
 
-        val teamMember1_1 = teamMemberRepository.save(
-                TeamMember(coachTeam1_2, mutableSetOf(Role.COACH, Role.ADMIN), team1)
-        )
-        val teamMember1_2 = teamMemberRepository.save(
-                TeamMember(coachTeam1_2, mutableSetOf(Role.COACH, Role.ADMIN), team2)
-        )
-        teamMember1_1.licenseNumber = "12345"
-        teamMember1_2.licenseNumber = "12345"
-        val teamMember2 = teamMemberRepository.save(
-                TeamMember(playerTeam1, mutableSetOf(Role.PLAYER), team1)
-        )
-        val teamMember3 = teamMemberRepository.save(
-                TeamMember(playerCoachTeam2, mutableSetOf(Role.PLAYER, Role.COACH), team2)
-        )
-        teamMember3.licenseNumber = "255069690"
+        val adminCoachTeam1 = TeamMember(userTeam1_2, mutableSetOf(Role.COACH, Role.ADMIN), team1)
+        val adminCoachTeam2 = TeamMember(userTeam1_2, mutableSetOf(Role.COACH, Role.ADMIN), team2)
+        val playerTeam1 = TeamMember(userTeam1, mutableSetOf(Role.PLAYER), team1)
+        val playerCoachTeam2 = TeamMember(userTeam2, mutableSetOf(Role.PLAYER, Role.COACH), team2)
+        adminCoachTeam1.licenseNumber = "12345"
+        adminCoachTeam2.licenseNumber = "12345"
+        playerCoachTeam2.licenseNumber = "255069690"
 
-        team1 = teamRepository.save(team1)
-        team2 = teamRepository.save(team2)
+        teamMemberRepository.save(mutableListOf(adminCoachTeam1, adminCoachTeam2, playerTeam1, playerCoachTeam2))
 
         val stadium = stadiumRepository.save(Stadium("LE stade", "2 allée", "Toulouse", team1))
 

@@ -1,6 +1,11 @@
 package com.zcorp.opensportmanagement.model
 
 import com.fasterxml.jackson.annotation.JsonBackReference
+import com.sun.org.apache.xpath.internal.operations.Bool
+import com.zcorp.opensportmanagement.controllers.MatchController
+import org.springframework.hateoas.ResourceSupport
+import org.springframework.hateoas.mvc.ControllerLinkBuilder
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -14,10 +19,15 @@ import javax.persistence.Table
 @Table(name = "match")
 class Match : Event {
 
-    @ManyToOne val opponent: Opponent
-    @ManyToOne @JsonBackReference val championship: Championship
-    @ManyToMany val presentPlayers: MutableSet<User>
-    @ManyToMany val notPresentPlayers: MutableSet<User>
+    @ManyToOne
+    val opponent: Opponent
+    @ManyToOne
+    @JsonBackReference
+    val championship: Championship
+    @ManyToMany
+    val presentPlayers: MutableSet<TeamMember>
+    @ManyToMany
+    val notPresentPlayers: MutableSet<TeamMember>
 
     constructor(name: String, description: String, fromDateTime: LocalDateTime, toDateTime: LocalDateTime, stadium: Stadium,
                 opponent: Opponent, team: Team, championship: Championship) :
@@ -59,7 +69,7 @@ class Match : Event {
         this.notPresentPlayers = mutableSetOf()
     }
 
-    fun parcipate(player: User, present: Boolean): Match {
+    fun parcipate(player: TeamMember, present: Boolean): Match {
         if (present) {
             if (presentPlayers.size < MAX_PLAYERS) {
                 presentPlayers.add(player)
@@ -71,8 +81,16 @@ class Match : Event {
         }
         return this
     }
+}
 
-    
+
+// Resource with self links
+class MatchResource(val id: Int, val opponent: Opponent, val presentPlayers: Set<TeamMember>, val notPresentPlayers: Set<TeamMember>, championshipId: Int) : ResourceSupport() {
+    constructor(m: Match) : this(m.id, m.opponent, m.presentPlayers, m.notPresentPlayers, m.championship.id)
+
+    init {
+        add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(MatchController::class.java).getMatches(championshipId, UsernamePasswordAuthenticationToken(null, null))).withSelfRel())
+    }
 }
 
 

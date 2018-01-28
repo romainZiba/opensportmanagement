@@ -1,6 +1,11 @@
 package com.zcorp.opensportmanagement.model
 
 import com.fasterxml.jackson.annotation.JsonBackReference
+import com.zcorp.opensportmanagement.controllers.OpponentController
+import com.zcorp.opensportmanagement.controllers.StadiumController
+import org.springframework.hateoas.ResourceSupport
+import org.springframework.hateoas.mvc.ControllerLinkBuilder
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import javax.persistence.*
 
 @Entity
@@ -33,6 +38,15 @@ data class Opponent(@Column(name = "name") val name: String,
         var result = name.hashCode()
         result = 31 * result + team.hashCode()
         return result
+    }
+}
+
+// Resource with self links
+class OpponentResource(val name: String, val phoneNumber: String, val email: String, val teamId: Int) : ResourceSupport() {
+    constructor(o: Opponent) : this(o.name, o.phoneNumber, o.email, o.team.id)
+
+    init {
+        add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(OpponentController::class.java).getOpponents(teamId, UsernamePasswordAuthenticationToken(null, null))).withSelfRel())
     }
 }
 

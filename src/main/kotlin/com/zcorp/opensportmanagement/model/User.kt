@@ -3,17 +3,17 @@ package com.zcorp.opensportmanagement.model
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonManagedReference
 import javax.persistence.*
+import javax.validation.constraints.NotNull
 
 @Entity
 @Table(name = "user")
 @JsonIgnoreProperties("memberOf")
-data class User(val firstName: String,
+data class User(@Id @NotNull val username: String,
+                val firstName: String,
                 val lastName: String,
-                @Column(unique = true) val username: String,
                 var password: String,
                 val email: String,
-                val phoneNumber: String?,
-                @Id @GeneratedValue val id: Int = -1) {
+                val phoneNumber: String?) {
 
     @OneToMany(mappedBy = "user")
     @JsonManagedReference(value = "memberOf")
@@ -27,7 +27,7 @@ data class User(val firstName: String,
     }
 
     override fun hashCode(): Int {
-        return id
+        return username.hashCode()
     }
 
     override fun toString(): String {

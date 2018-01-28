@@ -5,30 +5,30 @@ import com.zcorp.opensportmanagement.UserForbiddenException
 import com.zcorp.opensportmanagement.model.Event
 import com.zcorp.opensportmanagement.model.Match
 import com.zcorp.opensportmanagement.model.MatchDto
+import com.zcorp.opensportmanagement.model.MatchResource
 import com.zcorp.opensportmanagement.repositories.*
 import com.zcorp.opensportmanagement.security.AccessController
-import com.zcorp.opensportmanagement.security.IAuthenticationFacade
+import org.springframework.data.rest.webmvc.RepositoryRestController
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 import javax.validation.constraints.NotNull
 
-@RestController
-class MatchController(private val authenticationFacade: IAuthenticationFacade,
-                      private val userRepository: UserRepository,
-                      private val matchRepository: MatchRepository,
-                      private val championshipRepository: ChampionshipRepository,
-                      private val stadiumRepository: StadiumRepository,
-                      private val opponentRepository: OpponentRepository,
-                      private val eventRepository: EventRepository,
-                      private val accessController: AccessController) {
+@RepositoryRestController
+open class MatchController(private val teamMemberRepository: TeamMemberRepository,
+                           private val matchRepository: MatchRepository,
+                           private val championshipRepository: ChampionshipRepository,
+                           private val stadiumRepository: StadiumRepository,
+                           private val opponentRepository: OpponentRepository,
+                           private val eventRepository: EventRepository,
+                           private val accessController: AccessController) {
 
     @PostMapping("/teams/{teamId}/seasons/{seasonId}/championships/{championshipId}/matches")
-    fun createMatch(@PathVariable("teamId") teamId: Int,
-                    @NotNull @PathVariable("championshipId") championshipId: Int,
-                    @RequestBody matchDto: MatchDto,
-                    authentication: Authentication): ResponseEntity<Event> {
+    open fun createMatch(@PathVariable("teamId") teamId: Int,
+                         @NotNull @PathVariable("championshipId") championshipId: Int,
+                         @RequestBody matchDto: MatchDto,
+                         authentication: Authentication): ResponseEntity<Event> {
 
         if (accessController.isTeamAdmin(authentication, teamId)) {
             val championship = championshipRepository.findOne(championshipId)
@@ -49,23 +49,40 @@ class MatchController(private val authenticationFacade: IAuthenticationFacade,
         throw UserForbiddenException()
     }
 
-    @GetMapping("/teams/{teamId}/matches")
-    fun findAll(@PathVariable teamId: Int, authentication: Authentication) {
-        if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) matchRepository.findAll()
+    @GetMapping("/championships/{championshipId}/matches")
+    open fun getMatches(@PathVariable championshipId: Int, authentication: Authentication): ResponseEntity<List<MatchResource>> {
+        val championship = championshipRepository.findOne(championshipId)
+        if (accessController.isUserAllowedToAccessTeam(authentication, championship.season.team.id)) {
+            return ResponseEntity.ok(championship.matches.map { match -> MatchResource(match) })
+        }
+        throw UserForbiddenException()
+    }
+
+    @GetMapping("/matches/{matchId}")
+    open fun getMatch(@PathVariable matchId: Int, authentication: Authentication): ResponseEntity<MatchResource> {
+        val match = matchRepository.findOne(matchId)
+        if (accessController.isUserAllowedToAccessTeam(authentication, match.championship.season.team.id)) {
+            return ResponseEntity.ok(MatchResource(match))
+        }
+        throw UserForbiddenException()
     }
 
     @PutMapping("/matches/{matchId}/{present}")
-    fun participate(@NotNull @PathVariable("matchId") matchId: Int,
-                    @NotNull @PathVariable("present") present: Boolean): Match {
+    open fun participate(@NotNull @PathVariable("matchId") matchId: Int,
+                         @NotNull @PathVariable("present") present: Boolean,
+                         authentication: Authentication): ResponseEntity<MatchResource> {
 
         //TODO: handle access rights
         var match = matchRepository.findOne(matchId)
         if (match != null) {
-            val authentication = authenticationFacade.authentication
-            val user = userRepository.findByUsername(authentication.name)
-            match = match.parcipate(user!!, present)
-            matchRepository.save(match)
-            return match
+            val teamId = match.championship.season.team.id
+            if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
+                val teamMember = teamMemberRepository.findByUsername(authentication.name, teamId)
+                match = match.parcipate(teamMember!!, present)
+                match = matchRepository.save(match)
+                return ResponseEntity.ok(MatchResource(match))
+            }
+
         }
         throw EntityNotFoundException("Match not found")
     }

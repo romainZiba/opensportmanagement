@@ -1,9 +1,7 @@
 package com.zcorp.opensportmanagement.model
 
 import com.fasterxml.jackson.annotation.JsonManagedReference
-import com.zcorp.opensportmanagement.controllers.OpponentController
-import com.zcorp.opensportmanagement.controllers.SeasonController
-import com.zcorp.opensportmanagement.controllers.TeamController
+import com.zcorp.opensportmanagement.controllers.*
 import org.springframework.hateoas.ResourceSupport
 import org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo
 import org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn
@@ -56,7 +54,11 @@ class TeamResource(val id: Int, val name: String, val sport: Sport, val genderKi
 
     init {
         add(linkTo(methodOn(TeamController::class.java).getTeam(id, UsernamePasswordAuthenticationToken(null, null))).withSelfRel())
+        add(linkTo(methodOn(TeamMemberController::class.java).getTeamMembers(id, UsernamePasswordAuthenticationToken(null, null))).withRel("members"))
+        add(linkTo(methodOn(StadiumController::class.java).getStadiums(id, UsernamePasswordAuthenticationToken(null, null))).withRel("stadiums"))
         add(linkTo(methodOn(SeasonController::class.java).getSeasons(id, UsernamePasswordAuthenticationToken(null, null))).withRel("seasons"))
+        add(linkTo(methodOn(EventController::class.java).getEvents(id, UsernamePasswordAuthenticationToken(null, null))).withRel("events"))
+        add(linkTo(methodOn(OpponentController::class.java).getOpponents(id, UsernamePasswordAuthenticationToken(null, null))).withRel("opponents"))
     }
 }
 

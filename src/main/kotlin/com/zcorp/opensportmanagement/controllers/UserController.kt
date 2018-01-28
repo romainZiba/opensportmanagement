@@ -6,19 +6,23 @@ import com.zcorp.opensportmanagement.EntityNotFoundException
 import com.zcorp.opensportmanagement.model.User
 import com.zcorp.opensportmanagement.model.UserDto
 import com.zcorp.opensportmanagement.repositories.UserRepository
+import org.springframework.data.rest.webmvc.RepositoryRestController
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.ResponseStatus
 import javax.validation.Valid
 
 
-@RestController
-class UserController(private val userRepository: UserRepository,
-                     private val bCryptPasswordEncoder: BCryptPasswordEncoder) {
+@RepositoryRestController
+open class UserController(private val userRepository: UserRepository,
+                          private val bCryptPasswordEncoder: BCryptPasswordEncoder) {
 
     @PostMapping("/users/sign-up")
-    fun createUser(@Valid @RequestBody user: User): ResponseEntity<UserDto> {
+    open fun createUser(@Valid @RequestBody user: User): ResponseEntity<UserDto> {
         if (userRepository.findByUsername(user.username) == null) {
             user.password = bCryptPasswordEncoder.encode(user.password)
             val userSaved = userRepository.save(user)

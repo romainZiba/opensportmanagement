@@ -6,7 +6,7 @@ import javax.persistence.*
 import javax.validation.constraints.NotNull
 
 @Entity
-@Table(name = "user")
+@Table(name = "app_user")
 @JsonIgnoreProperties("memberOf")
 data class User(@Id @NotNull val username: String,
                 val firstName: String,

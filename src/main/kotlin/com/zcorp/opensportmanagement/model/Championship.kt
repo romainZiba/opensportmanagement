@@ -17,7 +17,7 @@ data class Championship(@Column(name = "name") val name: String,
                         @ManyToOne @JsonBackReference @JoinColumn(name = "season_id") val season: Season,
                         @Id @GeneratedValue val id: Int = -1) {
 
-    @OneToMany(mappedBy = "championship")
+    @OneToMany(mappedBy = "championship", cascade = [CascadeType.REMOVE])
     @JsonManagedReference
     val matches: MutableSet<Match> = mutableSetOf()
 
@@ -32,8 +32,8 @@ class ChampionshipResource(val id: Int, val name: String, seasonId: Int) : Resou
     constructor(c: Championship) : this(c.id, c.name, c.season.id)
 
     init {
-        add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(ChampionshipController::class.java).getChampionships(seasonId, UsernamePasswordAuthenticationToken(null, null))).withSelfRel())
-        add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(MatchController::class.java).getMatches(id, UsernamePasswordAuthenticationToken(null, null))).withRel("championships"))
+        add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(ChampionshipController::class.java).getChampionships(seasonId, UsernamePasswordAuthenticationToken(null, null))).withSelfRel().withRel("championships"))
+        add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(MatchController::class.java).getMatches(id, UsernamePasswordAuthenticationToken(null, null))).withRel("matches"))
     }
 }
 

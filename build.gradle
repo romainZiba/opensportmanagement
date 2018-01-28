@@ -48,8 +48,11 @@ dependencies {
     compile "com.fasterxml.jackson.core:jackson-core"
     compile "com.fasterxml.jackson.core:jackson-databind"
     runtime "com.fasterxml.jackson.datatype:jackson-datatype-jdk8"
-    runtime "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
     compile "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.0"
+
+    runtime('org.postgresql:postgresql:42.1.4')
+    runtime "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
+
 
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile group: 'junit', name: 'junit', version: '4.11'

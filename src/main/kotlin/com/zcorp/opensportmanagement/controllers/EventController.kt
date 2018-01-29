@@ -47,21 +47,22 @@ open class EventController(private val teamRepository: TeamRepository,
     }
 
     @RequestMapping("/teams/{teamId}/events/{eventId}", method = [RequestMethod.GET])
-    open fun getEvent(@PathVariable("teamId") teamId: Int,
-                      @PathVariable("eventId") eventId: Int,
+    open fun getEvent(@PathVariable("eventId") eventId: Int,
                       authentication: Authentication): ResponseEntity<EventResource> {
-        if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
-            val event = eventRepository.findOne(eventId)
+        val event = eventRepository.findOne(eventId) ?: throw UserForbiddenException()
+        val team = event.team ?: throw UserForbiddenException()
+        if (accessController.isUserAllowedToAccessTeam(authentication, team.id)) {
             return ResponseEntity.ok(EventResource(event))
         }
         throw UserForbiddenException()
     }
 
     @RequestMapping("/teams/{teamId}/events/{eventId}", method = [RequestMethod.DELETE])
-    open fun deleteEvent(@PathVariable("teamId") teamId: Int,
-                         @PathVariable("eventId") eventId: Int,
+    open fun deleteEvent(@PathVariable("eventId") eventId: Int,
                          authentication: Authentication): ResponseEntity<Any> {
-        if (accessController.isTeamAdmin(authentication, teamId)) {
+        val event = eventRepository.findOne(eventId) ?: throw UserForbiddenException()
+        val team = event.team ?: throw UserForbiddenException()
+        if (accessController.isTeamAdmin(authentication, team.id)) {
             eventRepository.delete(eventId)
             return ResponseEntity.noContent().build()
         }

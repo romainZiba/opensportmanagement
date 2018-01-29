@@ -66,10 +66,12 @@ open class SeasonController(private val seasonRepository: SeasonRepository,
     @DeleteMapping("/teams/{teamId}/seasons/{seasonId}")
     fun deleteSeason(@PathVariable("teamId") teamId: Int,
                      @PathVariable("seasonId") seasonId: Int,
-                     authentication: Authentication) {
+                     authentication: Authentication): ResponseEntity<Any> {
         val season = seasonRepository.findOne(seasonId) ?: throw UserForbiddenException()
         if (accessController.isTeamAdmin(authentication, season.team.id)) {
             seasonRepository.delete(seasonId)
+            return ResponseEntity.noContent().build()
         }
+        throw UserForbiddenException()
     }
 }

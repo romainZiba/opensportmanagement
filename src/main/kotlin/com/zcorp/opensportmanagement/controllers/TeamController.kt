@@ -22,13 +22,13 @@ open class TeamController(private val teamRepository: TeamRepository,
     @RequestMapping("/teams", method = [RequestMethod.POST])
     open fun createTeam(@RequestBody teamDto: TeamDto,
                         authentication: Authentication): ResponseEntity<TeamResource> {
-        val team = Team(teamDto.name, teamDto.sport, teamDto.genderKind, teamDto.ageGroup)
+        var team = Team(teamDto.name, teamDto.sport, teamDto.genderKind, teamDto.ageGroup)
         val user = userRepository.findByUsername(authentication.name)
                 ?: throw EntityNotFoundException("User ${authentication.name} does not exist")
         val teamMember = TeamMember(user, mutableSetOf(Role.ADMIN), team)
         team.members.add(teamMember)
-        val teamSaved = teamRepository.save(team)
-        return ResponseEntity(TeamResource(teamSaved), HttpStatus.CREATED)
+        team = teamRepository.save(team)
+        return ResponseEntity(TeamResource(team), HttpStatus.CREATED)
     }
 
     @RequestMapping("/teams", method = [RequestMethod.GET])
@@ -59,10 +59,12 @@ open class TeamController(private val teamRepository: TeamRepository,
     }
 
     @RequestMapping("/teams/{teamId}", method = [RequestMethod.DELETE])
-    open fun deleteTeam(@PathVariable teamId: Int, authentication: Authentication) {
+    open fun deleteTeam(@PathVariable teamId: Int, authentication: Authentication): ResponseEntity<Any> {
         if (accessController.isTeamAdmin(authentication, teamId)) {
             teamRepository.delete(teamId)
+            return ResponseEntity.noContent().build()
         }
+        throw UserForbiddenException()
     }
 
     /** Handle the error */

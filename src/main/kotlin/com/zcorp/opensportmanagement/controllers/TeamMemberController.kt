@@ -27,11 +27,10 @@ open class TeamMemberController(private val teamRepository: TeamRepository,
     }
 
     @RequestMapping("/teams/{teamId}/members/{memberId}", method = [RequestMethod.GET])
-    open fun getTeamMember(@PathVariable("teamId") teamId: Int,
-                           @PathVariable("memberId") memberId: Int,
+    open fun getTeamMember(@PathVariable("memberId") memberId: Int,
                            authentication: Authentication): ResponseEntity<TeamMemberResource> {
-        if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
-            val teamMember = teamMemberRepository.findOne(memberId)
+        val teamMember = teamMemberRepository.findOne(memberId) ?: throw UserForbiddenException()
+        if (accessController.isUserAllowedToAccessTeam(authentication, teamMember.team.id)) {
             return ResponseEntity.ok(TeamMemberResource(teamMember))
         }
         throw UserForbiddenException()

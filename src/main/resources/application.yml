@@ -13,3 +13,4 @@ spring:
     generate-ddl: true
     hibernate:
       ddl-auto: create
+    database-platform: org.hibernate.dialect.PostgreSQLDialect

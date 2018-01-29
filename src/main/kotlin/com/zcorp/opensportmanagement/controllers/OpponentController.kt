@@ -24,16 +24,16 @@ open class OpponentController(private val opponentRepository: OpponentRepository
     @PostMapping("/teams/{teamId}/opponents")
     open fun createOpponent(@NotNull @PathVariable("teamId") teamId: Int,
                             @RequestBody opponentDto: OpponentDto,
-                            authentication: Authentication): ResponseEntity<Opponent> {
+                            authentication: Authentication): ResponseEntity<OpponentResource> {
 
         if (accessController.isTeamAdmin(authentication, teamId)) {
             val team = teamRepository.findOne(teamId) ?: throw EntityNotFoundException("Team $teamId does not exist")
             if (team.opponents.map { it.name }.contains(opponentDto.name)) {
                 throw EntityAlreadyExistsException("Opponent " + opponentDto.name + " already exists")
             } else {
-                val opponent = Opponent(opponentDto.name, opponentDto.phoneNumber, opponentDto.email, team)
-                val opponentSaved = opponentRepository.save(opponent)
-                return ResponseEntity(opponentSaved, HttpStatus.CREATED)
+                var opponent = Opponent(opponentDto.name, opponentDto.phoneNumber, opponentDto.email, team)
+                opponent = opponentRepository.save(opponent)
+                return ResponseEntity(OpponentResource(opponent), HttpStatus.CREATED)
             }
         }
         throw UserForbiddenException()
@@ -49,20 +49,18 @@ open class OpponentController(private val opponentRepository: OpponentRepository
     }
 
     @RequestMapping("/teams/{teamId}/opponents/{opponentId}", method = [RequestMethod.GET])
-    open fun getStadium(@PathVariable("teamId") teamId: Int,
-                        @PathVariable("opponentId") opponentId: Int,
+    open fun getStadium(@PathVariable("opponentId") opponentId: Int,
                         authentication: Authentication): ResponseEntity<OpponentResource> {
-        if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
-            val opponent = opponentRepository.findOne(opponentId)
+        val opponent = opponentRepository.findOne(opponentId) ?: throw UserForbiddenException()
+        if (accessController.isUserAllowedToAccessTeam(authentication, opponent.team.id)) {
             return ResponseEntity.ok(OpponentResource(opponent))
         }
         throw UserForbiddenException()
     }
 
     @RequestMapping("/teams/{teamId}/opponents/{opponentId}", method = [RequestMethod.DELETE])
-    open fun deleteChampionship(@PathVariable("teamId") teamId: Int,
-                                @PathVariable("opponentId") opponentId: Int,
-                                authentication: Authentication): ResponseEntity<Any> {
+    open fun deleteOpponent(@PathVariable("opponentId") opponentId: Int,
+                            authentication: Authentication): ResponseEntity<Any> {
         val opponent = opponentRepository.findOne(opponentId) ?: throw UserForbiddenException()
         if (accessController.isTeamAdmin(authentication, opponent.team.id)) {
             opponentRepository.delete(opponentId)

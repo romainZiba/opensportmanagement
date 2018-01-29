@@ -27,11 +27,10 @@ open class StadiumController(private val teamRepository: TeamRepository,
     }
 
     @RequestMapping("/teams/{teamId}/stadiums/{stadiumId}", method = [RequestMethod.GET])
-    open fun getStadium(@PathVariable("teamId") teamId: Int,
-                        @PathVariable("stadiumId") stadiumId: Int,
+    open fun getStadium(@PathVariable("stadiumId") stadiumId: Int,
                         authentication: Authentication): ResponseEntity<StadiumResource> {
-        if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
-            val stadium = stadiumRepository.findOne(stadiumId)
+        val stadium = stadiumRepository.findOne(stadiumId) ?: throw UserForbiddenException()
+        if (accessController.isUserAllowedToAccessTeam(authentication, stadium.team.id)) {
             return ResponseEntity.ok(StadiumResource(stadium))
         }
         throw UserForbiddenException()

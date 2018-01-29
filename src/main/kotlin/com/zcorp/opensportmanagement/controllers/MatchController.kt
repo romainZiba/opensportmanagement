@@ -25,33 +25,28 @@ open class MatchController(private val teamMemberRepository: TeamMemberRepositor
                            private val accessController: AccessController) {
 
     @PostMapping("/teams/{teamId}/seasons/{seasonId}/championships/{championshipId}/matches")
-    open fun createMatch(@PathVariable("teamId") teamId: Int,
-                         @NotNull @PathVariable("championshipId") championshipId: Int,
+    open fun createMatch(@NotNull @PathVariable("championshipId") championshipId: Int,
                          @RequestBody matchDto: MatchDto,
-                         authentication: Authentication): ResponseEntity<Event> {
-
-        if (accessController.isTeamAdmin(authentication, teamId)) {
-            val championship = championshipRepository.findOne(championshipId)
-            if (championship != null) {
-                val opponentName = matchDto.opponentName
-                val stadiumName = matchDto.stadiumName
-                val stadium = stadiumRepository.findByName(stadiumName)
-                        ?: throw EntityNotFoundException("Stadium $stadiumName does not exist")
-                val opponent = opponentRepository.findByName(opponentName)
-                        ?: throw EntityNotFoundException("Opponent $opponentName does not exist")
-                val match = Match(matchDto.name, matchDto.description, matchDto.fromDateTime, matchDto.toDateTime,
-                        stadium, opponent, championship.season.team, championship)
-                val matchSaved = eventRepository.save(match)
-                return ResponseEntity(matchSaved, HttpStatus.CREATED)
-            }
-            throw EntityNotFoundException("Championship $championshipId does not exist")
+                         authentication: Authentication): ResponseEntity<MatchResource> {
+        val championship = championshipRepository.findOne(championshipId) ?: throw UserForbiddenException()
+        if (accessController.isTeamAdmin(authentication, championship.season.team.id)) {
+            val opponentName = matchDto.opponentName
+            val stadiumName = matchDto.stadiumName
+            val stadium = stadiumRepository.findByName(stadiumName)
+                    ?: throw EntityNotFoundException("Stadium $stadiumName does not exist")
+            val opponent = opponentRepository.findByName(opponentName)
+                    ?: throw EntityNotFoundException("Opponent $opponentName does not exist")
+            val match = Match(matchDto.name, matchDto.description, matchDto.fromDateTime, matchDto.toDateTime,
+                    stadium, opponent, championship.season.team, championship)
+            val matchSaved = eventRepository.save(match)
+            return ResponseEntity(MatchResource(matchSaved), HttpStatus.CREATED)
         }
         throw UserForbiddenException()
     }
 
     @GetMapping("/championships/{championshipId}/matches")
     open fun getMatches(@PathVariable championshipId: Int, authentication: Authentication): ResponseEntity<List<MatchResource>> {
-        val championship = championshipRepository.findOne(championshipId)
+        val championship = championshipRepository.findOne(championshipId) ?: throw UserForbiddenException()
         if (accessController.isUserAllowedToAccessTeam(authentication, championship.season.team.id)) {
             return ResponseEntity.ok(championship.matches.map { match -> MatchResource(match) })
         }
@@ -71,18 +66,14 @@ open class MatchController(private val teamMemberRepository: TeamMemberRepositor
     open fun participate(@NotNull @PathVariable("matchId") matchId: Int,
                          @NotNull @PathVariable("present") present: Boolean,
                          authentication: Authentication): ResponseEntity<MatchResource> {
-
-        //TODO: handle access rights
-        var match = matchRepository.findOne(matchId)
-        if (match != null) {
-            val teamId = match.championship.season.team.id
-            if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
-                val teamMember = teamMemberRepository.findByUsername(authentication.name, teamId)
-                match = match.parcipate(teamMember!!, present)
-                match = matchRepository.save(match)
-                return ResponseEntity.ok(MatchResource(match))
-            }
-
+        var match = matchRepository.findOne(matchId) ?: throw UserForbiddenException()
+        val teamId = match.championship.season.team.id
+        if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
+            val teamMember = teamMemberRepository.findByUsername(authentication.name, teamId)
+                    ?: throw EntityNotFoundException("Team member ${authentication.name} does not exist")
+            match = match.parcipate(teamMember, present)
+            match = matchRepository.save(match)
+            return ResponseEntity.ok(MatchResource(match))
         }
         throw EntityNotFoundException("Match not found")
     }

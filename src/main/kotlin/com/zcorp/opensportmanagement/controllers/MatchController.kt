@@ -24,7 +24,7 @@ open class MatchController(private val teamMemberRepository: TeamMemberRepositor
                            private val eventRepository: EventRepository,
                            private val accessController: AccessController) {
 
-    @PostMapping("/teams/{teamId}/seasons/{seasonId}/championships/{championshipId}/matches")
+    @PostMapping("/championships/{championshipId}/matches")
     open fun createMatch(@NotNull @PathVariable("championshipId") championshipId: Int,
                          @RequestBody matchDto: MatchDto,
                          authentication: Authentication): ResponseEntity<MatchResource> {

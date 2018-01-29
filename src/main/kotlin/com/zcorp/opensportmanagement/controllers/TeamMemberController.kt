@@ -26,7 +26,7 @@ open class TeamMemberController(private val teamRepository: TeamRepository,
         throw UserForbiddenException()
     }
 
-    @RequestMapping("/teams/{teamId}/members/{memberId}", method = [RequestMethod.GET])
+    @RequestMapping("/members/{memberId}", method = [RequestMethod.GET])
     open fun getTeamMember(@PathVariable("memberId") memberId: Int,
                            authentication: Authentication): ResponseEntity<TeamMemberResource> {
         val teamMember = teamMemberRepository.findOne(memberId) ?: throw UserForbiddenException()

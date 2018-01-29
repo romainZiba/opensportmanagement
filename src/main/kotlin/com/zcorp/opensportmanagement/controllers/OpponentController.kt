@@ -48,9 +48,9 @@ open class OpponentController(private val opponentRepository: OpponentRepository
         throw UserForbiddenException()
     }
 
-    @RequestMapping("/teams/{teamId}/opponents/{opponentId}", method = [RequestMethod.GET])
-    open fun getStadium(@PathVariable("opponentId") opponentId: Int,
-                        authentication: Authentication): ResponseEntity<OpponentResource> {
+    @RequestMapping("/opponents/{opponentId}", method = [RequestMethod.GET])
+    open fun getOpponent(@PathVariable("opponentId") opponentId: Int,
+                         authentication: Authentication): ResponseEntity<OpponentResource> {
         val opponent = opponentRepository.findOne(opponentId) ?: throw UserForbiddenException()
         if (accessController.isUserAllowedToAccessTeam(authentication, opponent.team.id)) {
             return ResponseEntity.ok(OpponentResource(opponent))
@@ -58,7 +58,7 @@ open class OpponentController(private val opponentRepository: OpponentRepository
         throw UserForbiddenException()
     }
 
-    @RequestMapping("/teams/{teamId}/opponents/{opponentId}", method = [RequestMethod.DELETE])
+    @RequestMapping("/opponents/{opponentId}", method = [RequestMethod.DELETE])
     open fun deleteOpponent(@PathVariable("opponentId") opponentId: Int,
                             authentication: Authentication): ResponseEntity<Any> {
         val opponent = opponentRepository.findOne(opponentId) ?: throw UserForbiddenException()

@@ -52,9 +52,8 @@ open class SeasonController(private val seasonRepository: SeasonRepository,
         throw UserForbiddenException()
     }
 
-    @GetMapping("/teams/{teamId}/seasons/{seasonId}")
-    fun getSeason(@PathVariable("teamId") teamId: Int,
-                  @PathVariable("seasonId") seasonId: Int,
+    @GetMapping("/seasons/{seasonId}")
+    fun getSeason(@PathVariable("seasonId") seasonId: Int,
                   authentication: Authentication): SeasonResource {
         val season = seasonRepository.findOne(seasonId) ?: throw UserForbiddenException()
         if (accessController.isUserAllowedToAccessTeam(authentication, season.team.id)) {
@@ -63,9 +62,8 @@ open class SeasonController(private val seasonRepository: SeasonRepository,
         throw UserForbiddenException()
     }
 
-    @DeleteMapping("/teams/{teamId}/seasons/{seasonId}")
-    fun deleteSeason(@PathVariable("teamId") teamId: Int,
-                     @PathVariable("seasonId") seasonId: Int,
+    @DeleteMapping("/seasons/{seasonId}")
+    fun deleteSeason(@PathVariable("seasonId") seasonId: Int,
                      authentication: Authentication): ResponseEntity<Any> {
         val season = seasonRepository.findOne(seasonId) ?: throw UserForbiddenException()
         if (accessController.isTeamAdmin(authentication, season.team.id)) {

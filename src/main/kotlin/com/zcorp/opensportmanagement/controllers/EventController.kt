@@ -46,7 +46,7 @@ open class EventController(private val teamRepository: TeamRepository,
         throw UserForbiddenException()
     }
 
-    @RequestMapping("/teams/{teamId}/events/{eventId}", method = [RequestMethod.GET])
+    @RequestMapping("/events/{eventId}", method = [RequestMethod.GET])
     open fun getEvent(@PathVariable("eventId") eventId: Int,
                       authentication: Authentication): ResponseEntity<EventResource> {
         val event = eventRepository.findOne(eventId) ?: throw UserForbiddenException()
@@ -57,7 +57,7 @@ open class EventController(private val teamRepository: TeamRepository,
         throw UserForbiddenException()
     }
 
-    @RequestMapping("/teams/{teamId}/events/{eventId}", method = [RequestMethod.DELETE])
+    @RequestMapping("/events/{eventId}", method = [RequestMethod.DELETE])
     open fun deleteEvent(@PathVariable("eventId") eventId: Int,
                          authentication: Authentication): ResponseEntity<Any> {
         val event = eventRepository.findOne(eventId) ?: throw UserForbiddenException()

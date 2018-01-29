@@ -26,7 +26,7 @@ open class StadiumController(private val teamRepository: TeamRepository,
         throw UserForbiddenException()
     }
 
-    @RequestMapping("/teams/{teamId}/stadiums/{stadiumId}", method = [RequestMethod.GET])
+    @RequestMapping("/stadiums/{stadiumId}", method = [RequestMethod.GET])
     open fun getStadium(@PathVariable("stadiumId") stadiumId: Int,
                         authentication: Authentication): ResponseEntity<StadiumResource> {
         val stadium = stadiumRepository.findOne(stadiumId) ?: throw UserForbiddenException()

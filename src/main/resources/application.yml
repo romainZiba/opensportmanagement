@@ -4,13 +4,17 @@ spring:
       indent_output: true
       write_dates_as_timestamps: false
       write_durations_as_timestamps: false
-  datasource:
-    url: jdbc:postgresql://localhost:5438/open
-    username: postgres
-    password: open
-    driver-class-name: org.postgresql.Driver
-  jpa:
-    generate-ddl: true
-    hibernate:
-      ddl-auto: create
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
+#  datasource:
+#    url: jdbc:postgresql://localhost:5438/open
+#    username: postgres
+#    password: open
+#    driver-class-name: org.postgresql.Driver
+#  jpa:
+#    generate-ddl: true
+#    hibernate:
+#      ddl-auto: create
+#    database-platform: org.hibernate.dialect.PostgreSQLDialect
+rethinkdb:
+  dbhost: '127.0.0.1'
+server:
+  port: 8090

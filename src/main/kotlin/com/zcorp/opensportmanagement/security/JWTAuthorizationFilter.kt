@@ -30,7 +30,7 @@ class JWTAuthorizationFilter(authManager: AuthenticationManager) : BasicAuthenti
                                   chain: FilterChain) {
         val header = req.getHeader(HEADER_STRING)
 
-        if (header == null || !header!!.startsWith(TOKEN_PREFIX)) {
+        if (header == null || !header.startsWith(TOKEN_PREFIX)) {
             chain.doFilter(req, res)
             return
         }
@@ -61,12 +61,12 @@ class JWTAuthorizationFilter(authManager: AuthenticationManager) : BasicAuthenti
             try {
                 val user = Jwts.parser()
                         .setSigningKey(SECRET)
-                        .parseClaimsJws(token!!.replace(TOKEN_PREFIX, ""))
+                        .parseClaimsJws(token.replace(TOKEN_PREFIX, ""))
                         .body
                         .subject
                 var teams: MutableList<String> = Jwts.parser()
                         .setSigningKey(SECRET)
-                        .parseClaimsJws(token!!.replace(TOKEN_PREFIX, ""))
+                        .parseClaimsJws(token.replace(TOKEN_PREFIX, ""))
                         .body[TEAMS] as MutableList<String>
                 return if (user != null) {
                     UsernamePasswordAuthenticationToken(user, null, teams.mapTo(ArrayList<GrantedAuthority>()) { SimpleGrantedAuthority(it) })

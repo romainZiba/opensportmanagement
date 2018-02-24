@@ -1,22 +1,19 @@
 package com.zcorp.opensportmanagement.security
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.SignatureAlgorithm
 import org.slf4j.LoggerFactory
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.core.GrantedAuthority
-import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter
 import java.io.IOException
-import java.util.*
 import javax.servlet.FilterChain
 import javax.servlet.ServletException
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
-import kotlin.collections.ArrayList
 
 
 class JWTAuthorizationFilter(authManager: AuthenticationManager) : BasicAuthenticationFilter(authManager) {
@@ -43,13 +40,8 @@ class JWTAuthorizationFilter(authManager: AuthenticationManager) : BasicAuthenti
         }
 
         // User is authorized. Refresh the access token
-        val token = Jwts.builder()
-                .setSubject((authentication.principal.toString()))
-                .setExpiration(Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .signWith(SignatureAlgorithm.HS512, SECRET)
-                .compact()
+        val token = JWTUtils.getToken(authentication)
         res.addHeader(HEADER_STRING, TOKEN_PREFIX + token)
-
         SecurityContextHolder.getContext().authentication = authentication
         chain.doFilter(req, res)
     }
@@ -64,12 +56,16 @@ class JWTAuthorizationFilter(authManager: AuthenticationManager) : BasicAuthenti
                         .parseClaimsJws(token.replace(TOKEN_PREFIX, ""))
                         .body
                         .subject
-                var teams: MutableList<String> = Jwts.parser()
+                val stringAuthorities = Jwts.parser()
                         .setSigningKey(SECRET)
                         .parseClaimsJws(token.replace(TOKEN_PREFIX, ""))
-                        .body[TEAMS] as MutableList<String>
+                        .body[AUTHORITIES] as String
+
+                val mapper = jacksonObjectMapper()
+                mapper.findAndRegisterModules()
+                val authorities = mapper.readValue<List<OpenGrantedAuthority>>(stringAuthorities)
                 return if (user != null) {
-                    UsernamePasswordAuthenticationToken(user, null, teams.mapTo(ArrayList<GrantedAuthority>()) { SimpleGrantedAuthority(it) })
+                    UsernamePasswordAuthenticationToken(user, null, authorities)
                 } else null
             } catch (e: ExpiredJwtException) {
                 LOG.error("Token expired ", e)

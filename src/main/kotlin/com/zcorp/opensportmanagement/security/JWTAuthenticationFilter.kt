@@ -1,8 +1,6 @@
 package com.zcorp.opensportmanagement.security
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.SignatureAlgorithm
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
@@ -47,17 +45,7 @@ class JWTAuthenticationFilter(authManager: AuthenticationManager) : UsernamePass
                                           res: HttpServletResponse,
                                           chain: FilterChain,
                                           auth: Authentication) {
-
-        var claims: MutableMap<String, Any> = mutableMapOf()
-        claims[TEAMS] = auth.authorities.map { it.authority }
-        claims[ADMIN] = auth
-
-        val token = Jwts.builder()
-                .setClaims(claims)
-                .setSubject((auth.principal as User).username)
-                .setExpiration(Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .signWith(SignatureAlgorithm.HS512, SECRET)
-                .compact()
+        val token = JWTUtils.getToken(auth)
         res.addHeader(HEADER_STRING, TOKEN_PREFIX + token)
     }
 }

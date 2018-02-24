@@ -6,10 +6,10 @@ import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Service
 
 @Service
-class AccessController(val teamMemberRepository: TeamMemberRepository) {
+class AccessController {
 
     fun getUserTeamIds(authentication: Authentication): List<Int> {
-        return authentication.authorities.map { it.authority.toInt() }
+        return authentication.authorities.map { (it as OpenGrantedAuthority).teamId }
     }
 
     fun isUserAllowedToAccessTeam(authentication: Authentication, teamId: Int): Boolean {
@@ -17,7 +17,10 @@ class AccessController(val teamMemberRepository: TeamMemberRepository) {
     }
 
     fun isTeamAdmin(authentication: Authentication, teamId: Int): Boolean {
-        val teamMember = teamMemberRepository.findByUsername(authentication.name, teamId)
-        return teamMember?.roles?.contains(Role.COACH) ?: false
+        return authentication.authorities
+                .map { (it as OpenGrantedAuthority).teamId to it.roles }
+                .toMap()
+                .getOrDefault(teamId, emptySet())
+                .any { it == Role.ADMIN }
     }
 }

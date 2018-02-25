@@ -47,5 +47,10 @@ class JWTAuthenticationFilter(authManager: AuthenticationManager) : UsernamePass
                                           auth: Authentication) {
         val token = JWTUtils.getToken(auth)
         res.addHeader(HEADER_STRING, TOKEN_PREFIX + token)
+        res.addHeader("Content-type", "application/json")
+        val response = "{\"username\": \"" + (auth.principal as User).username + "\"}"
+        res.writer.write(response)
+        res.writer.flush()
+        res.writer.close()
     }
 }

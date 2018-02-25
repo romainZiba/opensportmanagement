@@ -15,7 +15,7 @@ class JWTUtils {
             mapper.findAndRegisterModules()
             val authoritiesAsString = mapper.writeValueAsString(auth.authorities)
             claims[AUTHORITIES] = authoritiesAsString
-            var username: String = ""
+            var username = ""
             if (auth.principal is User) {
                 username = (auth.principal as User).username
             } else if (auth.principal is String) {

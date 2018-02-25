@@ -18,3 +18,11 @@ rethinkdb:
   dbhost: '127.0.0.1'
 server:
   port: 8090
+  ssl:
+    key-store-type: PKCS12
+    key-store: path/to/keystore.p12
+    key-store-password: changeThisWithYoutOwn
+    key-alias: tomcat
+
+security:
+  require-ssl: true

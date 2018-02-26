@@ -39,9 +39,9 @@ open class Application {
                   teamMemberRepository: TeamMemberRepository) = CommandLineRunner {
         // save entities
 
-        var team1 = teamRepository.save(Team("TEAM 1", Sport.BASKETBALL, Gender.BOTH, AgeGroup.ADULTS))
+        var team1 = teamRepository.save(Team("TEAM 1", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS))
 
-        var team2 = teamRepository.save(Team("TEAM 2", Sport.BASKETBALL, Gender.BOTH, AgeGroup.ADULTS))
+        var team2 = teamRepository.save(Team("TEAM 2", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS))
 
         val userTeam1_2 = userRepository.save(User("CR", "Coach", "Rock", bCryptPasswordEncoder().encode("CR"),
                 "CR@caramail.com", ""))
@@ -52,10 +52,10 @@ open class Application {
                 bCryptPasswordEncoder().encode("bbb"), "bbb@caramail.com",
                 ""))
 
-        val adminCoachTeam1 = TeamMember(userTeam1_2, mutableSetOf(Role.COACH, Role.ADMIN), team1)
-        val adminCoachTeam2 = TeamMember(userTeam1_2, mutableSetOf(Role.COACH, Role.ADMIN), team2)
-        val playerTeam1 = TeamMember(userTeam1, mutableSetOf(Role.PLAYER), team1)
-        val playerCoachTeam2 = TeamMember(userTeam2, mutableSetOf(Role.PLAYER, Role.COACH), team2)
+        val adminCoachTeam1 = TeamMember(userTeam1_2, mutableSetOf(TeamMember.Role.COACH, TeamMember.Role.ADMIN), team1)
+        val adminCoachTeam2 = TeamMember(userTeam1_2, mutableSetOf(TeamMember.Role.COACH, TeamMember.Role.ADMIN), team2)
+        val playerTeam1 = TeamMember(userTeam1, mutableSetOf(TeamMember.Role.PLAYER), team1)
+        val playerCoachTeam2 = TeamMember(userTeam2, mutableSetOf(TeamMember.Role.PLAYER, TeamMember.Role.COACH), team2)
         adminCoachTeam1.licenseNumber = "12345"
         adminCoachTeam2.licenseNumber = "12345"
         playerCoachTeam2.licenseNumber = "255069690"
@@ -69,7 +69,7 @@ open class Application {
         val season = seasonRepository.save(Season("2017-2018",
                 LocalDate.of(2017, Month.SEPTEMBER, 1),
                 LocalDate.of(2018, Month.JULY, 31),
-                Status.CURRENT,
+                Season.Status.CURRENT,
                 mutableSetOf(),
                 team1
         ))

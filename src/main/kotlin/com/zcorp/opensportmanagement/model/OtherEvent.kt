@@ -1,6 +1,6 @@
 package com.zcorp.opensportmanagement.model
 
-import com.zcorp.opensportmanagement.controllers.EventController
+import com.zcorp.opensportmanagement.rest.EventController
 import org.springframework.hateoas.ResourceSupport
 import org.springframework.hateoas.mvc.ControllerLinkBuilder
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken

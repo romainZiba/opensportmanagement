@@ -1,14 +1,14 @@
-package com.zcorp.opensportmanagement.controllers
+package com.zcorp.opensportmanagement.rest
 
 import com.zcorp.opensportmanagement.EntityAlreadyExistsException
 import com.zcorp.opensportmanagement.EntityNotFoundException
 import com.zcorp.opensportmanagement.UserForbiddenException
+import com.zcorp.opensportmanagement.dto.SeasonDto
 import com.zcorp.opensportmanagement.model.Season
-import com.zcorp.opensportmanagement.model.SeasonDto
-import com.zcorp.opensportmanagement.model.SeasonResource
 import com.zcorp.opensportmanagement.model.Team
 import com.zcorp.opensportmanagement.repositories.SeasonRepository
 import com.zcorp.opensportmanagement.repositories.TeamRepository
+import com.zcorp.opensportmanagement.rest.resources.SeasonResource
 import com.zcorp.opensportmanagement.security.AccessController
 import org.springframework.data.rest.webmvc.RepositoryRestController
 import org.springframework.http.HttpStatus

@@ -1,11 +1,11 @@
-package com.zcorp.opensportmanagement.controllers
+package com.zcorp.opensportmanagement.rest
 
 import com.zcorp.opensportmanagement.UserForbiddenException
+import com.zcorp.opensportmanagement.dto.ChampionshipDto
 import com.zcorp.opensportmanagement.model.Championship
-import com.zcorp.opensportmanagement.model.ChampionshipDto
-import com.zcorp.opensportmanagement.model.ChampionshipResource
 import com.zcorp.opensportmanagement.repositories.ChampionshipRepository
 import com.zcorp.opensportmanagement.repositories.SeasonRepository
+import com.zcorp.opensportmanagement.rest.resources.ChampionshipResource
 import com.zcorp.opensportmanagement.security.AccessController
 import org.springframework.data.rest.webmvc.RepositoryRestController
 import org.springframework.http.HttpStatus

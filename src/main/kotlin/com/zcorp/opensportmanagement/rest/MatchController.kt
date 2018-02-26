@@ -1,8 +1,7 @@
-package com.zcorp.opensportmanagement.controllers
+package com.zcorp.opensportmanagement.rest
 
 import com.zcorp.opensportmanagement.EntityNotFoundException
 import com.zcorp.opensportmanagement.UserForbiddenException
-import com.zcorp.opensportmanagement.model.Event
 import com.zcorp.opensportmanagement.model.Match
 import com.zcorp.opensportmanagement.model.MatchDto
 import com.zcorp.opensportmanagement.model.MatchResource

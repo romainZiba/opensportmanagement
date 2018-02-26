@@ -2,7 +2,11 @@ package com.zcorp.opensportmanagement.model
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonManagedReference
-import javax.persistence.*
+import com.zcorp.opensportmanagement.dto.UserDto
+import javax.persistence.Entity
+import javax.persistence.Id
+import javax.persistence.OneToMany
+import javax.persistence.Table
 import javax.validation.constraints.NotNull
 
 @Entity
@@ -38,7 +42,4 @@ data class User(@Id @NotNull val username: String,
         return UserDto(firstName, lastName, username, email, phoneNumber, memberOf.map { it.team.toDto() }.toSet())
     }
 }
-
-class UserDto(val firstName: String, val lastName: String, val username: String, val email: String, val phoneNumber: String?,
-              val teamsDto: Set<TeamDto>)
 

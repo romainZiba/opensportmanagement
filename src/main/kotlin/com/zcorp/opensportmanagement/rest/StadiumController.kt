@@ -1,9 +1,9 @@
-package com.zcorp.opensportmanagement.controllers
+package com.zcorp.opensportmanagement.rest
 
 import com.zcorp.opensportmanagement.UserForbiddenException
-import com.zcorp.opensportmanagement.model.StadiumResource
 import com.zcorp.opensportmanagement.repositories.StadiumRepository
 import com.zcorp.opensportmanagement.repositories.TeamRepository
+import com.zcorp.opensportmanagement.rest.resources.StadiumResource
 import com.zcorp.opensportmanagement.security.AccessController
 import org.springframework.data.rest.webmvc.RepositoryRestController
 import org.springframework.http.ResponseEntity

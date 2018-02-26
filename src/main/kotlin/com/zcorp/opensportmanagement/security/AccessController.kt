@@ -1,7 +1,6 @@
 package com.zcorp.opensportmanagement.security
 
-import com.zcorp.opensportmanagement.model.Role
-import com.zcorp.opensportmanagement.repositories.TeamMemberRepository
+import com.zcorp.opensportmanagement.model.TeamMember
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Service
 
@@ -21,6 +20,6 @@ class AccessController {
                 .map { (it as OpenGrantedAuthority).teamId to it.roles }
                 .toMap()
                 .getOrDefault(teamId, emptySet())
-                .any { it == Role.ADMIN }
+                .any { it == TeamMember.Role.ADMIN }
     }
 }

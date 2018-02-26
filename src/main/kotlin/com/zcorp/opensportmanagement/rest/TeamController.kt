@@ -1,12 +1,15 @@
-package com.zcorp.opensportmanagement.controllers
+package com.zcorp.opensportmanagement.rest
 
 import com.zcorp.opensportmanagement.EntityAlreadyExistsException
 import com.zcorp.opensportmanagement.EntityNotFoundException
 import com.zcorp.opensportmanagement.UserAlreadyMemberException
 import com.zcorp.opensportmanagement.UserForbiddenException
-import com.zcorp.opensportmanagement.model.*
+import com.zcorp.opensportmanagement.dto.TeamDto
+import com.zcorp.opensportmanagement.model.Team
+import com.zcorp.opensportmanagement.model.TeamMember
 import com.zcorp.opensportmanagement.repositories.TeamRepository
 import com.zcorp.opensportmanagement.repositories.UserRepository
+import com.zcorp.opensportmanagement.rest.resources.TeamResource
 import com.zcorp.opensportmanagement.security.AccessController
 import org.springframework.data.rest.webmvc.RepositoryRestController
 import org.springframework.http.HttpStatus
@@ -25,7 +28,7 @@ open class TeamController(private val teamRepository: TeamRepository,
         var team = Team(teamDto.name, teamDto.sport, teamDto.genderKind, teamDto.ageGroup)
         val user = userRepository.findByUsername(authentication.name)
                 ?: throw EntityNotFoundException("User ${authentication.name} does not exist")
-        val teamMember = TeamMember(user, mutableSetOf(Role.ADMIN), team)
+        val teamMember = TeamMember(user, mutableSetOf(TeamMember.Role.ADMIN), team)
         team.members.add(teamMember)
         team = teamRepository.save(team)
         return ResponseEntity(TeamResource(team), HttpStatus.CREATED)
@@ -53,7 +56,7 @@ open class TeamController(private val teamRepository: TeamRepository,
         }
         val team = teamRepository.findOne(teamId) ?: throw EntityNotFoundException("Team $teamId does not exist")
         val user = userRepository.findByUsername(authentication.name)
-        val teamMember = TeamMember(user!!, mutableSetOf(Role.PLAYER), team)
+        val teamMember = TeamMember(user!!, mutableSetOf(TeamMember.Role.PLAYER), team)
         team.members.add(teamMember)
         return ResponseEntity.ok(TeamResource(teamRepository.save(team)))
     }

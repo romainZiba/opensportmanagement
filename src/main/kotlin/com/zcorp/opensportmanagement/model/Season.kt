@@ -2,8 +2,8 @@ package com.zcorp.opensportmanagement.model
 
 import com.fasterxml.jackson.annotation.JsonBackReference
 import com.fasterxml.jackson.annotation.JsonManagedReference
-import com.zcorp.opensportmanagement.controllers.ChampionshipController
-import com.zcorp.opensportmanagement.controllers.SeasonController
+import com.zcorp.opensportmanagement.rest.ChampionshipController
+import com.zcorp.opensportmanagement.rest.SeasonController
 import org.springframework.hateoas.ResourceSupport
 import org.springframework.hateoas.mvc.ControllerLinkBuilder
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -36,21 +36,8 @@ data class Season(@Column(name = "name") val name: String,
     override fun hashCode(): Int {
         return id
     }
-}
 
-// Resource with self links
-class SeasonResource(val id: Int, val name: String, val fromDate: LocalDate, val toDate: LocalDate, val status: Status,
-                     val teamId: Int) : ResourceSupport() {
-    constructor(s: Season) : this(s.id, s.name, s.fromDate, s.toDate, s.status, s.team.id)
-
-    init {
-        add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(SeasonController::class.java).getSeasons(teamId, UsernamePasswordAuthenticationToken(null, null))).withSelfRel())
-        add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(ChampionshipController::class.java).getChampionships(id, UsernamePasswordAuthenticationToken(null, null))).withRel("championships"))
+    enum class Status {
+        CURRENT, PREVIOUS, NEXT
     }
-}
-
-class SeasonDto(val name: String, val fromDate: LocalDate, val toDate: LocalDate, val status: Status)
-
-enum class Status {
-    CURRENT, PREVIOUS, NEXT
 }

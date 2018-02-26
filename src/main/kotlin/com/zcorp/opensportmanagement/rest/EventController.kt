@@ -1,4 +1,4 @@
-package com.zcorp.opensportmanagement.controllers
+package com.zcorp.opensportmanagement.rest
 
 import com.zcorp.opensportmanagement.BadInputException
 import com.zcorp.opensportmanagement.UserForbiddenException
@@ -33,6 +33,15 @@ open class EventController(private val teamRepository: TeamRepository,
             team.events.add(event)
             teamRepository.save(team)
             return ResponseEntity.created(URI("")).build()
+        }
+        throw UserForbiddenException()
+    }
+
+    @RequestMapping("/teams/{teamId}/events/count", method = [RequestMethod.GET])
+    open fun getEventsCount(@PathVariable("teamId") teamId: Int, authentication: Authentication): ResponseEntity<Int> {
+        if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
+            val team = teamRepository.findOne(teamId)
+            return ResponseEntity.ok(team.events.size)
         }
         throw UserForbiddenException()
     }

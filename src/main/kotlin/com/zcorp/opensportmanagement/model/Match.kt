@@ -1,8 +1,7 @@
 package com.zcorp.opensportmanagement.model
 
 import com.fasterxml.jackson.annotation.JsonBackReference
-import com.sun.org.apache.xpath.internal.operations.Bool
-import com.zcorp.opensportmanagement.controllers.MatchController
+import com.zcorp.opensportmanagement.rest.MatchController
 import org.springframework.hateoas.ResourceSupport
 import org.springframework.hateoas.mvc.ControllerLinkBuilder
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken

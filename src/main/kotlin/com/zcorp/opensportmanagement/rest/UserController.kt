@@ -1,10 +1,10 @@
-package com.zcorp.opensportmanagement.controllers
+package com.zcorp.opensportmanagement.rest
 
 
 import com.zcorp.opensportmanagement.EntityAlreadyExistsException
 import com.zcorp.opensportmanagement.EntityNotFoundException
+import com.zcorp.opensportmanagement.dto.UserDto
 import com.zcorp.opensportmanagement.model.User
-import com.zcorp.opensportmanagement.model.UserDto
 import com.zcorp.opensportmanagement.repositories.UserRepository
 import org.springframework.data.rest.webmvc.RepositoryRestController
 import org.springframework.http.HttpStatus

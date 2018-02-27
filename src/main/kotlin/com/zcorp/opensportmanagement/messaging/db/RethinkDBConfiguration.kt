@@ -24,8 +24,8 @@ open class RethinkDBConfiguration {
     }
 
     @Bean
-    internal open fun dbInitializer(): DbInitializer {
-        return DbInitializer()
+    internal open fun rethinkDbService(): RethinkDbService {
+        return RethinkDbService()
     }
 
     companion object {

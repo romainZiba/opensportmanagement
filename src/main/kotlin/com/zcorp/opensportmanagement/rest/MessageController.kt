@@ -1,41 +1,32 @@
 package com.zcorp.opensportmanagement.rest
 
-import com.zcorp.opensportmanagement.messaging.Message
-import com.zcorp.opensportmanagement.messaging.db.DbInitializer.Companion.db
-import com.zcorp.opensportmanagement.messaging.db.DbInitializer.Companion.indexTime
-import com.zcorp.opensportmanagement.messaging.db.DbInitializer.Companion.tableName
-import com.zcorp.opensportmanagement.messaging.db.RethinkDBConnectionFactory
-import org.slf4j.LoggerFactory
+import com.zcorp.opensportmanagement.model.Message
+import com.zcorp.opensportmanagement.messaging.db.RethinkDbService
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestMethod
-import org.springframework.web.bind.annotation.RestController
-import java.time.OffsetDateTime
+import org.springframework.security.core.Authentication
+import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/messages")
 class MessageController {
 
-    private val log = LoggerFactory.getLogger(MessageController::class.java)
-
     @Autowired
-    private lateinit var connectionFactory: RethinkDBConnectionFactory
+    private lateinit var rethinkDbService: RethinkDbService
 
-    @RequestMapping(method = [(RequestMethod.GET)])
-    fun get(): List<Message> {
-        return db.table(tableName)
-                .orderBy(indexTime)
-                .run(connectionFactory.createConnection(), Message::class.java)
+    @GetMapping("/conversations")
+    fun getConversations(authentication: Authentication): Map<String?, String> {
+        return rethinkDbService.getConversations(authentication.name)
     }
 
-    @RequestMapping(method = [(RequestMethod.POST)])
-    fun postMessage(@RequestBody message: Message): Message {
-        message.time = OffsetDateTime.now()
-        val run = db.table(tableName).insert(message)
-                .run<Any>(connectionFactory.createConnection())
+    @GetMapping("/conversations/{conversationId}/messages")
+    fun getMessages(@PathVariable("conversationId") conversation: String): List<Message> {
+        //TODO: check if user is allowed to access to this conversation
+        return rethinkDbService.getMessages(conversation)
+    }
 
-        log.info("Insert {}", run)
+    @PostMapping("/messages")
+    fun postMessage(@RequestBody message: Message, authentication: Authentication): Message {
+        message.from = authentication.name
+        rethinkDbService.createMessage(message)
         return message
     }
 }

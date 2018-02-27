@@ -1,5 +1,5 @@
-var userName = window.prompt("Enter your name", "some user");
-//var userName = "lol";
+var conversationId = "e717d4f3-a03e-4e57-8af2-c493a2b6a6da";
+var jwt;
 
 function post(url, data) {
     return $.ajax({
@@ -7,7 +7,8 @@ function post(url, data) {
         url: url,
         headers: {
             'Accept': 'application/json',
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': jwt
         },
         data: JSON.stringify(data)
     })
@@ -16,11 +17,11 @@ function post(url, data) {
 function appendMessage(message) {
     var fromNow = moment(message.time).format('HH:mm:ss');
     var $message = $(`<li class="clearfix">
-        <div class="message-data ${message.from == userName ? 'align-left': 'align-right'}">
+        <div class="message-data ${message.from == userName ? 'align-left' : 'align-right'}">
         <span class="message-data-name">${message.from}</span>
         <span class="message-data-time">${fromNow}</span>
     </div>
-    <div class="message ${message.from == userName ? 'my-message': 'other-message float-right'}">
+    <div class="message ${message.from == userName ? 'my-message' : 'other-message float-right'}">
         ${message.message}
     </div>
     </li>`);
@@ -29,13 +30,55 @@ function appendMessage(message) {
     $messages.scrollTop($messages.prop("scrollHeight"));
 }
 
-function getPreviousMessages() {
-    $.get('/messages').done(messages => messages.forEach(appendMessage));
+function login() {
+    $.ajax({
+        type: 'POST',
+        url: '/login',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        data: JSON.stringify({username: 'CR', password: 'CR'})
+    }).done(function (data, textStatus, jqXHR) {
+        jwt = jqXHR.getResponseHeader("Authorization");
+        getConversations(jwt);
+        // getPreviousMessages(jwt);
+    })
+}
+
+function getConversations(jwt) {
+    $.ajax({
+        type: 'GET',
+        url: '/conversations',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': jwt
+        }
+    }).done(function (conversations) {
+        conversationId = window.prompt("Choose a conversation", "UUUUUID");
+        getPreviousMessages(jwt)
+        connectWebSocket()
+    })
+}
+
+function getPreviousMessages(jwt) {
+    $.ajax({
+        type: 'GET',
+        url: '/conversations/' + conversationId + '/messages',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': jwt
+        }
+    }).done(function (messages) {
+        messages.forEach(appendMessage)
+    })
 }
 
 function sendMessage() {
     var $messageInput = $('#messageInput');
-    var message = {message: $messageInput.val(), from: userName};
+    var message = {message: $messageInput.val(), from: userName, conversationId: conversationId};
     $messageInput.val('');
     post('/messages', message);
 }
@@ -49,11 +92,11 @@ function connectWebSocket() {
     var socket = new SockJS('/messagesWS');
     stompClient = Stomp.over(socket);
     //stompClient.debug = null;
-    stompClient.connect({}, (frame) => {
+    stompClient.connect({}, (frame) = > {
         console.log('Connected: ' + frame);
-        stompClient.subscribe('/topic/messages', onNewMessage);
-    });
+    stompClient.subscribe('/topic/' + conversationId, onNewMessage);
+})
+    ;
 }
 
-getPreviousMessages();
-connectWebSocket();
+login();

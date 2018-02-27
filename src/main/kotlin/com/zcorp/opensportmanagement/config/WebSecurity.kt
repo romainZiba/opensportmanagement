@@ -33,7 +33,6 @@ open class WebSecurity(val userDetailsService: UserDetailsService) : WebSecurity
                 .antMatchers("/js/**").permitAll()
                 .antMatchers("/webjars/**").permitAll()
                 .antMatchers("/messagesWS/**").permitAll()
-                .antMatchers("/messages**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .addFilter(JWTAuthenticationFilter(authenticationManager()))

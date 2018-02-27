@@ -78,7 +78,7 @@ open class Application {
                 LocalDateTime.of(2018, 1, 1, 10, 0, 0),
                 LocalDateTime.of(2018, 1, 1, 12, 0, 0),
                 stadium, opponent, team1, championship))
-        val event = eventRepository.save(OtherEvent(
+        val event = eventRepository.save(Event(
                 "Apéro",
                 "Apéro avec les potes",
                 LocalDateTime.of(2017, 1, 1, 10, 0, 0),

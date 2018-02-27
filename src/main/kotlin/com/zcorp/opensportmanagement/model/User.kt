@@ -23,17 +23,6 @@ data class User(@Id @NotNull val username: String,
     @JsonManagedReference(value = "memberOf")
     val memberOf: MutableSet<TeamMember> = mutableSetOf()
 
-    override fun equals(other: Any?): Boolean {
-        if (other != null) {
-            return other is User && other.username.equals(username)
-        }
-        return false
-    }
-
-    override fun hashCode(): Int {
-        return username.hashCode()
-    }
-
     override fun toString(): String {
         return "User(username='$username')"
     }

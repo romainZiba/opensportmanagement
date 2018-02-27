@@ -2,10 +2,10 @@ package com.zcorp.opensportmanagement.rest
 
 import com.zcorp.opensportmanagement.EntityNotFoundException
 import com.zcorp.opensportmanagement.UserForbiddenException
+import com.zcorp.opensportmanagement.dto.MatchDto
 import com.zcorp.opensportmanagement.model.Match
-import com.zcorp.opensportmanagement.model.MatchDto
-import com.zcorp.opensportmanagement.model.MatchResource
 import com.zcorp.opensportmanagement.repositories.*
+import com.zcorp.opensportmanagement.rest.resources.MatchResource
 import com.zcorp.opensportmanagement.security.AccessController
 import org.springframework.data.rest.webmvc.RepositoryRestController
 import org.springframework.http.HttpStatus

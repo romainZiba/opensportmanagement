@@ -1,4 +1,4 @@
-package com.zcorp.opensportmanagement.model
+package com.zcorp.opensportmanagement
 
 import java.sql.Date
 import java.time.LocalDate
@@ -7,7 +7,7 @@ import javax.persistence.Converter
 
 /**
  * Convert Java 8 LocalDate into SQL DATE.
- * This converter is needed because JPA still not manage Java 8 DateTime API.
+ * This converter is needed because JPA does not manage Java 8 DateTime API.
  */
 @Converter(autoApply = true)
 class LocalDateAttributeConverter : AttributeConverter<LocalDate, Date> {

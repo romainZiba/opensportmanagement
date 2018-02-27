@@ -2,12 +2,12 @@ package com.zcorp.opensportmanagement.rest
 
 import com.zcorp.opensportmanagement.BadInputException
 import com.zcorp.opensportmanagement.UserForbiddenException
-import com.zcorp.opensportmanagement.model.EventResource
-import com.zcorp.opensportmanagement.model.OtherEvent
-import com.zcorp.opensportmanagement.model.OtherEventDto
+import com.zcorp.opensportmanagement.dto.EventDto
+import com.zcorp.opensportmanagement.model.Event
 import com.zcorp.opensportmanagement.model.Team
 import com.zcorp.opensportmanagement.repositories.EventRepository
 import com.zcorp.opensportmanagement.repositories.TeamRepository
+import com.zcorp.opensportmanagement.rest.resources.EventResource
 import com.zcorp.opensportmanagement.security.AccessController
 import org.springframework.data.rest.webmvc.RepositoryRestController
 import org.springframework.http.ResponseEntity
@@ -25,7 +25,7 @@ open class EventController(private val teamRepository: TeamRepository,
 
     @RequestMapping("/teams/{teamId}/events", method = [RequestMethod.POST])
     open fun createEvent(@PathVariable("teamId") teamId: Int,
-                         @RequestBody eventDto: OtherEventDto,
+                         @RequestBody eventDto: EventDto,
                          authentication: Authentication): ResponseEntity<Any> {
         if (accessController.isTeamAdmin(authentication, teamId)) {
             val team = teamRepository.findOne(teamId)
@@ -78,7 +78,7 @@ open class EventController(private val teamRepository: TeamRepository,
         throw UserForbiddenException()
     }
 
-    private fun createEventFromDto(eventDto: OtherEventDto, team: Team): OtherEvent {
+    private fun createEventFromDto(eventDto: EventDto, team: Team): Event {
         val place = eventDto.place
         val stadium = eventDto.stadium
         if (place == null && stadium == null) {
@@ -96,18 +96,18 @@ open class EventController(private val teamRepository: TeamRepository,
 
         if (eventDto.reccurenceDays == null) {
             return if (stadium == null) {
-                OtherEvent(eventDto.name, eventDto.description, fromDateTime!!, toDateTime!!,
+                Event(eventDto.name, eventDto.description, fromDateTime!!, toDateTime!!,
                         place!!, team)
             } else {
-                OtherEvent(eventDto.name, eventDto.description, fromDateTime!!, toDateTime!!,
+                Event(eventDto.name, eventDto.description, fromDateTime!!, toDateTime!!,
                         stadium, team)
             }
         } else {
             return if (stadium == null) {
-                OtherEvent(eventDto.name, eventDto.description, eventDto.reccurenceDays, eventDto.recurrenceFromDate!!,
+                Event(eventDto.name, eventDto.description, eventDto.reccurenceDays, eventDto.recurrenceFromDate!!,
                         eventDto.recurrenceToDate!!, recurrenceFromTime!!, recurrenceToTime!!, place!!, team)
             } else {
-                OtherEvent(eventDto.name, eventDto.description, eventDto.reccurenceDays, eventDto.recurrenceFromDate!!,
+                Event(eventDto.name, eventDto.description, eventDto.reccurenceDays, eventDto.recurrenceFromDate!!,
                         eventDto.recurrenceToDate!!, recurrenceFromTime!!, recurrenceToTime!!, stadium, team)
             }
         }

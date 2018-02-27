@@ -26,7 +26,7 @@ data class Team(val name: String,
 
     @OneToMany(mappedBy = "team")
     @JsonManagedReference
-    val events: MutableSet<OtherEvent> = mutableSetOf()
+    val events: MutableSet<Event> = mutableSetOf()
 
     @OneToMany(mappedBy = "team")
     @JsonManagedReference

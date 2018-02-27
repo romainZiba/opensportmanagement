@@ -1,7 +1,9 @@
-package com.zcorp.opensportmanagement.messaging.chat
+package com.zcorp.opensportmanagement.messaging
 
 import com.rethinkdb.RethinkDB
 import com.rethinkdb.net.Cursor
+import com.zcorp.opensportmanagement.messaging.db.DbInitializer.Companion.db
+import com.zcorp.opensportmanagement.messaging.db.DbInitializer.Companion.tableName
 import com.zcorp.opensportmanagement.messaging.db.RethinkDBConnectionFactory
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -10,8 +12,8 @@ import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 
 @Service
-open class ChatChangesListener {
-    private val log = LoggerFactory.getLogger(ChatChangesListener::class.java)
+open class MessageChangesListener {
+    private val log = LoggerFactory.getLogger(MessageChangesListener::class.java)
 
     @Autowired
     private lateinit var connectionFactory: RethinkDBConnectionFactory
@@ -21,14 +23,14 @@ open class ChatChangesListener {
 
     @Async
     open fun pushChangesToWebSocket() {
-        val cursor: Cursor<ChatMessage> = r.db("chat").table("messages").changes()
+        val cursor: Cursor<Message> = db.table(tableName).changes()
                 .getField("new_val")
-                .run(connectionFactory.createConnection(), ChatMessage::class.java)
+                .run(connectionFactory.createConnection(), Message::class.java)
 
         while (cursor.hasNext()) {
-            val chatMessage = cursor.next()
-            log.info("New message: {}", chatMessage.message)
-            webSocket.convertAndSend("/topic/messages", chatMessage)
+            val message = cursor.next()
+            log.info("New message: {}", message.message)
+            webSocket.convertAndSend("/topic/messages", message)
         }
     }
 

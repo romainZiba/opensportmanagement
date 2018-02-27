@@ -30,14 +30,14 @@ function appendMessage(message) {
 }
 
 function getPreviousMessages() {
-    $.get('/chat').done(messages => messages.forEach(appendMessage));
+    $.get('/messages').done(messages => messages.forEach(appendMessage));
 }
 
 function sendMessage() {
     var $messageInput = $('#messageInput');
     var message = {message: $messageInput.val(), from: userName};
     $messageInput.val('');
-    post('/chat', message);
+    post('/messages', message);
 }
 
 function onNewMessage(result) {
@@ -46,7 +46,7 @@ function onNewMessage(result) {
 }
 
 function connectWebSocket() {
-    var socket = new SockJS('/chatWS');
+    var socket = new SockJS('/messagesWS');
     stompClient = Stomp.over(socket);
     //stompClient.debug = null;
     stompClient.connect({}, (frame) => {

@@ -1,11 +1,11 @@
-package com.zcorp.opensportmanagement.messaging.chat
+package com.zcorp.opensportmanagement.messaging
 
 import java.time.OffsetDateTime
 
 /**
  * This class does not use the Kotlin feature because for now, there are some constraints due to ReflectDB
  */
-open class ChatMessage() {
+open class Message() {
 
     var message: String = ""
     var from: String = ""

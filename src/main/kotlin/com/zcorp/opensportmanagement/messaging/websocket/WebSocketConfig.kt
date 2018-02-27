@@ -17,7 +17,7 @@ open class WebSocketConfig : AbstractWebSocketMessageBrokerConfigurer() {
     }
 
     override fun registerStompEndpoints(registry: StompEndpointRegistry) {
-        registry.addEndpoint("/chatWS").withSockJS()
+        registry.addEndpoint("/messagesWS").withSockJS()
     }
 
 }

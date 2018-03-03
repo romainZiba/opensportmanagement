@@ -7,6 +7,7 @@ import com.rethinkdb.RethinkDB
 import com.rethinkdb.gen.ast.Db
 import com.rethinkdb.gen.ast.Table
 import com.zcorp.opensportmanagement.messaging.MessageChangesListener
+import com.zcorp.opensportmanagement.model.Conversation
 import com.zcorp.opensportmanagement.model.Message
 import com.zcorp.opensportmanagement.rest.MessageController
 import org.slf4j.LoggerFactory
@@ -44,7 +45,7 @@ class RethinkDbService : InitializingBean {
         }
     }
 
-    fun getConversations(username: String): Map<String?, String> {
+    fun getConversations(username: String): List<Conversation> {
         val connection = connectionFactory.createConnection()
         val messagesFromDb: List<Map<String, String>> = table.filter(
                 { row -> row.g("from").eq(username).or(row.g("recipients").eq(username)).or(row.g("recipients").isEmpty) })
@@ -54,9 +55,9 @@ class RethinkDbService : InitializingBean {
             val mapper = jacksonObjectMapper()
             mapper.findAndRegisterModules()
             val messages: List<Message> = mapper.convertValue(messagesFromDb)
-            return messages.map { it.conversationId to it.conversationTopic }.toMap()
+            return messages.map { Conversation(it.conversationId, it.conversationTopic) }.toList()
         }
-        return emptyMap()
+        return emptyList()
     }
 
     fun getMessages(conversation: String): List<Message> {

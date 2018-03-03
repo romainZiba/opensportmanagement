@@ -1,7 +1,8 @@
 package com.zcorp.opensportmanagement.rest
 
-import com.zcorp.opensportmanagement.model.Message
 import com.zcorp.opensportmanagement.messaging.db.RethinkDbService
+import com.zcorp.opensportmanagement.model.Conversation
+import com.zcorp.opensportmanagement.model.Message
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
@@ -13,7 +14,7 @@ class MessageController {
     private lateinit var rethinkDbService: RethinkDbService
 
     @GetMapping("/conversations")
-    fun getConversations(authentication: Authentication): Map<String?, String> {
+    fun getConversations(authentication: Authentication): List<Conversation> {
         return rethinkDbService.getConversations(authentication.name)
     }
 

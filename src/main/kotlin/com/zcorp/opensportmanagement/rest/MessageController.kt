@@ -14,7 +14,7 @@ class MessageController {
     private lateinit var rethinkDbService: RethinkDbService
 
     @GetMapping("/conversations")
-    fun getConversations(authentication: Authentication): List<Conversation> {
+    fun getConversations(authentication: Authentication): Set<Conversation> {
         return rethinkDbService.getConversations(authentication.name)
     }
 

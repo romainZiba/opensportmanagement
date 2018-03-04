@@ -44,7 +44,7 @@ class RethinkDbService : InitializingBean {
         }
     }
 
-    fun getConversations(username: String): List<Conversation> {
+    fun getConversations(username: String): Set<Conversation> {
         val connection = connectionFactory.createConnection()
         val messagesFromDb: List<Map<String, String>> = table.filter(
                 { row -> row.g("from").eq(username).or(row.g("recipients").eq(username)).or(row.g("recipients").isEmpty) })
@@ -54,9 +54,9 @@ class RethinkDbService : InitializingBean {
             val mapper = jacksonObjectMapper()
             mapper.findAndRegisterModules()
             val messages: List<Message> = mapper.convertValue(messagesFromDb)
-            return messages.map { Conversation(it.conversationId, it.conversationTopic) }.toList()
+            return messages.map { Conversation(it.conversationId, it.conversationTopic) }.toSet()
         }
-        return emptyList()
+        return emptySet()
     }
 
     fun getMessages(conversation: String): List<Message> {

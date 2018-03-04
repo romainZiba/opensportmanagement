@@ -1,6 +1,5 @@
 package com.zcorp.opensportmanagement.messaging.db
 
-import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.rethinkdb.RethinkDB
@@ -62,7 +61,7 @@ class RethinkDbService : InitializingBean {
 
     fun getMessages(conversation: String): List<Message> {
         val connection = connectionFactory.createConnection()
-        val messagesFromDb: List<Message> = table.filter({ row -> row.g("conversationId").eq(conversation) })
+        val messagesFromDb: List<Message> = table.filter({ row -> row.g(CONVERSATION_ID).eq(conversation) })
                 .orderBy(indexTime)
                 .run<List<Message>, Message>(connection, Message::class.java)
 
@@ -72,8 +71,19 @@ class RethinkDbService : InitializingBean {
     fun createMessage(message: Message) {
         val connection = connectionFactory.createConnection()
         message.time = OffsetDateTime.now()
-        if (message.conversationId.isEmpty()) {
+        val conversationId = message.conversationId
+        if (conversationId.isEmpty()) {
             message.conversationId = UUID.randomUUID().toString()
+        } else {
+            val ids: List<Map<String, String>> = table.filter(
+                    { row -> row.g(CONVERSATION_ID).eq(conversationId) })
+                    .pluck(CONVERSATION_TOPIC)
+                    .orderBy(indexTime)
+                    .limit(1)
+                    .run(connection, String::class.java)
+            if (ids.isNotEmpty()) {
+                message.conversationTopic = ids[0][CONVERSATION_TOPIC]!!
+            }
         }
         val run = table.insert(message).run<Any>(connection)
         log.info("Insert {}", run)
@@ -86,5 +96,7 @@ class RethinkDbService : InitializingBean {
         private const val tableName = "messages"
         val table: Table = db.table(tableName)
         const val indexTime = "time"
+        private const val CONVERSATION_ID = "conversationId"
+        private const val CONVERSATION_TOPIC = "conversationTopic"
     }
 }

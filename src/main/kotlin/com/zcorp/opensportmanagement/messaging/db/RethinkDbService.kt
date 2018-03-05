@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.rethinkdb.RethinkDB
 import com.rethinkdb.gen.ast.Db
 import com.rethinkdb.gen.ast.Table
+import com.rethinkdb.net.Cursor
 import com.zcorp.opensportmanagement.messaging.MessageChangesListener
 import com.zcorp.opensportmanagement.model.Conversation
 import com.zcorp.opensportmanagement.model.Message
@@ -15,6 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.OffsetDateTime
 import java.util.*
 
+/**
+ * This class is used to access the Rethink database
+ * Conversion of type needs to be done due to the following bug: https://github.com/rethinkdb/rethinkdb/issues/5859
+ */
 class RethinkDbService : InitializingBean {
 
     private val log = LoggerFactory.getLogger(MessageController::class.java)
@@ -46,10 +51,10 @@ class RethinkDbService : InitializingBean {
 
     fun getConversations(username: String): Set<Conversation> {
         val connection = connectionFactory.createConnection()
-        val messagesFromDb: List<Map<String, String>> = table.filter(
-                { row -> row.g("from").eq(username).or(row.g("recipients").eq(username)).or(row.g("recipients").isEmpty) })
+        val messagesFromDb: List<Any> = table.filter(
+                { row -> row.g("from").eq(username).or(row.g("recipients").isEmpty).or(row.g("recipients").contains(username)) })
                 .orderBy(indexTime)
-                .run(connection, Message::class.java)
+                .run(connection)
         if (messagesFromDb.isNotEmpty()) {
             val mapper = jacksonObjectMapper()
             mapper.findAndRegisterModules()
@@ -61,32 +66,50 @@ class RethinkDbService : InitializingBean {
 
     fun getMessages(conversation: String): List<Message> {
         val connection = connectionFactory.createConnection()
-        val messagesFromDb: List<Message> = table.filter({ row -> row.g(CONVERSATION_ID).eq(conversation) })
+        val messagesFromDb: List<Any> = table.filter({ row -> row.g(CONVERSATION_ID).eq(conversation) })
                 .orderBy(indexTime)
-                .run<List<Message>, Message>(connection, Message::class.java)
-
-        return messagesFromDb
+                .run(connection)
+        if (messagesFromDb.isNotEmpty()) {
+            val mapper = jacksonObjectMapper()
+            mapper.findAndRegisterModules()
+            val messages: List<Message> = mapper.convertValue(messagesFromDb)
+            return messages
+        }
+        return emptyList()
     }
 
-    fun createMessage(message: Message) {
+    fun createConversation(message: Message) {
         val connection = connectionFactory.createConnection()
         message.time = OffsetDateTime.now()
         val conversationId = message.conversationId
         if (conversationId.isEmpty()) {
             message.conversationId = UUID.randomUUID().toString()
-        } else {
-            val ids: List<Map<String, String>> = table.filter(
-                    { row -> row.g(CONVERSATION_ID).eq(conversationId) })
-                    .pluck(CONVERSATION_TOPIC)
-                    .orderBy(indexTime)
-                    .limit(1)
-                    .run(connection, String::class.java)
-            if (ids.isNotEmpty()) {
-                message.conversationTopic = ids[0][CONVERSATION_TOPIC]!!
-            }
+            val run = table.insert(message).run<Any>(connection)
+            log.info("Insert {}", run)
         }
-        val run = table.insert(message).run<Any>(connection)
-        log.info("Insert {}", run)
+    }
+
+    fun createMessageInConversation(message: Message): Message {
+        val connection = connectionFactory.createConnection()
+        message.time = OffsetDateTime.now()
+        val conversationId = message.conversationId
+
+        val data: Cursor<Any> = table.filter(
+                { row -> row.g(CONVERSATION_ID).eq(conversationId) })
+                .pluck(CONVERSATION_TOPIC, RECIPIENTS)
+                .limit(1)
+                .run(connection)
+        if (data.hasNext()) {
+            val mapper = jacksonObjectMapper()
+            mapper.findAndRegisterModules()
+            val messageFromDB: Message = mapper.convertValue(data.next())
+            message.conversationTopic = messageFromDB.conversationTopic
+            message.recipients = messageFromDB.recipients
+            val run = table.insert(message).run<Any>(connection)
+            log.info("Insert {}", run)
+            return message
+        }
+        return message
     }
 
     companion object {
@@ -98,5 +121,6 @@ class RethinkDbService : InitializingBean {
         const val indexTime = "time"
         private const val CONVERSATION_ID = "conversationId"
         private const val CONVERSATION_TOPIC = "conversationTopic"
+        private const val RECIPIENTS = "recipients"
     }
 }

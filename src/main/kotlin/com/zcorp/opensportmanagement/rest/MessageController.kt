@@ -1,6 +1,6 @@
 package com.zcorp.opensportmanagement.rest
 
-import com.zcorp.opensportmanagement.ConversationIdMissingException
+import com.zcorp.opensportmanagement.dto.MessageDto
 import com.zcorp.opensportmanagement.messaging.db.RethinkDbService
 import com.zcorp.opensportmanagement.model.Conversation
 import com.zcorp.opensportmanagement.model.Message
@@ -33,13 +33,13 @@ class MessageController {
     }
 
     @PostMapping("/conversations/{conversationId}/messages")
-    fun createMessage(@RequestBody messageString: String,
+    fun createMessage(@RequestBody messageDto: MessageDto,
                       @PathVariable("conversationId") conversationId: String,
                       authentication: Authentication): Message {
         var message = Message()
         message.from = authentication.name
         message.conversationId = conversationId
-        message.message = messageString
+        message.message = messageDto.message
         message = rethinkDbService.createMessageInConversation(message)
         return message
     }

@@ -1,4 +1,5 @@
 var conversationId = "e717d4f3-a03e-4e57-8af2-c493a2b6a6da";
+var userName = 'CR';
 var jwt;
 
 function post(url, data) {
@@ -38,7 +39,7 @@ function login() {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         },
-        data: JSON.stringify({username: 'CR', password: 'CR'})
+        data: JSON.stringify({username: userName, password: userName})
     }).done(function (data, textStatus, jqXHR) {
         jwt = jqXHR.getResponseHeader("Authorization");
         getConversations(jwt);
@@ -56,7 +57,7 @@ function getConversations(jwt) {
             'Authorization': jwt
         }
     }).done(function (conversations) {
-        conversationId = window.prompt("Choose a conversation", "UUUUUID");
+        conversationId = conversations[0]["conversationId"];
         getPreviousMessages(jwt)
         connectWebSocket()
     })
@@ -78,9 +79,9 @@ function getPreviousMessages(jwt) {
 
 function sendMessage() {
     var $messageInput = $('#messageInput');
-    var message = {message: $messageInput.val(), from: userName, conversationId: conversationId};
+    var message = {message: $messageInput.val()};
     $messageInput.val('');
-    post('/messages', message);
+    post('/conversations/' + conversationId + '/messages', message);
 }
 
 function onNewMessage(result) {
@@ -92,11 +93,10 @@ function connectWebSocket() {
     var socket = new SockJS('/messagesWS');
     stompClient = Stomp.over(socket);
     //stompClient.debug = null;
-    stompClient.connect({}, (frame) = > {
+    stompClient.connect({}, (frame) => {
         console.log('Connected: ' + frame);
-    stompClient.subscribe('/topic/' + conversationId, onNewMessage);
-})
-    ;
+        stompClient.subscribe('/topic/' + conversationId, onNewMessage);
+    });
 }
 
 login();

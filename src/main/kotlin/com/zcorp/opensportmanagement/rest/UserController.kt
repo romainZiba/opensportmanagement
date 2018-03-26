@@ -3,17 +3,16 @@ package com.zcorp.opensportmanagement.rest
 
 import com.zcorp.opensportmanagement.EntityAlreadyExistsException
 import com.zcorp.opensportmanagement.EntityNotFoundException
+import com.zcorp.opensportmanagement.UserForbiddenException
 import com.zcorp.opensportmanagement.dto.UserDto
 import com.zcorp.opensportmanagement.model.User
 import com.zcorp.opensportmanagement.repositories.UserRepository
 import org.springframework.data.rest.webmvc.RepositoryRestController
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.Authentication
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-import org.springframework.web.bind.annotation.ExceptionHandler
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.ResponseStatus
+import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
 
 
@@ -29,6 +28,12 @@ open class UserController(private val userRepository: UserRepository,
             return ResponseEntity(userSaved.toDto(), HttpStatus.CREATED)
         }
         throw EntityAlreadyExistsException("User " + user.username + " already exists")
+    }
+
+    @GetMapping("/users/me")
+    open fun whoAmi(authentication: Authentication): ResponseEntity<UserDto> {
+        return ResponseEntity.ok(userRepository.findByUsername(authentication.name)?.toDto()
+                ?: throw UserForbiddenException())
     }
 
     /** Handle the error */

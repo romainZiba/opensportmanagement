@@ -19,18 +19,12 @@ class Match : AbstractEvent {
     @ManyToOne
     @JsonBackReference
     val championship: Championship
-    @ManyToMany
-    val presentPlayers: MutableSet<TeamMember>
-    @ManyToMany
-    val notPresentPlayers: MutableSet<TeamMember>
 
     constructor(name: String, description: String, fromDateTime: LocalDateTime, toDateTime: LocalDateTime, stadium: Stadium,
                 opponent: Opponent, team: Team, championship: Championship) :
             super(name, description, fromDateTime, toDateTime, stadium, team) {
         this.opponent = opponent
         this.championship = championship
-        this.presentPlayers = mutableSetOf()
-        this.notPresentPlayers = mutableSetOf()
     }
 
     constructor(name: String, description: String, fromDateTime: LocalDateTime, toDateTime: LocalDateTime, place: String,
@@ -38,8 +32,6 @@ class Match : AbstractEvent {
             super(name, description, fromDateTime, toDateTime, place, team) {
         this.opponent = opponent
         this.championship = championship
-        this.presentPlayers = mutableSetOf()
-        this.notPresentPlayers = mutableSetOf()
     }
 
     constructor(name: String, description: String, reccurenceDays: MutableSet<DayOfWeek>, recurrenceFromDate: LocalDate,
@@ -49,8 +41,6 @@ class Match : AbstractEvent {
                     recurrenceToTime, stadium, team) {
         this.opponent = opponent
         this.championship = championship
-        this.presentPlayers = mutableSetOf()
-        this.notPresentPlayers = mutableSetOf()
     }
 
     constructor(name: String, description: String, reccurenceDays: MutableSet<DayOfWeek>, recurrenceFromDate: LocalDate,
@@ -60,21 +50,6 @@ class Match : AbstractEvent {
                     recurrenceToTime, place, team) {
         this.opponent = opponent
         this.championship = championship
-        this.presentPlayers = mutableSetOf()
-        this.notPresentPlayers = mutableSetOf()
-    }
-
-    fun parcipate(player: TeamMember, present: Boolean): Match {
-        if (present) {
-            if (presentPlayers.size < MAX_PLAYERS) {
-                presentPlayers.add(player)
-                notPresentPlayers.remove(player)
-            }
-        } else {
-            presentPlayers.remove(player)
-            notPresentPlayers.add(player)
-        }
-        return this
     }
 
     companion object {

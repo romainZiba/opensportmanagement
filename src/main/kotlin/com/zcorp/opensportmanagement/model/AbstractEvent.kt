@@ -8,7 +8,7 @@ import java.time.LocalTime
 import javax.persistence.*
 
 @MappedSuperclass
-abstract class AbstractEvent() {
+abstract class AbstractEvent {
 
     var name: String = ""
     var description: String = ""
@@ -36,53 +36,62 @@ abstract class AbstractEvent() {
     @Id
     var id: Int = -1
 
-    constructor(name: String, description: String, fromDateTime: LocalDateTime, toDateTime: LocalDateTime, stadium: Stadium,
-                team: Team) : this() {
+    @ManyToMany
+    private val presentPlayers: MutableSet<TeamMember>
+    @ManyToMany
+    private val absentPlayers: MutableSet<TeamMember>
+
+    private constructor(name: String, description: String, team: Team) {
         this.name = name
         this.description = description
+        this.team = team
+        this.presentPlayers = mutableSetOf()
+        this.absentPlayers = mutableSetOf()
+    }
+
+    constructor(name: String, description: String, fromDateTime: LocalDateTime, toDateTime: LocalDateTime, stadium: Stadium,
+                team: Team) : this(name, description, team) {
         this.recurrent = false
         this.fromDateTime = fromDateTime
         this.toDateTime = toDateTime
         this.stadium = stadium
-        this.team = team
     }
 
     constructor(name: String, description: String, fromDateTime: LocalDateTime, toDateTime: LocalDateTime, place: String,
-                team: Team) : this() {
-        this.name = name
-        this.description = description
+                team: Team) : this(name, description, team) {
         this.fromDateTime = fromDateTime
         this.toDateTime = toDateTime
         this.place = place
-        this.team = team
     }
 
     constructor(name: String, description: String, reccurenceDays: MutableSet<DayOfWeek>, recurrenceFromDate: LocalDate,
                 recurrenceToDate: LocalDate, recurrenceFromTime: LocalTime, recurrenceToTime: LocalTime, stadium: Stadium,
-                team: Team) : this() {
-        this.name = name
-        this.description = description
+                team: Team) : this(name, description, team) {
         this.reccurenceDays = reccurenceDays
         this.recurrenceFromDate = recurrenceFromDate
         this.recurrenceToDate = recurrenceToDate
         this.recurrenceFromTime = recurrenceFromTime
         this.recurrenceToTime = recurrenceToTime
         this.stadium = stadium
-        this.team = team
     }
 
     constructor(name: String, description: String, reccurenceDays: MutableSet<DayOfWeek>, recurrenceFromDate: LocalDate,
                 recurrenceToDate: LocalDate, recurrenceFromTime: LocalTime, recurrenceToTime: LocalTime, place: String,
-                team: Team) : this() {
-        this.name = name
-        this.description = description
+                team: Team) : this(name, description, team) {
         this.reccurenceDays = reccurenceDays
         this.recurrenceFromDate = recurrenceFromDate
         this.recurrenceToDate = recurrenceToDate
         this.recurrenceFromTime = recurrenceFromTime
         this.recurrenceToTime = recurrenceToTime
         this.place = place
-        this.team = team
+    }
+
+    fun getPresentPlayers(): Set<TeamMember> {
+        return presentPlayers
+    }
+
+    fun getAbsentPlayers(): Set<TeamMember> {
+        return absentPlayers
     }
 
     override fun toString(): String {
@@ -102,6 +111,19 @@ abstract class AbstractEvent() {
 
     override fun hashCode(): Int {
         return id
+    }
+
+    fun parcipate(player: TeamMember, present: Boolean): AbstractEvent {
+        if (present) {
+            if (presentPlayers.size < Match.MAX_PLAYERS) {
+                presentPlayers.add(player)
+                absentPlayers.remove(player)
+            }
+        } else {
+            presentPlayers.remove(player)
+            absentPlayers.add(player)
+        }
+        return this
     }
 
     enum class EventType(val type: String) {

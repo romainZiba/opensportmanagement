@@ -70,7 +70,7 @@ open class MatchController(private val teamMemberRepository: TeamMemberRepositor
         if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
             val teamMember = teamMemberRepository.findByUsername(authentication.name, teamId)
                     ?: throw EntityNotFoundException("Team member ${authentication.name} does not exist")
-            match = match.parcipate(teamMember, present)
+            match.parcipate(teamMember, present)
             match = matchRepository.save(match)
             return ResponseEntity.ok(MatchResource(match))
         }

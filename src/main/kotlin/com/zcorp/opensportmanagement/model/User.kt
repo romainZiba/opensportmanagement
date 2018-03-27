@@ -28,7 +28,7 @@ data class User(@Id @NotNull val username: String,
     }
 
     fun toDto(): UserDto {
-        return UserDto(firstName, lastName, username, email, phoneNumber, memberOf.map { it.team.toDto() }.toSet())
+        return UserDto(firstName, lastName, username, email, phoneNumber)
     }
 }
 

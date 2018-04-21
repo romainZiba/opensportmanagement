@@ -32,6 +32,7 @@ open class Application {
     open fun init(teamRepository: TeamRepository,
                   stadiumRepository: StadiumRepository,
                   eventRepository: EventRepository,
+                  matchRepository: MatchRepository,
                   opponentRepository: OpponentRepository,
                   seasonRepository: SeasonRepository,
                   championshipRepository: ChampionshipRepository,
@@ -74,7 +75,7 @@ open class Application {
                 team1
         ))
         val championship = championshipRepository.save(Championship("Championnat 2017-2018", season))
-        val match = eventRepository.save(Match("Match de championnat", "Super match",
+        val match = matchRepository.save(Match("Match de championnat", "Super match",
                 LocalDateTime.of(2018, 1, 1, 10, 0, 0),
                 LocalDateTime.of(2018, 1, 1, 12, 0, 0),
                 stadium, opponent, team1, championship))

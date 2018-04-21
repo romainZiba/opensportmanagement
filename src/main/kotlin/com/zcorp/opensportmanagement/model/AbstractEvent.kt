@@ -7,8 +7,15 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import javax.persistence.*
 
-@MappedSuperclass
+@Entity
+@Table(name = "event")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "event_type")
 abstract class AbstractEvent {
+
+    @GeneratedValue
+    @Id
+    var id: Int = -1
 
     var name: String = ""
     var description: String = ""
@@ -31,10 +38,6 @@ abstract class AbstractEvent {
     @JoinColumn(name = "team_id")
     @JsonBackReference
     var team: Team? = null
-
-    @GeneratedValue
-    @Id
-    var id: Int = -1
 
     @ManyToMany
     private val presentPlayers: MutableSet<TeamMember>
@@ -127,19 +130,13 @@ abstract class AbstractEvent {
     }
 
     enum class EventType(val type: String) {
-        CHAMPIONSHIP(championship),
-        FRIENDLY(friendly),
-        BETWEEN_US(between_us),
-        TOURNAMENT(tournament),
+        MATCH(match),
         TRAINING(training),
         OTHER(other)
     }
 
     companion object {
-        const val championship = "CHAMPIONSHIP"
-        const val friendly = "FRIENDLY"
-        const val between_us = "BETWEEN_US"
-        const val tournament = "TOURNAMENT"
+        const val match = "MATCH"
         const val training = "TRAINING"
         const val other = "OTHER"
     }

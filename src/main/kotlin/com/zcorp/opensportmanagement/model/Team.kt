@@ -24,9 +24,9 @@ data class Team(val name: String,
     @JsonManagedReference
     val seasons: MutableSet<Season> = mutableSetOf()
 
-    @OneToMany(mappedBy = "team")
+    @OneToMany(mappedBy = "team", targetEntity = AbstractEvent::class)
     @JsonManagedReference
-    val events: MutableSet<Event> = mutableSetOf()
+    val events: MutableSet<AbstractEvent> = mutableSetOf()
 
     @OneToMany(mappedBy = "team")
     @JsonManagedReference

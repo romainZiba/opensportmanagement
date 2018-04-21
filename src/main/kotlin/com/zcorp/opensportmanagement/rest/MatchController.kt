@@ -37,7 +37,7 @@ open class MatchController(private val teamMemberRepository: TeamMemberRepositor
                     ?: throw EntityNotFoundException("Opponent $opponentName does not exist")
             val match = Match(matchDto.name, matchDto.description, matchDto.fromDateTime, matchDto.toDateTime,
                     stadium, opponent, championship.season.team, championship)
-            val matchSaved = eventRepository.save(match)
+            val matchSaved = matchRepository.save(match)
             return ResponseEntity(MatchResource(matchSaved), HttpStatus.CREATED)
         }
         throw UserForbiddenException()

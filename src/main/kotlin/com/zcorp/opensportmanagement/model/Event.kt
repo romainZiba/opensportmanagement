@@ -4,11 +4,11 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import javax.persistence.DiscriminatorValue
 import javax.persistence.Entity
-import javax.persistence.Table
 
 @Entity
-@Table(name = "event")
+@DiscriminatorValue(AbstractEvent.other)
 class Event : AbstractEvent {
 
     constructor(name: String, description: String, fromDateTime: LocalDateTime, toDateTime: LocalDateTime,
@@ -30,8 +30,4 @@ class Event : AbstractEvent {
                 team: Team) :
             super(name, description, reccurenceDays, recurrenceFromDate, recurrenceToDate, recurrenceFromTime,
                     recurrenceToTime, place, team)
-
-    override fun toString(): String {
-        return "Event() ${super.toString()}"
-    }
 }

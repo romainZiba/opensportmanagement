@@ -37,15 +37,6 @@ open class EventController(private val teamRepository: TeamRepository,
         throw UserForbiddenException()
     }
 
-    @RequestMapping("/teams/{teamId}/events/count", method = [RequestMethod.GET])
-    open fun getEventsCount(@PathVariable("teamId") teamId: Int, authentication: Authentication): ResponseEntity<Int> {
-        if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
-            val team = teamRepository.findOne(teamId)
-            return ResponseEntity.ok(team.events.size)
-        }
-        throw UserForbiddenException()
-    }
-
     @RequestMapping("/teams/{teamId}/events", method = [RequestMethod.GET])
     open fun getEvents(@PathVariable("teamId") teamId: Int, authentication: Authentication): ResponseEntity<List<EventResource>> {
         if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {

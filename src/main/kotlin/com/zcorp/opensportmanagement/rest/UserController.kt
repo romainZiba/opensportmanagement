@@ -7,6 +7,7 @@ import com.zcorp.opensportmanagement.UserForbiddenException
 import com.zcorp.opensportmanagement.dto.UserDto
 import com.zcorp.opensportmanagement.model.User
 import com.zcorp.opensportmanagement.repositories.UserRepository
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.rest.webmvc.RepositoryRestController
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -17,10 +18,11 @@ import javax.validation.Valid
 
 
 @RepositoryRestController
-open class UserController(private val userRepository: UserRepository,
-                          private val bCryptPasswordEncoder: BCryptPasswordEncoder) {
+@RequestMapping("/users")
+open class UserController @Autowired constructor(private val userRepository: UserRepository,
+                                                 private val bCryptPasswordEncoder: BCryptPasswordEncoder) {
 
-    @PostMapping("/users/sign-up")
+    @PostMapping("/sign-up")
     open fun createUser(@Valid @RequestBody user: User): ResponseEntity<UserDto> {
         if (userRepository.findByUsername(user.username) == null) {
             user.password = bCryptPasswordEncoder.encode(user.password)
@@ -30,7 +32,7 @@ open class UserController(private val userRepository: UserRepository,
         throw EntityAlreadyExistsException("User " + user.username + " already exists")
     }
 
-    @GetMapping("/users/me")
+    @GetMapping("/me")
     open fun whoAmi(authentication: Authentication): ResponseEntity<UserDto> {
         return ResponseEntity.ok(userRepository.findByUsername(authentication.name)?.toDto()
                 ?: throw UserForbiddenException())

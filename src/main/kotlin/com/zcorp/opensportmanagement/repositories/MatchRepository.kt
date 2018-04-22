@@ -1,7 +1,6 @@
 package com.zcorp.opensportmanagement.repositories
 
 import com.zcorp.opensportmanagement.model.Match
-import com.zcorp.opensportmanagement.model.Team
-import org.springframework.data.repository.CrudRepository
+import org.springframework.data.jpa.repository.JpaRepository
 
-interface MatchRepository : CrudRepository<Match, Int>
+interface MatchRepository : JpaRepository<Match, Int>

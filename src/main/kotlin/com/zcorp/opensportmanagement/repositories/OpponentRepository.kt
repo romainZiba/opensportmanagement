@@ -1,8 +1,8 @@
 package com.zcorp.opensportmanagement.repositories
 
 import com.zcorp.opensportmanagement.model.Opponent
-import org.springframework.data.repository.CrudRepository
+import org.springframework.data.jpa.repository.JpaRepository
 
-interface OpponentRepository : CrudRepository<Opponent, Int> {
+interface OpponentRepository : JpaRepository<Opponent, Int> {
     fun findByName(name: String): Opponent?
 }

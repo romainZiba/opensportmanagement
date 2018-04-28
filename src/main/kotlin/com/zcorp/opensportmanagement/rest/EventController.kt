@@ -21,7 +21,7 @@ open class EventController @Autowired constructor(private val eventRepository: E
     @GetMapping("/{eventId}")
     open fun getEvent(@PathVariable("eventId") eventId: Int,
                       authentication: Authentication): ResponseEntity<EventResource> {
-        val event = eventRepository.findOne(eventId) ?: throw UserForbiddenException()
+        val event = eventRepository.getOne(eventId) ?: throw UserForbiddenException()
         val team = event.team ?: throw UserForbiddenException()
         if (accessController.isUserAllowedToAccessTeam(authentication, team.id)) {
             return ResponseEntity.ok(EventResource(event))
@@ -32,10 +32,10 @@ open class EventController @Autowired constructor(private val eventRepository: E
     @DeleteMapping("/{eventId}")
     open fun deleteEvent(@PathVariable("eventId") eventId: Int,
                          authentication: Authentication): ResponseEntity<Any> {
-        val event = eventRepository.findOne(eventId) ?: throw UserForbiddenException()
+        val event = eventRepository.getOne(eventId) ?: throw UserForbiddenException()
         val team = event.team ?: throw UserForbiddenException()
         if (accessController.isTeamAdmin(authentication, team.id)) {
-            eventRepository.delete(eventId)
+            eventRepository.deleteById(eventId)
             return ResponseEntity.noContent().build()
         }
         throw UserForbiddenException()

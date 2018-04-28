@@ -20,7 +20,7 @@ open class TeamMemberController @Autowired constructor(private val teamMemberRep
     @GetMapping("/{memberId}")
     open fun getTeamMember(@PathVariable("memberId") memberId: Int,
                            authentication: Authentication): ResponseEntity<TeamMemberResource> {
-        val teamMember = teamMemberRepository.findOne(memberId) ?: throw UserForbiddenException()
+        val teamMember = teamMemberRepository.getOne(memberId) ?: throw UserForbiddenException()
         if (accessController.isUserAllowedToAccessTeam(authentication, teamMember.team.id)) {
             return ResponseEntity.ok(TeamMemberResource(teamMember))
         }

@@ -59,7 +59,7 @@ open class Application {
         adminCoachTeam2.licenseNumber = "12345"
         playerCoachTeam2.licenseNumber = "255069690"
 
-        teamMemberRepository.save(mutableListOf(adminCoachTeam1, adminCoachTeam2, playerTeam1, playerCoachTeam2))
+        teamMemberRepository.saveAll(mutableListOf(adminCoachTeam1, adminCoachTeam2, playerTeam1, playerCoachTeam2))
 
         val stadium = stadiumRepository.save(Stadium("LE stade", "2 allée", "Toulouse", team1))
 

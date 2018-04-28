@@ -20,7 +20,7 @@ open class StadiumController @Autowired constructor(private val stadiumRepositor
     @GetMapping("/{stadiumId}")
     open fun getStadium(@PathVariable("stadiumId") stadiumId: Int,
                         authentication: Authentication): ResponseEntity<StadiumResource> {
-        val stadium = stadiumRepository.findOne(stadiumId) ?: throw UserForbiddenException()
+        val stadium = stadiumRepository.getOne(stadiumId) ?: throw UserForbiddenException()
         if (accessController.isUserAllowedToAccessTeam(authentication, stadium.team.id)) {
             return ResponseEntity.ok(StadiumResource(stadium))
         }

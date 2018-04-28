@@ -50,7 +50,7 @@ open class TeamController @Autowired constructor(private val teamRepository: Tea
     @GetMapping("/{teamId}")
     open fun getTeam(@PathVariable teamId: Int, authentication: Authentication): ResponseEntity<TeamResource> {
         if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
-            val team = teamRepository.findOne(teamId)
+            val team = teamRepository.getOne(teamId)
             return ResponseEntity.ok(TeamResource(team))
         }
         throw UserForbiddenException()
@@ -61,7 +61,7 @@ open class TeamController @Autowired constructor(private val teamRepository: Tea
         if (accessController.getUserTeamIds(authentication).contains(teamId)) {
             throw UserAlreadyMemberException()
         }
-        val team = teamRepository.findOne(teamId) ?: throw EntityNotFoundException("Team $teamId does not exist")
+        val team = teamRepository.getOne(teamId) ?: throw EntityNotFoundException("Team $teamId does not exist")
         val user = userRepository.findByUsername(authentication.name)
         val teamMember = TeamMember(user!!, mutableSetOf(TeamMember.Role.PLAYER), team)
         team.members.add(teamMember)
@@ -71,7 +71,7 @@ open class TeamController @Autowired constructor(private val teamRepository: Tea
     @DeleteMapping("/{teamId}")
     open fun deleteTeam(@PathVariable teamId: Int, authentication: Authentication): ResponseEntity<Any> {
         if (accessController.isTeamAdmin(authentication, teamId)) {
-            teamRepository.delete(teamId)
+            teamRepository.deleteById(teamId)
             return ResponseEntity.noContent().build()
         }
         throw UserForbiddenException()
@@ -80,7 +80,7 @@ open class TeamController @Autowired constructor(private val teamRepository: Tea
     @GetMapping("/{teamId}/events")
     open fun getEvents(@PathVariable("teamId") teamId: Int, authentication: Authentication): ResponseEntity<List<EventResource>> {
         if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
-            val team = teamRepository.findOne(teamId)
+            val team = teamRepository.getOne(teamId)
             return ResponseEntity.ok(team.events.map { event -> EventResource(event) })
         }
         throw UserForbiddenException()
@@ -91,7 +91,7 @@ open class TeamController @Autowired constructor(private val teamRepository: Tea
                          @RequestBody eventDto: EventDto,
                          authentication: Authentication): ResponseEntity<Any> {
         if (accessController.isTeamAdmin(authentication, teamId)) {
-            val team = teamRepository.findOne(teamId)
+            val team = teamRepository.getOne(teamId)
             val event = createEventFromDto(eventDto, team)
             team.events.add(event)
             teamRepository.save(team)
@@ -106,7 +106,7 @@ open class TeamController @Autowired constructor(private val teamRepository: Tea
                             authentication: Authentication): ResponseEntity<OpponentResource> {
 
         if (accessController.isTeamAdmin(authentication, teamId)) {
-            val team = teamRepository.findOne(teamId) ?: throw EntityNotFoundException("Team $teamId does not exist")
+            val team = teamRepository.getOne(teamId) ?: throw EntityNotFoundException("Team $teamId does not exist")
             if (team.opponents.map { it.name }.contains(opponentDto.name)) {
                 throw EntityAlreadyExistsException("Opponent " + opponentDto.name + " already exists")
             } else {
@@ -121,7 +121,7 @@ open class TeamController @Autowired constructor(private val teamRepository: Tea
     @GetMapping("/{teamId}/opponents")
     open fun getOpponents(@PathVariable("teamId") teamId: Int, authentication: Authentication): ResponseEntity<List<OpponentResource>> {
         if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
-            val team = teamRepository.findOne(teamId)
+            val team = teamRepository.getOne(teamId)
             return ResponseEntity.ok(team.opponents.map { opponent -> OpponentResource(opponent) })
         }
         throw UserForbiddenException()
@@ -131,7 +131,7 @@ open class TeamController @Autowired constructor(private val teamRepository: Tea
     open fun getSeasons(@PathVariable("teamId") teamId: Int,
                         authentication: Authentication): ResponseEntity<List<SeasonResource>> {
         if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
-            val team: Team = teamRepository.findOne(teamId)
+            val team: Team = teamRepository.getOne(teamId)
                     ?: throw EntityNotFoundException("Team $teamId does not exist")
             return ResponseEntity.ok(team.seasons.map { season -> SeasonResource(season) })
         }
@@ -143,7 +143,7 @@ open class TeamController @Autowired constructor(private val teamRepository: Tea
                           @RequestBody seasonDto: SeasonDto,
                           authentication: Authentication): ResponseEntity<SeasonResource> {
         if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
-            val team: Team = teamRepository.findOne(teamId)
+            val team: Team = teamRepository.getOne(teamId)
                     ?: throw EntityNotFoundException("Team $teamId does not exist")
             if (team.seasons.map { it.name }.contains(seasonDto.name)) {
                 throw EntityAlreadyExistsException("Season " + seasonDto.name + " already exists")
@@ -159,7 +159,7 @@ open class TeamController @Autowired constructor(private val teamRepository: Tea
     @GetMapping("/{teamId}/stadiums")
     open fun getStadiums(@PathVariable("teamId") teamId: Int, authentication: Authentication): ResponseEntity<List<StadiumResource>> {
         if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
-            val team = teamRepository.findOne(teamId)
+            val team = teamRepository.getOne(teamId)
             return ResponseEntity.ok(team.stadiums.map { stadium -> StadiumResource(stadium) })
         }
         throw UserForbiddenException()
@@ -168,7 +168,7 @@ open class TeamController @Autowired constructor(private val teamRepository: Tea
     @GetMapping("/{teamId}/members")
     open fun getTeamMembers(@PathVariable("teamId") teamId: Int, authentication: Authentication): ResponseEntity<List<TeamMemberResource>> {
         if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
-            val team = teamRepository.findOne(teamId)
+            val team = teamRepository.getOne(teamId)
             return ResponseEntity.ok(team.members.map { teamMember -> TeamMemberResource(teamMember) })
         }
         throw UserForbiddenException()

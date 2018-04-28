@@ -30,7 +30,7 @@ open class ChampionshipController @Autowired constructor(private val championshi
     @GetMapping("/{championshipId}")
     open fun getChampionship(@PathVariable("championshipId") championshipId: Int,
                              authentication: Authentication): ResponseEntity<ChampionshipResource> {
-        val championship = championshipRepository.findOne(championshipId) ?: throw UserForbiddenException()
+        val championship = championshipRepository.getOne(championshipId) ?: throw UserForbiddenException()
         if (accessController.isUserAllowedToAccessTeam(authentication, championship.season.team.id)) {
             return ResponseEntity.ok(ChampionshipResource(championship))
         }
@@ -40,9 +40,9 @@ open class ChampionshipController @Autowired constructor(private val championshi
     @DeleteMapping("/{championshipId}")
     open fun deleteChampionship(@PathVariable("championshipId") championshipId: Int,
                                 authentication: Authentication): ResponseEntity<Any> {
-        val championship = championshipRepository.findOne(championshipId) ?: throw UserForbiddenException()
+        val championship = championshipRepository.getOne(championshipId) ?: throw UserForbiddenException()
         if (accessController.isTeamAdmin(authentication, championship.season.team.id)) {
-            championshipRepository.delete(championship.id)
+            championshipRepository.deleteById(championship.id)
             return ResponseEntity.noContent().build()
         }
         throw UserForbiddenException()
@@ -50,7 +50,7 @@ open class ChampionshipController @Autowired constructor(private val championshi
 
     @GetMapping("/{championshipId}/matches")
     open fun getMatches(@PathVariable championshipId: Int, authentication: Authentication): ResponseEntity<List<MatchResource>> {
-        val championship = championshipRepository.findOne(championshipId) ?: throw UserForbiddenException()
+        val championship = championshipRepository.getOne(championshipId) ?: throw UserForbiddenException()
         if (accessController.isUserAllowedToAccessTeam(authentication, championship.season.team.id)) {
             return ResponseEntity.ok(championship.matches.map { match -> MatchResource(match) })
         }
@@ -61,7 +61,7 @@ open class ChampionshipController @Autowired constructor(private val championshi
     open fun createMatch(@NotNull @PathVariable("championshipId") championshipId: Int,
                          @RequestBody matchDto: MatchDto,
                          authentication: Authentication): ResponseEntity<MatchResource> {
-        val championship = championshipRepository.findOne(championshipId) ?: throw UserForbiddenException()
+        val championship = championshipRepository.getOne(championshipId) ?: throw UserForbiddenException()
         if (accessController.isTeamAdmin(authentication, championship.season.team.id)) {
             val opponentName = matchDto.opponentName
             val stadiumName = matchDto.stadiumName

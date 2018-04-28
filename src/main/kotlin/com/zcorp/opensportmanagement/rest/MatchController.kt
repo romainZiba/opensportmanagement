@@ -21,7 +21,7 @@ open class MatchController @Autowired constructor(private val teamMemberReposito
 
     @GetMapping("/{matchId}")
     open fun getMatch(@PathVariable matchId: Int, authentication: Authentication): ResponseEntity<MatchResource> {
-        val match = matchRepository.findOne(matchId)
+        val match = matchRepository.getOne(matchId)
         if (accessController.isUserAllowedToAccessTeam(authentication, match.championship.season.team.id)) {
             return ResponseEntity.ok(MatchResource(match))
         }
@@ -32,7 +32,7 @@ open class MatchController @Autowired constructor(private val teamMemberReposito
     open fun participate(@NotNull @PathVariable("matchId") matchId: Int,
                          @NotNull @PathVariable("present") present: Boolean,
                          authentication: Authentication): ResponseEntity<MatchResource> {
-        var match = matchRepository.findOne(matchId) ?: throw UserForbiddenException()
+        var match = matchRepository.getOne(matchId) ?: throw UserForbiddenException()
         val teamId = match.championship.season.team.id
         if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
             val teamMember = teamMemberRepository.findByUsername(authentication.name, teamId)
@@ -47,9 +47,9 @@ open class MatchController @Autowired constructor(private val teamMemberReposito
     @DeleteMapping("/{matchId}")
     open fun deleteChampionship(@PathVariable("matchId") matchId: Int,
                                 authentication: Authentication): ResponseEntity<Any> {
-        val match = matchRepository.findOne(matchId) ?: throw UserForbiddenException()
+        val match = matchRepository.getOne(matchId) ?: throw UserForbiddenException()
         if (accessController.isTeamAdmin(authentication, match.championship.season.team.id)) {
-            matchRepository.delete(matchId)
+            matchRepository.deleteById(matchId)
             return ResponseEntity.noContent().build()
         }
         throw UserForbiddenException()

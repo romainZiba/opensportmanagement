@@ -24,7 +24,7 @@ open class SeasonController @Autowired constructor(private val seasonRepository:
     @GetMapping("/{seasonId}")
     fun getSeason(@PathVariable("seasonId") seasonId: Int,
                   authentication: Authentication): SeasonResource {
-        val season = seasonRepository.findOne(seasonId) ?: throw UserForbiddenException()
+        val season = seasonRepository.getOne(seasonId) ?: throw UserForbiddenException()
         if (accessController.isUserAllowedToAccessTeam(authentication, season.team.id)) {
             return SeasonResource(season)
         }
@@ -34,9 +34,9 @@ open class SeasonController @Autowired constructor(private val seasonRepository:
     @DeleteMapping("/{seasonId}")
     fun deleteSeason(@PathVariable("seasonId") seasonId: Int,
                      authentication: Authentication): ResponseEntity<Any> {
-        val season = seasonRepository.findOne(seasonId) ?: throw UserForbiddenException()
+        val season = seasonRepository.getOne(seasonId) ?: throw UserForbiddenException()
         if (accessController.isTeamAdmin(authentication, season.team.id)) {
-            seasonRepository.delete(seasonId)
+            seasonRepository.deleteById(seasonId)
             return ResponseEntity.noContent().build()
         }
         throw UserForbiddenException()
@@ -44,7 +44,7 @@ open class SeasonController @Autowired constructor(private val seasonRepository:
 
     @GetMapping("/{seasonId}/championships")
     open fun getChampionships(@PathVariable("seasonId") seasonId: Int, authentication: Authentication): ResponseEntity<List<ChampionshipResource>> {
-        val season = seasonRepository.findOne(seasonId) ?: throw UserForbiddenException()
+        val season = seasonRepository.getOne(seasonId) ?: throw UserForbiddenException()
         if (accessController.isUserAllowedToAccessTeam(authentication, season.team.id)) {
             return ResponseEntity.ok(season.championships.map { championship -> ChampionshipResource(championship) })
         }
@@ -55,7 +55,7 @@ open class SeasonController @Autowired constructor(private val seasonRepository:
     open fun createChampionship(@PathVariable("seasonId") seasonId: Int,
                                 @RequestBody championshipDto: ChampionshipDto,
                                 authentication: Authentication): ResponseEntity<ChampionshipResource> {
-        val season = seasonRepository.findOne(seasonId) ?: throw UserForbiddenException()
+        val season = seasonRepository.getOne(seasonId) ?: throw UserForbiddenException()
         val teamId = season.team.id
         if (accessController.isTeamAdmin(authentication, teamId)) {
             var championship = Championship(championshipDto.name, season)

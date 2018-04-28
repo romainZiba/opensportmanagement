@@ -2,8 +2,8 @@ group 'com.zcorp'
 version '1.0-SNAPSHOT'
 
 buildscript {
-    ext.kotlin_version = '1.2.21'
-    ext.spring_boot_version = '1.5.9.RELEASE'
+    ext.kotlin_version = '1.2.31'
+    ext.spring_boot_version = '2.0.1.RELEASE'
 
     repositories {
         mavenCentral()
@@ -20,6 +20,7 @@ apply plugin: 'java'
 apply plugin: 'kotlin'
 apply plugin: 'war'
 apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
 apply plugin: 'kotlin-allopen'
 apply plugin: 'kotlin-jpa'
 
@@ -35,7 +36,7 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     compile "org.springframework.boot:spring-boot-starter-web:$spring_boot_version"
     compile "org.springframework.boot:spring-boot-starter-websocket:$spring_boot_version"
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: '1.5.9.RELEASE'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: '2.0.1.RELEASE'
     compile 'org.springframework.boot:spring-boot-starter-security'
     compile("org.springframework.boot:spring-boot-starter-data-rest")
     compile('org.springframework.boot:spring-boot-devtools')
@@ -55,6 +56,8 @@ dependencies {
     compile("com.h2database:h2")
     runtime('org.postgresql:postgresql:42.1.4')
     compile group: 'com.rethinkdb', name: 'rethinkdb-driver', version: '2.3.3'
+
+    runtime("org.springframework.boot:spring-boot-properties-migrator")
 
     // Client application
     compile 'org.webjars:jquery:3.0.0-alpha1'

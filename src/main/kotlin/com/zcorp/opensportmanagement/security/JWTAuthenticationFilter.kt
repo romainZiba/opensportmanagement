@@ -44,7 +44,6 @@ class JWTAuthenticationFilter(authManager: AuthenticationManager) : UsernamePass
                                           res: HttpServletResponse,
                                           chain: FilterChain,
                                           auth: Authentication) {
-        val token = JWTUtils.getToken(auth)
-        res.addHeader(HEADER_STRING, TOKEN_PREFIX + token)
+        res.addCookie(JWTUtils.getAccessCookie(auth))
     }
 }

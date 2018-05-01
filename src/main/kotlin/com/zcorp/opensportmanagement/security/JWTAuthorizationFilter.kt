@@ -10,6 +10,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter
 import java.io.IOException
+import java.net.URLDecoder
 import javax.servlet.FilterChain
 import javax.servlet.ServletException
 import javax.servlet.http.HttpServletRequest
@@ -25,40 +26,45 @@ class JWTAuthorizationFilter(authManager: AuthenticationManager) : BasicAuthenti
     override fun doFilterInternal(req: HttpServletRequest,
                                   res: HttpServletResponse,
                                   chain: FilterChain) {
-        val header = req.getHeader(HEADER_STRING)
+        val cookie = req.cookies.find { cookie -> cookie.name == COOKIE_KEY }
 
-        if (header == null || !header.startsWith(TOKEN_PREFIX)) {
+        if (cookie == null) {
             chain.doFilter(req, res)
             return
         }
-
+        val decodedToken = URLDecoder.decode(cookie.value, URL_ENCODING)
+        if (!decodedToken.startsWith(TOKEN_PREFIX)) {
+            chain.doFilter(req, res)
+            return
+        }
         val authentication = getAuthentication(req)
-
         if (authentication == null) {
             chain.doFilter(req, res)
             return
         }
 
-        // User is authorized. Refresh the access token
-        val token = JWTUtils.getToken(authentication)
-        res.addHeader(HEADER_STRING, TOKEN_PREFIX + token)
+        if (JWTUtils.refreshRequired(decodedToken)) {
+            res.addCookie(JWTUtils.getAccessCookie(authentication))
+        }
+        // User is authorized
         SecurityContextHolder.getContext().authentication = authentication
         chain.doFilter(req, res)
     }
 
     private fun getAuthentication(request: HttpServletRequest): UsernamePasswordAuthenticationToken? {
-        val token = request.getHeader(HEADER_STRING)
+        val token = request.cookies.find { cookie -> cookie.name == "access_token" }?.value
         if (token != null) {
             // parse the token.
+            val decodedToken = URLDecoder.decode(token, URL_ENCODING)
             try {
                 val user = Jwts.parser()
                         .setSigningKey(SECRET)
-                        .parseClaimsJws(token.replace(TOKEN_PREFIX, ""))
+                        .parseClaimsJws(decodedToken.replace(TOKEN_PREFIX, ""))
                         .body
                         .subject
                 val stringAuthorities = Jwts.parser()
                         .setSigningKey(SECRET)
-                        .parseClaimsJws(token.replace(TOKEN_PREFIX, ""))
+                        .parseClaimsJws(decodedToken.replace(TOKEN_PREFIX, ""))
                         .body[AUTHORITIES] as String
 
                 val mapper = jacksonObjectMapper()

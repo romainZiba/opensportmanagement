@@ -19,6 +19,7 @@ class JWTUtils {
             val cookie = Cookie(COOKIE_KEY, URLEncoder.encode(TOKEN_PREFIX + newToken, URL_ENCODING))
             cookie.isHttpOnly = true
             cookie.secure = false
+            cookie.maxAge = EXPIRATION_TIME
             return cookie
         }
 
@@ -54,7 +55,7 @@ class JWTUtils {
             return Jwts.builder()
                     .setClaims(claims)
                     .setSubject(subject)
-                    .setExpiration(Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                    .setExpiration(Date(System.currentTimeMillis() + EXPIRATION_TIME * 1000))
                     .setIssuedAt(Date())
                     .signWith(SignatureAlgorithm.HS512, SECRET)
                     .compact()

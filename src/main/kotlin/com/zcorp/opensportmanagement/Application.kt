@@ -37,10 +37,13 @@ open class Application {
                   userRepository: UserRepository,
                   teamMemberRepository: TeamMemberRepository) = CommandLineRunner {
         // save entities
+        var team1 = Team("TEAM 1", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS)
+        team1.imgUrl = "http://tsnimages.tsn.ca/ImageProvider/TeamLogo?seoId=san-antonio-spurs&width=500&height=500"
+        team1 = teamRepository.save(team1)
 
-        var team1 = teamRepository.save(Team("TEAM 1", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS))
-
-        var team2 = teamRepository.save(Team("TEAM 2", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS))
+        var team2 = Team("TEAM 2", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS)
+        team2.imgUrl = "http://tsnimages.tsn.ca/ImageProvider/TeamLogo?seoId=san-antonio-spurs&width=140&height=140"
+        team2 = teamRepository.save(team2)
 
         val userTeam1_2 = userRepository.save(User("CR", "Coach", "Rock", bCryptPasswordEncoder().encode("CR"),
                 "CR@caramail.com", ""))
@@ -63,7 +66,10 @@ open class Application {
 
         val stadium = stadiumRepository.save(Stadium("LE stade", "2 allée", "Toulouse", team1))
 
-        val opponent = opponentRepository.save(Opponent("TCMS2", "0159756563", "testmail@gmail.com", team1))
+
+        var opponent = Opponent("TCMS2", "0159756563", "testmail@gmail.com", team1)
+        opponent.imgUrl = "http://tsnimages.tsn.ca/ImageProvider/TeamLogo?seoId=houston-rockets"
+        opponent = opponentRepository.save(opponent)
 
         val season = seasonRepository.save(Season("2017-2018",
                 LocalDate.of(2017, Month.SEPTEMBER, 1),

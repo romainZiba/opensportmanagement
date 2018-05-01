@@ -34,7 +34,7 @@ class EventResource(val _id: Int,
                 this.localTeamName = event.team.name
                 this.localTeamImgUrl = event.team.imgUrl
                 this.localTeamScore = event.teamScore
-                this.visitorTeamName = event.opponent.imgUrl
+                this.visitorTeamName = event.opponent.name
                 this.visitorTeamImgUrl = event.opponent.imgUrl
                 this.visitorTeamScore = event.opponentScore
             } else {

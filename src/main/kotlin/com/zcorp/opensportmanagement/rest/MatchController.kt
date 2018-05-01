@@ -2,6 +2,7 @@ package com.zcorp.opensportmanagement.rest
 
 import com.zcorp.opensportmanagement.EntityNotFoundException
 import com.zcorp.opensportmanagement.UserForbiddenException
+import com.zcorp.opensportmanagement.dto.ResultDto
 import com.zcorp.opensportmanagement.repositories.MatchRepository
 import com.zcorp.opensportmanagement.repositories.TeamMemberRepository
 import com.zcorp.opensportmanagement.rest.resources.MatchResource
@@ -26,6 +27,22 @@ open class MatchController @Autowired constructor(private val teamMemberReposito
             return ResponseEntity.ok(MatchResource(match))
         }
         throw UserForbiddenException()
+    }
+
+    @PutMapping("/{matchId}/score")
+    open fun participate(@NotNull @PathVariable("matchId") matchId: Int,
+                         @RequestBody resultDto: ResultDto,
+                         authentication: Authentication): ResponseEntity<MatchResource> {
+        var match = matchRepository.getOne(matchId) ?: throw UserForbiddenException()
+        val teamId = match.championship.season.team.id
+        if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
+            match.isDone = true
+            match.teamScore = resultDto.teamScore
+            match.opponentScore = resultDto.opponentScore
+            match = matchRepository.save(match)
+            return ResponseEntity.ok(MatchResource(match))
+        }
+        throw EntityNotFoundException("Match not found")
     }
 
     @PutMapping("/{matchId}/{present}")

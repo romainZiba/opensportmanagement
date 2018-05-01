@@ -32,6 +32,8 @@ data class Team(val name: String,
     @JsonManagedReference
     val opponents: MutableSet<Opponent> = mutableSetOf()
 
+    var imgUrl = ""
+
     override fun toString(): String {
         return "Team(name='$name', sport=$sport, genderKind=$genderKind, ageGroup=$ageGroup, id=$id)"
     }

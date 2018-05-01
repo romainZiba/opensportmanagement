@@ -37,7 +37,7 @@ abstract class AbstractEvent {
     @ManyToOne
     @JoinColumn(name = "team_id")
     @JsonBackReference
-    var team: Team? = null
+    val team: Team
 
     @ManyToMany
     private val presentPlayers: MutableSet<TeamMember>

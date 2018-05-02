@@ -15,6 +15,8 @@ class EventResource(val _id: Int,
                     val fromDate: LocalDateTime?,
                     val toDate: LocalDateTime?,
                     val place: String?,
+                    val presentMembers: List<String>,
+                    val absentMembers: List<String>,
                     @JsonIgnore val teamId: Int) : ResourceSupport() {
 
     var localTeamName: String? = null
@@ -27,7 +29,10 @@ class EventResource(val _id: Int,
 
 
     constructor(event: AbstractEvent) : this(event.id, event.name, event.description, event.fromDateTime,
-            event.toDateTime, event.place, event.team!!.id) {
+            event.toDateTime, event.place,
+            event.getPresentPlayers().map { teamMember -> teamMember.user.username },
+            event.getAbsentPlayers().map { teamMember -> teamMember.user.username },
+            event.team.id) {
         if (event is Match) {
             this.isDone = event.isDone
             if (event.isTeamLocal) {

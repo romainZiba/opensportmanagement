@@ -30,7 +30,7 @@ open class MatchController @Autowired constructor(private val teamMemberReposito
     }
 
     @PutMapping("/{matchId}/score")
-    open fun participate(@NotNull @PathVariable("matchId") matchId: Int,
+    open fun changeScore(@NotNull @PathVariable("matchId") matchId: Int,
                          @RequestBody resultDto: ResultDto,
                          authentication: Authentication): ResponseEntity<MatchResource> {
         var match = matchRepository.getOne(matchId) ?: throw UserForbiddenException()

@@ -1,6 +1,6 @@
 package com.zcorp.opensportmanagement.model
 
-import com.fasterxml.jackson.annotation.JsonBackReference
+import com.zcorp.opensportmanagement.dto.EventDto
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -36,7 +36,6 @@ abstract class AbstractEvent {
 
     @ManyToOne
     @JoinColumn(name = "team_id")
-    @JsonBackReference
     val team: Team
 
     @ManyToMany
@@ -96,6 +95,8 @@ abstract class AbstractEvent {
     fun getAbsentPlayers(): Set<TeamMember> {
         return absentPlayers
     }
+
+    abstract fun toDto(): EventDto
 
     override fun toString(): String {
         return "AbstractEvent(name='$name', description='$description', id=$id)"

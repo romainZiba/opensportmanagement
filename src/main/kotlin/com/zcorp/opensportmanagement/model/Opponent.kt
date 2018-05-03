@@ -1,6 +1,6 @@
 package com.zcorp.opensportmanagement.model
 
-import com.fasterxml.jackson.annotation.JsonBackReference
+import com.zcorp.opensportmanagement.dto.OpponentDto
 import javax.persistence.*
 
 @Entity
@@ -8,6 +8,10 @@ import javax.persistence.*
 data class Opponent(@Column(name = "name") val name: String,
                     val phoneNumber: String,
                     val email: String,
-                    @ManyToOne @JsonBackReference @JoinColumn(name = "team_id") val team: Team,
                     var imgUrl: String = "",
-                    @Id @GeneratedValue val id: Int = -1)
+                    @ManyToOne @JoinColumn(name = "team_id") val team: Team,
+                    @Id @GeneratedValue val id: Int = -1) {
+    fun toDto(): OpponentDto {
+        return OpponentDto(name, phoneNumber, email, imgUrl)
+    }
+}

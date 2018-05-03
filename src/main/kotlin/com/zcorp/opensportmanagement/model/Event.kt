@@ -1,5 +1,6 @@
 package com.zcorp.opensportmanagement.model
 
+import com.zcorp.opensportmanagement.dto.EventDto
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -10,7 +11,6 @@ import javax.persistence.Entity
 @Entity
 @DiscriminatorValue(AbstractEvent.other)
 class Event : AbstractEvent {
-
     constructor(name: String, description: String, fromDateTime: LocalDateTime, toDateTime: LocalDateTime,
                 stadium: Stadium, team: Team) :
             super(name, description, fromDateTime, toDateTime, stadium, team)
@@ -30,4 +30,12 @@ class Event : AbstractEvent {
                 team: Team) :
             super(name, description, reccurenceDays, recurrenceFromDate, recurrenceToDate, recurrenceFromTime,
                     recurrenceToTime, place, team)
+
+    override fun toDto(): EventDto {
+        return EventDto(this.id, this.name, this.description, this.fromDateTime, this.toDateTime,
+                this.place,
+                this.stadium?.id,
+                this.getPresentPlayers().map { it.user.username }.toList(),
+                this.getAbsentPlayers().map { it.user.username}.toList())
+    }
 }

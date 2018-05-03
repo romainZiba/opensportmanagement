@@ -1,4 +1,4 @@
-package com.zcorp.opensportmanagement
+package com.zcorp.opensportmanagement.rest
 
 class EntityNotFoundException(override var message: String) : Exception()
 class EntityAlreadyExistsException(override var message: String) : Exception()

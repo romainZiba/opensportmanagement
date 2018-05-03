@@ -1,9 +1,8 @@
 package com.zcorp.opensportmanagement.rest
 
-import com.zcorp.opensportmanagement.UserForbiddenException
-import com.zcorp.opensportmanagement.repositories.StadiumRepository
-import com.zcorp.opensportmanagement.rest.resources.StadiumResource
+import com.zcorp.opensportmanagement.dto.StadiumDto
 import com.zcorp.opensportmanagement.security.AccessController
+import com.zcorp.opensportmanagement.service.StadiumService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.rest.webmvc.RepositoryRestController
 import org.springframework.http.ResponseEntity
@@ -14,15 +13,15 @@ import org.springframework.web.bind.annotation.RequestMapping
 
 @RepositoryRestController
 @RequestMapping("/stadiums")
-open class StadiumController @Autowired constructor(private val stadiumRepository: StadiumRepository,
+open class StadiumController @Autowired constructor(private val stadiumService: StadiumService,
                                                     private val accessController: AccessController) {
 
     @GetMapping("/{stadiumId}")
     open fun getStadium(@PathVariable("stadiumId") stadiumId: Int,
-                        authentication: Authentication): ResponseEntity<StadiumResource> {
-        val stadium = stadiumRepository.getOne(stadiumId) ?: throw UserForbiddenException()
+                        authentication: Authentication): ResponseEntity<StadiumDto> {
+        val stadium = stadiumService.getStadium(stadiumId) ?: throw UserForbiddenException()
         if (accessController.isUserAllowedToAccessTeam(authentication, stadium.team.id)) {
-            return ResponseEntity.ok(StadiumResource(stadium))
+            return ResponseEntity.ok(stadium.toDto())
         }
         throw UserForbiddenException()
     }

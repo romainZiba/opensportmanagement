@@ -1,8 +1,10 @@
 package com.zcorp.opensportmanagement.model
 
-import com.fasterxml.jackson.annotation.JsonManagedReference
 import com.zcorp.opensportmanagement.dto.TeamDto
-import javax.persistence.*
+import javax.persistence.Entity
+import javax.persistence.GeneratedValue
+import javax.persistence.Id
+import javax.persistence.Table
 
 @Entity
 @Table(name = "team")
@@ -10,36 +12,11 @@ data class Team(val name: String,
                 val sport: Sport,
                 val genderKind: Gender,
                 val ageGroup: AgeGroup,
+                var imgUrl: String = "",
                 @Id @GeneratedValue val id: Int = -1) {
 
-    @OneToMany(mappedBy = "team", cascade = [(CascadeType.ALL)])
-    @JsonManagedReference
-    val members: MutableSet<TeamMember> = mutableSetOf()
-
-    @OneToMany(mappedBy = "team")
-    @JsonManagedReference
-    val stadiums: MutableSet<Stadium> = mutableSetOf()
-
-    @OneToMany(mappedBy = "team")
-    @JsonManagedReference
-    val seasons: MutableSet<Season> = mutableSetOf()
-
-    @OneToMany(mappedBy = "team", targetEntity = AbstractEvent::class)
-    @JsonManagedReference
-    val events: MutableSet<AbstractEvent> = mutableSetOf()
-
-    @OneToMany(mappedBy = "team")
-    @JsonManagedReference
-    val opponents: MutableSet<Opponent> = mutableSetOf()
-
-    var imgUrl = ""
-
-    override fun toString(): String {
-        return "Team(name='$name', sport=$sport, genderKind=$genderKind, ageGroup=$ageGroup, id=$id)"
-    }
-
     fun toDto(): TeamDto {
-        return TeamDto(name, sport, genderKind, ageGroup)
+        return TeamDto(id, name, sport, genderKind, ageGroup)
     }
 
     enum class Sport {

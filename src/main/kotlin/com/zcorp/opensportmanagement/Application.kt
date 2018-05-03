@@ -2,7 +2,7 @@ package com.zcorp.opensportmanagement
 
 import com.zcorp.opensportmanagement.model.*
 import com.zcorp.opensportmanagement.repositories.*
-import org.slf4j.LoggerFactory
+import com.zcorp.opensportmanagement.service.UserService
 import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -18,8 +18,6 @@ import java.time.Month
 @EnableAsync
 open class Application {
 
-    private val LOG = LoggerFactory.getLogger(Application::class.java)
-
     @Bean
     open fun bCryptPasswordEncoder(): BCryptPasswordEncoder {
         return BCryptPasswordEncoder()
@@ -27,7 +25,8 @@ open class Application {
 
     @Bean
     @Transactional
-    open fun init(teamRepository: TeamRepository,
+    open fun init(userService: UserService,
+                  teamRepository: TeamRepository,
                   stadiumRepository: StadiumRepository,
                   eventRepository: EventRepository,
                   matchRepository: MatchRepository,
@@ -36,7 +35,7 @@ open class Application {
                   championshipRepository: ChampionshipRepository,
                   userRepository: UserRepository,
                   teamMemberRepository: TeamMemberRepository) = CommandLineRunner {
-        // save entities
+
         var team1 = Team("TEAM 1", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS)
         team1.imgUrl = "http://tsnimages.tsn.ca/ImageProvider/TeamLogo?seoId=san-antonio-spurs&width=500&height=500"
         team1 = teamRepository.save(team1)
@@ -45,37 +44,35 @@ open class Application {
         team2.imgUrl = "http://tsnimages.tsn.ca/ImageProvider/TeamLogo?seoId=san-antonio-spurs&width=140&height=140"
         team2 = teamRepository.save(team2)
 
-        val userTeam1_2 = userRepository.save(User("CR", "Coach", "Rock", bCryptPasswordEncoder().encode("CR"),
-                "CR@caramail.com", ""))
-        val userTeam1 = userRepository.save(User("PW", "Player", "Wow", bCryptPasswordEncoder().encode("PW"),
-                "PW@caramail.com", ""))
-
-        val userTeam2 = userRepository.save(User("bbb", "Bobb", "Bobbybob",
+        var userTeam1_2 = User("CR", "Coach", "Rock", bCryptPasswordEncoder().encode("CR"),
+                "CR@caramail.com", "")
+        var userTeam1 = User("PW", "Player", "Wow", bCryptPasswordEncoder().encode("PW"),
+                "PW@caramail.com", "")
+        var userTeam2 = User("bbb", "Bobb", "Bobbybob",
                 bCryptPasswordEncoder().encode("bbb"), "bbb@caramail.com",
-                ""))
+                "")
+        userTeam1_2 = userRepository.save(userTeam1_2)
+        userTeam1 = userRepository.save(userTeam1)
+        userTeam2 = userRepository.save(userTeam2)
 
-        val adminCoachTeam1 = TeamMember(userTeam1_2, mutableSetOf(TeamMember.Role.COACH, TeamMember.Role.ADMIN), team1)
-        val adminCoachTeam2 = TeamMember(userTeam1_2, mutableSetOf(TeamMember.Role.COACH, TeamMember.Role.ADMIN), team2)
-        val playerTeam1 = TeamMember(userTeam1, mutableSetOf(TeamMember.Role.PLAYER), team1)
-        val playerCoachTeam2 = TeamMember(userTeam2, mutableSetOf(TeamMember.Role.PLAYER, TeamMember.Role.COACH), team2)
-        adminCoachTeam1.licenseNumber = "12345"
-        adminCoachTeam2.licenseNumber = "12345"
-        playerCoachTeam2.licenseNumber = "255069690"
-
-        teamMemberRepository.saveAll(mutableListOf(adminCoachTeam1, adminCoachTeam2, playerTeam1, playerCoachTeam2))
+        userService.joinTeam(userTeam1_2.username, team1.id)
+        userService.joinTeam(userTeam1_2.username, team2.id)
+        userService.joinTeam(userTeam1.username, team1.id)
+        userService.joinTeam(userTeam2.username, team2.id)
 
         val stadium = stadiumRepository.save(Stadium("LE stade", "2 allée", "Toulouse", team1))
 
-
-        var opponent = Opponent("TCMS2", "0159756563", "testmail@gmail.com", team1)
-        opponent.imgUrl = "http://tsnimages.tsn.ca/ImageProvider/TeamLogo?seoId=houston-rockets"
+        var opponent = Opponent("TCMS2",
+                "0159756563",
+                "testmail@gmail.com",
+                "http://tsnimages.tsn.ca/ImageProvider/TeamLogo?seoId=houston-rockets",
+                team1)
         opponent = opponentRepository.save(opponent)
 
         val season = seasonRepository.save(Season("2017-2018",
                 LocalDate.of(2017, Month.SEPTEMBER, 1),
                 LocalDate.of(2018, Month.JULY, 31),
                 Season.Status.CURRENT,
-                mutableSetOf(),
                 team1
         ))
         val championship = championshipRepository.save(Championship("Championnat 2017-2018", season))

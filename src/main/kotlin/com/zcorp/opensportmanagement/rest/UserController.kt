@@ -1,41 +1,34 @@
 package com.zcorp.opensportmanagement.rest
 
 
-import com.zcorp.opensportmanagement.EntityAlreadyExistsException
-import com.zcorp.opensportmanagement.EntityNotFoundException
-import com.zcorp.opensportmanagement.UserForbiddenException
 import com.zcorp.opensportmanagement.dto.UserDto
 import com.zcorp.opensportmanagement.model.User
-import com.zcorp.opensportmanagement.repositories.UserRepository
+import com.zcorp.opensportmanagement.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.rest.webmvc.RepositoryRestController
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
 
 
 @RepositoryRestController
 @RequestMapping("/users")
-open class UserController @Autowired constructor(private val userRepository: UserRepository,
-                                                 private val bCryptPasswordEncoder: BCryptPasswordEncoder) {
+open class UserController @Autowired constructor(private val userService: UserService) {
 
     @PostMapping("/sign-up")
     open fun createUser(@Valid @RequestBody user: User): ResponseEntity<UserDto> {
-        if (userRepository.findByUsername(user.username) == null) {
-            user.password = bCryptPasswordEncoder.encode(user.password)
-            val userSaved = userRepository.save(user)
-            return ResponseEntity(userSaved.toDto(), HttpStatus.CREATED)
+        if (userService.findByUsername(user.username) == null) {
+            val user = userService.createUser(user)
+            return ResponseEntity(user, HttpStatus.CREATED)
         }
         throw EntityAlreadyExistsException("User " + user.username + " already exists")
     }
 
     @GetMapping("/me")
     open fun whoAmi(authentication: Authentication): ResponseEntity<UserDto> {
-        return ResponseEntity.ok(userRepository.findByUsername(authentication.name)?.toDto()
-                ?: throw UserForbiddenException())
+        return ResponseEntity.ok(userService.findByUsername(authentication.name) ?: throw UserForbiddenException())
     }
 
     /** Handle the error */

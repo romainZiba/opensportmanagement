@@ -4,12 +4,17 @@ import com.zcorp.opensportmanagement.dto.*
 import com.zcorp.opensportmanagement.security.AccessController
 import com.zcorp.opensportmanagement.service.TeamService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Pageable
 import org.springframework.data.rest.webmvc.RepositoryRestController
+import org.springframework.data.web.PagedResourcesAssembler
+import org.springframework.hateoas.PagedResources
+import org.springframework.hateoas.Resource
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 import javax.validation.constraints.NotNull
+
 
 @RepositoryRestController
 @RequestMapping("/teams")
@@ -49,10 +54,13 @@ open class TeamController @Autowired constructor(private val teamService: TeamSe
 
 
     @GetMapping("/{teamId}/events")
-    open fun getEvents(@PathVariable("teamId") teamId: Int, authentication: Authentication): ResponseEntity<List<EventDto>> {
+    open fun getEvents(@PathVariable("teamId") teamId: Int,
+                       pageable: Pageable,
+                       authentication: Authentication,
+                       assembler: PagedResourcesAssembler<EventDto>): ResponseEntity<PagedResources<Resource<EventDto>>> {
         if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
-            val events = teamService.getEvents(teamId)
-            return ResponseEntity.ok(events)
+            val eventsPage = teamService.getEvents(teamId, pageable)
+            return ResponseEntity.ok(assembler.toResource(eventsPage))
         }
         throw UserForbiddenException()
     }

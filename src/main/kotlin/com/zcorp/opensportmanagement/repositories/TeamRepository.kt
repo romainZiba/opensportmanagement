@@ -1,60 +1,29 @@
 package com.zcorp.opensportmanagement.repositories
 
 import com.zcorp.opensportmanagement.model.*
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
-import javax.persistence.EntityManager
-import javax.persistence.PersistenceContext
+import org.springframework.data.jpa.repository.Query
 
 interface TeamRepository : JpaRepository<Team, Int>, TeamDAO
 
 interface TeamDAO {
-    fun findByIds(names: List<Int>): List<Team>
+    @Query("SELECT t FROM Team t WHERE t.id IN :ids")
+    fun findByIds(ids: List<Int>): List<Team>
+
+    @Query("SELECT m FROM TeamMember m WHERE m.team.id = :teamId")
     fun getTeamMembers(teamId: Int): List<TeamMember>
+
+    @Query("SELECT s FROM Stadium s WHERE s.team.id = :teamId")
     fun getStadiums(teamId: Int): List<Stadium>
+
+    @Query("SELECT s FROM Season s WHERE s.team.id = :teamId")
     fun getSeasons(teamId: Int): List<Season>
-    fun getEvents(teamId: Int): List<AbstractEvent>
+
+    @Query("SELECT e FROM AbstractEvent e WHERE e.team.id = :teamId ORDER BY e.fromDateTime")
+    fun getEvents(teamId: Int, pageable: Pageable): Page<AbstractEvent>
+
+    @Query("SELECT o FROM Opponent o WHERE o.team.id = :teamId")
     fun getOpponents(teamId: Int): List<Opponent>
-}
-
-class TeamRepositoryImpl(@PersistenceContext private val em: EntityManager): TeamDAO {
-    override fun findByIds(ids: List<Int>): MutableList<Team> {
-        val q = em.createQuery("SELECT team FROM Team team WHERE team.id IN :ids", Team::class.java)
-        q.setParameter("ids", ids)
-        return q.resultList
-    }
-
-    override fun getTeamMembers(teamId: Int): List<TeamMember> {
-        val q = em.createQuery(
-                "SELECT member FROM TeamMember member WHERE member.team.id = :teamId", TeamMember::class.java)
-        q.setParameter("teamId", teamId)
-        return q.resultList
-    }
-
-    override fun getStadiums(teamId: Int): List<Stadium> {
-        val q = em.createQuery(
-                "SELECT stadiumId FROM Stadium stadiumId WHERE stadiumId.team.id = :teamId", Stadium::class.java)
-        q.setParameter("teamId", teamId)
-        return q.resultList
-    }
-
-    override fun getSeasons(teamId: Int): List<Season> {
-        val q = em.createQuery(
-                "SELECT season FROM Season season WHERE season.team.id = :teamId", Season::class.java)
-        q.setParameter("teamId", teamId)
-        return q.resultList
-    }
-
-    override fun getEvents(teamId: Int): List<AbstractEvent> {
-        val q = em.createQuery(
-                "SELECT event FROM AbstractEvent event WHERE event.team.id = :teamId", AbstractEvent::class.java)
-        q.setParameter("teamId", teamId)
-        return q.resultList
-    }
-
-    override fun getOpponents(teamId: Int): List<Opponent> {
-        val q = em.createQuery(
-                "SELECT opponent FROM Opponent opponent WHERE opponent.team.id = :teamId", Opponent::class.java)
-        q.setParameter("teamId", teamId)
-        return q.resultList
-    }
 }

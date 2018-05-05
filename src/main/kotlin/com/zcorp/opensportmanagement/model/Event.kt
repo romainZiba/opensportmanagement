@@ -35,7 +35,7 @@ class Event : AbstractEvent {
         return EventDto(this.id, this.name, this.description, this.fromDateTime, this.toDateTime,
                 this.place,
                 this.stadium?.id,
-                this.getPresentPlayers().map { it.user.username }.toList(),
-                this.getAbsentPlayers().map { it.user.username}.toList())
+                this.getPresentPlayers().map { it.toDto() }.toList(),
+                this.getAbsentPlayers().map { it.toDto() }.toList())
     }
 }

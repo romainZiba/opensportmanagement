@@ -66,8 +66,8 @@ class Match : AbstractEvent {
         val eventDto = EventDto(this.id, this.name, this.description, this.fromDateTime, this.toDateTime,
                 this.place,
                 this.stadium?.id,
-                this.getPresentPlayers().map { it.user.username }.toList(),
-                this.getAbsentPlayers().map { it.user.username}.toList())
+                this.getPresentPlayers().map { it.toDto() }.toList(),
+                this.getAbsentPlayers().map { it.toDto() }.toList())
         eventDto.isDone = this.isDone
         if (this.isTeamLocal) {
             eventDto.localTeamName = this.team.name

@@ -10,8 +10,6 @@ import com.zcorp.opensportmanagement.repositories.TeamRepository
 import com.zcorp.opensportmanagement.repositories.UserRepository
 import com.zcorp.opensportmanagement.rest.EntityNotFoundException
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional
@@ -31,14 +29,11 @@ open class UserService @Autowired constructor(private val teamRepository: TeamRe
 
     @Transactional
     open fun joinTeam(userId: String, teamId: Int) {
-        val user = userRepository.findByUsername(userId)
-        val optionalTeam = teamRepository.findById(teamId)
-        if (user != null && optionalTeam.isPresent) {
-            val team = optionalTeam.get()
-            var member = TeamMember(mutableSetOf(TeamMember.Role.PLAYER), team)
-            user.addTeamMember(member)
-            userRepository.save(user)
-        }
+        val user = userRepository.findByUsername(userId) ?: throw EntityNotFoundException("User $userId not found")
+        val team = teamRepository.getOne(teamId)
+        val member = TeamMember(mutableSetOf(TeamMember.Role.PLAYER), team)
+        user.addTeamMember(member)
+        userRepository.save(user)
     }
 
     @Transactional

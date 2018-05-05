@@ -4,11 +4,17 @@ import com.zcorp.opensportmanagement.dto.*
 import com.zcorp.opensportmanagement.model.*
 import com.zcorp.opensportmanagement.repositories.*
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional
 
 @Service
 open class TeamService {
+
+    companion object {
+        const val MAX_RESULTS = 20
+    }
 
     @Autowired
     lateinit var teamRepository: TeamRepository
@@ -74,8 +80,8 @@ open class TeamService {
     }
 
     @Transactional
-    open fun getEvents(teamId: Int): List<EventDto> {
-        return teamRepository.getEvents(teamId).map { it.toDto() }
+    open fun getEvents(teamId: Int, pageable: Pageable): Page<EventDto> {
+        return teamRepository.getEvents(teamId, pageable).map { event -> event.toDto() }
     }
 
     fun createEvent(eventDto: EventDto, teamId: Int): EventDto {

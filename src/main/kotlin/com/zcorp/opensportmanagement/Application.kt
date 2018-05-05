@@ -10,9 +10,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.scheduling.annotation.EnableAsync
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.Month
+import java.time.*
 
 @SpringBootApplication
 @EnableAsync
@@ -76,17 +74,42 @@ open class Application {
                 team1
         ))
         val championship = championshipRepository.save(Championship("Championnat 2017-2018", season))
-        val match = matchRepository.save(Match("Match de championnat", "Super match",
-                LocalDateTime.of(2018, 1, 1, 10, 0, 0),
-                LocalDateTime.of(2018, 1, 1, 12, 0, 0),
-                stadium, opponent, team1, championship))
-        val event = eventRepository.save(Event(
-                "Apéro",
-                "Apéro avec les potes",
-                LocalDateTime.of(2017, 1, 1, 10, 0, 0),
-                LocalDateTime.of(2017, 1, 1, 12, 0, 0),
-                "2 des champs",
-                team1))
+
+
+        (0..4L).forEach({
+            val fromDateTime = LocalDateTime.of(LocalDate.now().plusDays(it), LocalTime.of(20, 0))
+            matchRepository.save(Match("Match de championnat", "Un match",
+                    fromDateTime,
+                    fromDateTime.plusHours(2L),
+                    stadium, opponent, team1, championship))
+        })
+        (1..2L).forEach({
+            val fromDateTime = LocalDateTime.of(LocalDate.now().minusDays(it), LocalTime.of(20, 0))
+            matchRepository.save(Match("Match de championnat", "Un match",
+                    fromDateTime,
+                    fromDateTime.plusHours(2L),
+                    stadium, opponent, team1, championship))
+        })
+        eventRepository.save(Event("Entrainement", "Entrainement de l'équipe", mutableSetOf(DayOfWeek.THURSDAY),
+                LocalDate.of(2018, 9, 1),
+                LocalDate.of(2019, 6, 30),
+                LocalTime.of(21, 0),
+                LocalTime.of(23, 0),
+                stadium,
+                team1
+        ))
+
+        eventRepository.save(Event("Apéro", "Apéro avec les potes",
+                LocalDateTime.of(LocalDate.now().plusDays(5L), LocalTime.of(18, 0)),
+                LocalDateTime.of(LocalDate.now().plusDays(5L), LocalTime.of(19, 0)),
+                "2 des champs", team1))
+
+        eventRepository.save(Event("Anniversaire", "Plus plus",
+                LocalDateTime.of(LocalDate.now().plusDays(7L), LocalTime.of(18, 0)),
+                LocalDateTime.of(LocalDate.now().plusDays(7L), LocalTime.of(19, 0)),
+                "2 des champs", team1))
+
+
     }
 
 }

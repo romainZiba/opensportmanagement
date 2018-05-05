@@ -15,7 +15,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 @RunWith(SpringRunner::class)
 @WebMvcTest(UserController::class)
-class UserControllerIT {
+class UserControllerTest {
 
     @Autowired
     private lateinit var mvc: MockMvc

@@ -37,7 +37,7 @@ open class ChampionshipService @Autowired constructor(private val championshipRe
         val stadiumName = matchDto.stadiumName
         val stadium = stadiumRepository.findByName(stadiumName) ?: throw EntityNotFoundException("Stadium $stadiumName does not exist")
         val opponent = opponentRepository.findByName(opponentName) ?: throw EntityNotFoundException("OpponentDto $opponentName does not exist")
-        val match = Match(matchDto.name, matchDto.description, matchDto.fromDateTime, matchDto.toDateTime,
+        val match = Match(matchDto.name, matchDto.fromDateTime, matchDto.toDateTime,
                 stadium, opponent, championship.season.team, championship)
         return matchRepository.save(match)
     }

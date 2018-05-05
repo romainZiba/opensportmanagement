@@ -7,9 +7,8 @@ import java.time.LocalTime
 
 data class EventDto(val _id: Int,
                     val name: String,
-                    val description: String,
-                    val fromDate: LocalDateTime?,
-                    val toDate: LocalDateTime?,
+                    val fromDate: LocalDateTime,
+                    val toDate: LocalDateTime,
                     val place: String?,
                     val stadiumId: Int?,
                     val presentMembers: List<TeamMemberDto>,
@@ -26,3 +25,23 @@ data class EventDto(val _id: Int,
                     val recurrenceToTime: LocalTime? = null,
                     var recurrenceFromDate: LocalDate? = null,
                     val recurrenceToDate: LocalDate? = null)
+
+data class EventCreationDto(val name: String,
+                            val fromDate: LocalDateTime?,
+                            val toDate: LocalDateTime?,
+                            val place: String?,
+                            val stadiumId: Int?,
+                            val isRecurrent: Boolean,
+                            var recurrenceDays: MutableSet<DayOfWeek>?,
+                            var recurrenceFromTime: LocalTime?,
+                            val recurrenceToTime: LocalTime?,
+                            var recurrenceFromDate: LocalDate?,
+                            val recurrenceToDate: LocalDate?)
+
+data class MatchCreationDto(val name: String,
+                            val fromDate: LocalDateTime?,
+                            val toDate: LocalDateTime?,
+                            val place: String?,
+                            val stadiumId: Int?,
+                            var opponentId: Int? = null,
+                            var isTeamLocal: Boolean?)

@@ -1,105 +1,46 @@
 package com.zcorp.opensportmanagement.model
 
 import com.zcorp.opensportmanagement.dto.EventDto
-import java.time.DayOfWeek
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.LocalTime
 import javax.persistence.*
 
 @Entity
 @Table(name = "event")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "event_type")
-abstract class AbstractEvent {
-
-    @GeneratedValue
-    @Id
-    var id: Int = -1
-
-    var name: String = ""
-    var description: String = ""
-    var recurrent: Boolean = false
-    var fromDateTime: LocalDateTime? = null
-    var toDateTime: LocalDateTime? = null
-    @ElementCollection
-    var reccurenceDays: MutableSet<DayOfWeek> = mutableSetOf()
-    var recurrenceFromDate: LocalDate? = null
-    var recurrenceToDate: LocalDate? = null
-    var recurrenceFromTime: LocalTime? = null
-    var recurrenceToTime: LocalTime? = null
-
+abstract class AbstractEvent private constructor(val name: String,
+                                                 @ManyToOne @JoinColumn(name = "team_id") val team: Team,
+                                                 var fromDateTime: LocalDateTime,
+                                                 var toDateTime: LocalDateTime,
+                                                 @ManyToMany private val presentMembers: MutableSet<TeamMember> = mutableSetOf(),
+                                                 @ManyToMany private val absentMembers: MutableSet<TeamMember> = mutableSetOf(),
+                                                 @GeneratedValue @Id var id: Int = -1) {
     @ManyToOne
     var stadium: Stadium? = null
-
     var place: String? = null
 
-    @ManyToOne
-    @JoinColumn(name = "team_id")
-    val team: Team
-
-    @ManyToMany
-    private val presentPlayers: MutableSet<TeamMember>
-    @ManyToMany
-    private val absentPlayers: MutableSet<TeamMember>
-
-    private constructor(name: String, description: String, team: Team) {
-        this.name = name
-        this.description = description
-        this.team = team
-        this.presentPlayers = mutableSetOf()
-        this.absentPlayers = mutableSetOf()
-    }
-
-    constructor(name: String, description: String, fromDateTime: LocalDateTime, toDateTime: LocalDateTime, stadium: Stadium,
-                team: Team) : this(name, description, team) {
-        this.recurrent = false
-        this.fromDateTime = fromDateTime
-        this.toDateTime = toDateTime
+    constructor(name: String, fromDateTime: LocalDateTime, toDateTime: LocalDateTime, stadium: Stadium,
+                team: Team) : this(name, team, fromDateTime, toDateTime) {
         this.stadium = stadium
     }
 
-    constructor(name: String, description: String, fromDateTime: LocalDateTime, toDateTime: LocalDateTime, place: String,
-                team: Team) : this(name, description, team) {
-        this.fromDateTime = fromDateTime
-        this.toDateTime = toDateTime
+    constructor(name: String, fromDateTime: LocalDateTime, toDateTime: LocalDateTime, place: String,
+                team: Team) : this(name, team, fromDateTime, toDateTime) {
         this.place = place
     }
 
-    constructor(name: String, description: String, reccurenceDays: MutableSet<DayOfWeek>, recurrenceFromDate: LocalDate,
-                recurrenceToDate: LocalDate, recurrenceFromTime: LocalTime, recurrenceToTime: LocalTime, stadium: Stadium,
-                team: Team) : this(name, description, team) {
-        this.reccurenceDays = reccurenceDays
-        this.recurrenceFromDate = recurrenceFromDate
-        this.recurrenceToDate = recurrenceToDate
-        this.recurrenceFromTime = recurrenceFromTime
-        this.recurrenceToTime = recurrenceToTime
-        this.stadium = stadium
+    fun getAbsentMembers(): Set<TeamMember> {
+        return absentMembers
     }
 
-    constructor(name: String, description: String, reccurenceDays: MutableSet<DayOfWeek>, recurrenceFromDate: LocalDate,
-                recurrenceToDate: LocalDate, recurrenceFromTime: LocalTime, recurrenceToTime: LocalTime, place: String,
-                team: Team) : this(name, description, team) {
-        this.reccurenceDays = reccurenceDays
-        this.recurrenceFromDate = recurrenceFromDate
-        this.recurrenceToDate = recurrenceToDate
-        this.recurrenceFromTime = recurrenceFromTime
-        this.recurrenceToTime = recurrenceToTime
-        this.place = place
-    }
-
-    fun getPresentPlayers(): Set<TeamMember> {
-        return presentPlayers
-    }
-
-    fun getAbsentPlayers(): Set<TeamMember> {
-        return absentPlayers
+    fun getPresentMembers(): Set<TeamMember> {
+        return presentMembers
     }
 
     abstract fun toDto(): EventDto
 
     override fun toString(): String {
-        return "AbstractEvent(name='$name', description='$description', id=$id)"
+        return "AbstractEvent(name='$name', id=$id)"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -119,13 +60,13 @@ abstract class AbstractEvent {
 
     fun parcipate(player: TeamMember, present: Boolean): AbstractEvent {
         if (present) {
-            if (presentPlayers.size < Match.MAX_PLAYERS) {
-                presentPlayers.add(player)
-                absentPlayers.remove(player)
+            if (presentMembers.size < Match.MAX_PLAYERS) {
+                presentMembers.add(player)
+                absentMembers.remove(player)
             }
         } else {
-            presentPlayers.remove(player)
-            absentPlayers.add(player)
+            presentMembers.remove(player)
+            absentMembers.add(player)
         }
         return this
     }

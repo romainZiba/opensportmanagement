@@ -2,6 +2,7 @@ package com.zcorp.opensportmanagement.rest
 
 import com.zcorp.opensportmanagement.dto.*
 import com.zcorp.opensportmanagement.security.AccessController
+import com.zcorp.opensportmanagement.service.EventService
 import com.zcorp.opensportmanagement.service.TeamService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Pageable
@@ -19,6 +20,7 @@ import javax.validation.constraints.NotNull
 @RepositoryRestController
 @RequestMapping("/teams")
 open class TeamController @Autowired constructor(private val teamService: TeamService,
+                                                 private val eventService: EventService,
                                                  private val accessController: AccessController) {
 
     @GetMapping
@@ -67,11 +69,11 @@ open class TeamController @Autowired constructor(private val teamService: TeamSe
 
     @PostMapping("/{teamId}/events")
     open fun createEvent(@PathVariable("teamId") teamId: Int,
-                         @RequestBody eventDto: EventDto,
+                         @RequestBody eventDto: EventCreationDto,
                          authentication: Authentication): ResponseEntity<EventDto> {
         if (accessController.isTeamAdmin(authentication, teamId)) {
-            val event = teamService.createEvent(eventDto, teamId)
-            return ResponseEntity(event, HttpStatus.CREATED)
+            eventService.createEvent(teamId, eventDto)
+            return ResponseEntity(null, HttpStatus.CREATED)
         }
         throw UserForbiddenException()
     }

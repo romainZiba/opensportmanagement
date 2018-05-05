@@ -12,6 +12,7 @@ import com.zcorp.opensportmanagement.rest.EntityNotFoundException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 import javax.transaction.Transactional
 
 @Service
@@ -38,7 +39,7 @@ open class UserService @Autowired constructor(private val teamRepository: TeamRe
 
     @Transactional
     open fun participate(username: String, eventId: Int, present: Boolean): EventDto {
-        var event = eventRepository.getOne(eventId)
+        val event = eventRepository.getOne(eventId)
         val teamMember = teamMemberRepository.findByUsername(username, event.team.id) ?: throw EntityNotFoundException("Team member $username does not exist")
         event.parcipate(teamMember, present)
         return eventRepository.save(event).toDto()

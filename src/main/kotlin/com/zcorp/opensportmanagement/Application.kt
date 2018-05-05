@@ -1,7 +1,9 @@
 package com.zcorp.opensportmanagement
 
+import com.zcorp.opensportmanagement.dto.EventCreationDto
 import com.zcorp.opensportmanagement.model.*
 import com.zcorp.opensportmanagement.repositories.*
+import com.zcorp.opensportmanagement.service.EventService
 import com.zcorp.opensportmanagement.service.UserService
 import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.SpringApplication
@@ -24,6 +26,7 @@ open class Application {
     @Bean
     @Transactional
     open fun init(userService: UserService,
+                  eventService: EventService,
                   teamRepository: TeamRepository,
                   stadiumRepository: StadiumRepository,
                   eventRepository: EventRepository,
@@ -78,33 +81,33 @@ open class Application {
 
         (0..4L).forEach({
             val fromDateTime = LocalDateTime.of(LocalDate.now().plusDays(it), LocalTime.of(20, 0))
-            matchRepository.save(Match("Match de championnat", "Un match",
+            matchRepository.save(Match("Match de championnat",
                     fromDateTime,
                     fromDateTime.plusHours(2L),
                     stadium, opponent, team1, championship))
         })
         (1..2L).forEach({
             val fromDateTime = LocalDateTime.of(LocalDate.now().minusDays(it), LocalTime.of(20, 0))
-            matchRepository.save(Match("Match de championnat", "Un match",
+            matchRepository.save(Match("Match de championnat",
                     fromDateTime,
                     fromDateTime.plusHours(2L),
                     stadium, opponent, team1, championship))
         })
-        eventRepository.save(Event("Entrainement", "Entrainement de l'équipe", mutableSetOf(DayOfWeek.THURSDAY),
-                LocalDate.of(2018, 9, 1),
-                LocalDate.of(2019, 6, 30),
-                LocalTime.of(21, 0),
-                LocalTime.of(23, 0),
-                stadium,
-                team1
-        ))
 
-        eventRepository.save(Event("Apéro", "Apéro avec les potes",
+        val fromDate = LocalDate.of(2018, 1, 5) // It's a friday
+        val toDate = LocalDate.of(2018, 3, 31)
+        val fromTime = LocalTime.of(10, 0)
+        val toTime = LocalTime.of(11, 0)
+        val dto = EventCreationDto("event", null, null, null, stadium.id, true,
+                mutableSetOf(DayOfWeek.WEDNESDAY, DayOfWeek.TUESDAY), fromTime, toTime, fromDate, toDate)
+        eventService.createEvent(team1.id, dto)
+
+        eventRepository.save(Event("Apéro",
                 LocalDateTime.of(LocalDate.now().plusDays(5L), LocalTime.of(18, 0)),
                 LocalDateTime.of(LocalDate.now().plusDays(5L), LocalTime.of(19, 0)),
                 "2 des champs", team1))
 
-        eventRepository.save(Event("Anniversaire", "Plus plus",
+        eventRepository.save(Event("Anniversaire",
                 LocalDateTime.of(LocalDate.now().plusDays(7L), LocalTime.of(18, 0)),
                 LocalDateTime.of(LocalDate.now().plusDays(7L), LocalTime.of(19, 0)),
                 "2 des champs", team1))

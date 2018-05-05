@@ -38,7 +38,7 @@ class UserServiceTest {
 
     private val mockUser = User(username, firstName, lastName, password, email, phoneNumber)
     private val mockTeam = Team("SuperNam", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "", teamId)
-    private val mockEvent = Event("TheOne", "bla bla", LocalDateTime.of(2018, 1, 1, 10, 0, 0),
+    private val mockEvent = Event("TheOne", LocalDateTime.of(2018, 1, 1, 10, 0, 0),
             LocalDateTime.of(2018, 1, 1, 11, 0, 0), "here", mockTeam)
     private val mockTeamMember = TeamMember(mutableSetOf(TeamMember.Role.ADMIN), mockTeam, "", teamMemberId)
 
@@ -116,14 +116,14 @@ class UserServiceTest {
         whenever(eventRepoMock.getOne(any())).thenReturn(mockEvent)
         whenever(eventRepoMock.save(mockEvent)).thenReturn(mockEvent)
         whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
-        assertEquals(mockEvent.getPresentPlayers().size, 0)
+        assertEquals(mockEvent.getPresentMembers().size, 0)
         val eventDto = userService.participate(username, eventId, true)
-        assertEquals(mockEvent.getPresentPlayers().size, 1)
+        assertEquals(mockEvent.getPresentMembers().size, 1)
         verify(eventRepoMock).save(mockEvent)
         assertEquals(mockEvent.name, eventDto.name)
         assertEquals(mockEvent.id, eventDto._id)
         assertEquals(emptyList<TeamMember>(), eventDto.absentMembers)
-        assertEquals(listOf(mockUser.username), eventDto.presentMembers)
+        assertEquals(listOf(mockTeamMember.toDto()), eventDto.presentMembers)
         assertEquals(mockEvent.fromDateTime, eventDto.fromDate)
         assertEquals(mockEvent.toDateTime, eventDto.toDate)
         assertEquals(mockEvent.place, eventDto.place)

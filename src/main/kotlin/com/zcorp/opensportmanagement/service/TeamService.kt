@@ -84,12 +84,6 @@ open class TeamService {
         return teamRepository.getEvents(teamId, pageable).map { event -> event.toDto() }
     }
 
-    fun createEvent(eventDto: EventDto, teamId: Int): EventDto {
-        val team = teamRepository.getOne(teamId)
-        val event = createEventFromDto(eventDto, team)
-        return eventRepository.save(event).toDto()
-    }
-
     @Transactional
     open fun getOpponents(teamId: Int): List<OpponentDto> {
         return teamRepository.getOpponents(teamId).map { it.toDto() }
@@ -100,38 +94,5 @@ open class TeamService {
         val team = teamRepository.getOne(teamId)
         val opponent = Opponent(opponentDto.name, opponentDto.phoneNumber, opponentDto.email, opponentDto.imgUrl, team)
         return opponentRepository.save(opponent).toDto()
-    }
-
-    private fun createEventFromDto(eventDto: EventDto, team: Team): Event {
-        val place = eventDto.place
-        val optionalStadium = stadiumRepository.findById(eventDto.stadiumId)
-        if (place == null && !optionalStadium.isPresent) {
-            throw Exception("Either valid stadium identifier or place must be provided")
-        }
-        val recurrenceDays = eventDto.reccurenceDays
-        val fromDateTime = eventDto.fromDate
-        val toDateTime = eventDto.toDate
-        val recurrenceFromTime = eventDto.recurrenceFromTime
-        val recurrenceToTime = eventDto.recurrenceToTime
-        if ((recurrenceDays == null || recurrenceFromTime == null || recurrenceToTime == null)
-                && (fromDateTime == null || toDateTime == null)) {
-            throw Exception("Either recurrence or fixed event information must be provided")
-        }
-
-        return if (eventDto.reccurenceDays == null) {
-            if (optionalStadium.isPresent) {
-                Event(eventDto.name, eventDto.description, fromDateTime!!, toDateTime!!, optionalStadium.get(), team)
-            } else {
-                Event(eventDto.name, eventDto.description, fromDateTime!!, toDateTime!!, place!!, team)
-            }
-        } else {
-            if (optionalStadium.isPresent) {
-                Event(eventDto.name, eventDto.description, eventDto.reccurenceDays!!, eventDto.recurrenceFromDate!!,
-                        eventDto.recurrenceToDate!!, recurrenceFromTime!!, recurrenceToTime!!, optionalStadium.get(), team)
-            } else {
-                Event(eventDto.name, eventDto.description, eventDto.reccurenceDays!!, eventDto.recurrenceFromDate!!,
-                        eventDto.recurrenceToDate!!, recurrenceFromTime!!, recurrenceToTime!!, place!!, team)
-            }
-        }
     }
 }

@@ -1,6 +1,7 @@
 package com.zcorp.opensportmanagement.service
 
 import com.nhaarman.mockito_kotlin.any
+import com.nhaarman.mockito_kotlin.times
 import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.whenever
 import com.zcorp.opensportmanagement.model.Event
@@ -91,7 +92,7 @@ class UserServiceTest {
         assertEquals(0, mockUser.getMemberOf().size)
         userService.joinTeam(username, teamId)
         assertEquals(mockUser.getMemberOf().size, 1)
-        verify(userRepoMock).save(mockUser)
+        verify(userRepoMock, times(1)).save(mockUser)
     }
 
     @Test(expected = EntityNotFoundException::class)
@@ -116,13 +117,15 @@ class UserServiceTest {
         whenever(eventRepoMock.getOne(any())).thenReturn(mockEvent)
         whenever(eventRepoMock.save(mockEvent)).thenReturn(mockEvent)
         whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
-        assertEquals(mockEvent.getPresentMembers().size, 0)
         val eventDto = userService.participate(username, eventId, true)
-        assertEquals(mockEvent.getPresentMembers().size, 1)
-        verify(eventRepoMock).save(mockEvent)
+        assertEquals(1, mockEvent.getPresentMembers().size)
+        assertEquals(0, mockEvent.getAbsentMembers().size)
+        assertEquals(0, mockEvent.getWaitingMembers().size)
+        verify(eventRepoMock, times(1)).save(mockEvent)
         assertEquals(mockEvent.name, eventDto.name)
         assertEquals(mockEvent.id, eventDto._id)
         assertEquals(emptyList<TeamMember>(), eventDto.absentMembers)
+        assertEquals(emptyList<TeamMember>(), eventDto.waitingMembers)
         assertEquals(listOf(mockTeamMember.toDto()), eventDto.presentMembers)
         assertEquals(mockEvent.fromDateTime, eventDto.fromDate)
         assertEquals(mockEvent.toDateTime, eventDto.toDate)
@@ -135,4 +138,35 @@ class UserServiceTest {
         assertEquals(null, eventDto.visitorTeamName)
         assertEquals(null, eventDto.visitorTeamScore)
     }
-}
+
+    @Test
+    fun userParticipateEventFull() {
+        mockEvent.id = eventId
+        mockEvent.maxMembers = 0
+        mockTeamMember.user = mockUser
+        whenever(userRepoMock.findByUsername(mockUser.username)).thenReturn(mockUser)
+        whenever(eventRepoMock.getOne(any())).thenReturn(mockEvent)
+        whenever(eventRepoMock.save(mockEvent)).thenReturn(mockEvent)
+        whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
+        assertEquals(mockEvent.getPresentMembers().size, 0)
+        val eventDto = userService.participate(username, eventId, true)
+        assertEquals(mockEvent.getPresentMembers().size, 0)
+        assertEquals(mockEvent.getAbsentMembers().size, 0)
+        assertEquals(mockEvent.getWaitingMembers().size, 1)
+        verify(eventRepoMock, times(1)).save(mockEvent)
+        assertEquals(mockEvent.name, eventDto.name)
+        assertEquals(mockEvent.id, eventDto._id)
+        assertEquals(emptyList<TeamMember>(), eventDto.absentMembers)
+        assertEquals(emptyList<TeamMember>(), eventDto.presentMembers)
+        assertEquals(listOf(mockTeamMember.toDto()), eventDto.waitingMembers)
+        assertEquals(mockEvent.fromDateTime, eventDto.fromDate)
+        assertEquals(mockEvent.toDateTime, eventDto.toDate)
+        assertEquals(mockEvent.place, eventDto.place)
+        assertEquals(null, eventDto.isDone)
+        assertEquals(null, eventDto.localTeamName)
+        assertEquals(null, eventDto.localTeamScore)
+        assertEquals(null, eventDto.localTeamImgUrl)
+        assertEquals(null, eventDto.visitorTeamImgUrl)
+        assertEquals(null, eventDto.visitorTeamName)
+        assertEquals(null, eventDto.visitorTeamScore)
+    }}

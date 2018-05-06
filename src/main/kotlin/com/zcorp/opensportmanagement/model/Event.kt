@@ -21,6 +21,7 @@ class Event : AbstractEvent {
                 this.place,
                 this.stadium?.id,
                 this.getPresentMembers().map { it.toDto() }.toList(),
-                this.getAbsentMembers().map { it.toDto() }.toList())
+                this.getAbsentMembers().map { it.toDto() }.toList(),
+                this.getWaitingMembers().map { it.toDto() }.toList())
     }
 }

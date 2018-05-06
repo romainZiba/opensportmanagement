@@ -11,21 +11,12 @@ import javax.transaction.Transactional
 
 @Service
 open class TeamService {
-
-    companion object {
-        const val MAX_RESULTS = 20
-    }
-
     @Autowired
     lateinit var teamRepository: TeamRepository
     @Autowired
     lateinit var userRepository: UserRepository
     @Autowired
     lateinit var seasonRepository: SeasonRepository
-    @Autowired
-    lateinit var eventRepository: EventRepository
-    @Autowired
-    lateinit var stadiumRepository: StadiumRepository
     @Autowired
     lateinit var opponentRepository: OpponentRepository
 

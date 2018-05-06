@@ -14,10 +14,12 @@ abstract class AbstractEvent private constructor(val name: String,
                                                  var toDateTime: LocalDateTime,
                                                  @ManyToMany private val presentMembers: MutableSet<TeamMember> = mutableSetOf(),
                                                  @ManyToMany private val absentMembers: MutableSet<TeamMember> = mutableSetOf(),
+                                                 @ManyToMany private val waitingMembers: MutableSet<TeamMember> = mutableSetOf(),
                                                  @GeneratedValue @Id var id: Int = -1) {
     @ManyToOne
     var stadium: Stadium? = null
     var place: String? = null
+    var maxMembers = MAX_PLAYERS
 
     constructor(name: String, fromDateTime: LocalDateTime, toDateTime: LocalDateTime, stadium: Stadium,
                 team: Team) : this(name, team, fromDateTime, toDateTime) {
@@ -35,6 +37,10 @@ abstract class AbstractEvent private constructor(val name: String,
 
     fun getPresentMembers(): Set<TeamMember> {
         return presentMembers
+    }
+
+    fun getWaitingMembers(): Set<TeamMember> {
+        return waitingMembers
     }
 
     abstract fun toDto(): EventDto
@@ -58,14 +64,18 @@ abstract class AbstractEvent private constructor(val name: String,
         return id
     }
 
-    fun parcipate(player: TeamMember, present: Boolean): AbstractEvent {
+    fun participate(player: TeamMember, present: Boolean): AbstractEvent {
         if (present) {
-            if (presentMembers.size < Match.MAX_PLAYERS) {
+            if (presentMembers.size < maxMembers) {
                 presentMembers.add(player)
                 absentMembers.remove(player)
+                waitingMembers.remove(player)
+            } else {
+                waitingMembers.add(player)
             }
         } else {
             presentMembers.remove(player)
+            waitingMembers.remove(player)
             absentMembers.add(player)
         }
         return this
@@ -81,6 +91,9 @@ abstract class AbstractEvent private constructor(val name: String,
         const val match = "MATCH"
         const val training = "TRAINING"
         const val other = "OTHER"
+        //TODO: handle configuration of this parameter
+        const val MAX_PLAYERS: Int = 10
+
     }
 }
 

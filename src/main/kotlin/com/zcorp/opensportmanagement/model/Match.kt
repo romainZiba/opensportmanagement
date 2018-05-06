@@ -44,7 +44,8 @@ class Match : AbstractEvent {
                 this.place,
                 this.stadium?.id,
                 this.getPresentMembers().map { it.toDto() }.toList(),
-                this.getAbsentMembers().map { it.toDto() }.toList())
+                this.getAbsentMembers().map { it.toDto() }.toList(),
+                this.getWaitingMembers().map { it.toDto() }.toList())
         eventDto.isDone = this.isDone
         if (this.isTeamLocal) {
             eventDto.localTeamName = this.team.name
@@ -62,11 +63,6 @@ class Match : AbstractEvent {
             eventDto.visitorTeamScore = this.teamScore
         }
         return eventDto
-    }
-
-    companion object {
-        //TODO: handle configuration of this parameter
-        const val MAX_PLAYERS: Int = 10
     }
 }
 

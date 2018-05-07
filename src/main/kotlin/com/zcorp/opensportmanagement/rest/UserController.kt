@@ -32,9 +32,9 @@ open class UserController @Autowired constructor(private val userService: UserSe
     }
 
     /** Handle the error */
-    @ExceptionHandler(EntityNotFoundException::class)
+    @ExceptionHandler(NotFoundException::class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    fun handleError(e: EntityNotFoundException) = e.message
+    fun handleError(e: NotFoundException) = e.message
 
     @ExceptionHandler(EntityAlreadyExistsException::class)
     @ResponseStatus(HttpStatus.CONFLICT)

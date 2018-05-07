@@ -10,15 +10,10 @@ import org.springframework.stereotype.Service
 import javax.transaction.Transactional
 
 @Service
-open class TeamService {
-    @Autowired
-    lateinit var teamRepository: TeamRepository
-    @Autowired
-    lateinit var userRepository: UserRepository
-    @Autowired
-    lateinit var seasonRepository: SeasonRepository
-    @Autowired
-    lateinit var opponentRepository: OpponentRepository
+open class TeamService @Autowired constructor(private val teamRepository: TeamRepository,
+                                              private val userRepository: UserRepository,
+                                              private val seasonRepository: SeasonRepository,
+                                              private val opponentRepository: OpponentRepository) {
 
     @Transactional
     open fun getTeamMembers(teamId: Int): List<TeamMemberDto> {
@@ -38,7 +33,7 @@ open class TeamService {
     @Transactional
     open fun createTeam(teamDto: TeamDto, creatorUsername: String): TeamDto {
         val user = userRepository.findByUsername(creatorUsername) ?: throw UserNotFoundException()
-        var team = Team(teamDto.name, teamDto.sport, teamDto.genderKind, teamDto.ageGroup)
+        var team = Team(teamDto.name, teamDto.sport, teamDto.genderKind, teamDto.ageGroup, teamDto.imgUrl)
         team = teamRepository.save(team)
         val teamMember = TeamMember(mutableSetOf(TeamMember.Role.ADMIN), team)
         user.addTeamMember(teamMember)

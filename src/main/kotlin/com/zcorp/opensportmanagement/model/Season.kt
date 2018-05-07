@@ -17,7 +17,7 @@ data class Season(@Column(name = "name") val name: String,
                   @Id @GeneratedValue val id: Int = -1) {
 
     fun toDto(): SeasonDto {
-        return SeasonDto(name, fromDate, toDate, status)
+        return SeasonDto(name, fromDate, toDate, status, team.id, id)
     }
 
     enum class Status {

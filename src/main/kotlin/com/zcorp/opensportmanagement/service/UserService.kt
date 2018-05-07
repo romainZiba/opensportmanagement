@@ -8,7 +8,7 @@ import com.zcorp.opensportmanagement.repositories.EventRepository
 import com.zcorp.opensportmanagement.repositories.TeamMemberRepository
 import com.zcorp.opensportmanagement.repositories.TeamRepository
 import com.zcorp.opensportmanagement.repositories.UserRepository
-import com.zcorp.opensportmanagement.rest.EntityNotFoundException
+import com.zcorp.opensportmanagement.rest.NotFoundException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
@@ -29,7 +29,7 @@ open class UserService @Autowired constructor(private val teamRepository: TeamRe
 
     @Transactional
     open fun joinTeam(userId: String, teamId: Int) {
-        val user = userRepository.findByUsername(userId) ?: throw EntityNotFoundException("User $userId not found")
+        val user = userRepository.findByUsername(userId) ?: throw NotFoundException("User $userId not found")
         val team = teamRepository.getOne(teamId)
         val member = TeamMember(mutableSetOf(TeamMember.Role.PLAYER), team)
         user.addTeamMember(member)
@@ -39,7 +39,7 @@ open class UserService @Autowired constructor(private val teamRepository: TeamRe
     @Transactional
     open fun participate(username: String, eventId: Int, present: Boolean): EventDto {
         val event = eventRepository.getOne(eventId)
-        val teamMember = teamMemberRepository.findByUsername(username, event.team.id) ?: throw EntityNotFoundException("Team member $username does not exist")
+        val teamMember = teamMemberRepository.findByUsername(username, event.team.id) ?: throw NotFoundException("Team member $username does not exist")
         event.participate(teamMember, present)
         return eventRepository.save(event).toDto()
     }

@@ -1,3 +1,5 @@
 package com.zcorp.opensportmanagement.dto
 
-data class ChampionshipDto(val name: String)
+import com.fasterxml.jackson.annotation.JsonIgnore
+
+data class ChampionshipDto(val name: String, @JsonIgnore val teamId: Int? = null, val _id: Int? = null)

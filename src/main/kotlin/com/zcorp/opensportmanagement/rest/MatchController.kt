@@ -18,9 +18,9 @@ open class MatchController @Autowired constructor(private val matchService: Matc
 
     @GetMapping("/{matchId}")
     open fun getMatch(@PathVariable matchId: Int, authentication: Authentication): ResponseEntity<EventDto> {
-        val match = matchService.getMatch(matchId) ?: throw UserForbiddenException()
-        if (accessController.isUserAllowedToAccessTeam(authentication, match.team.id)) {
-            return ResponseEntity.ok(match.toDto())
+        val matchDto = matchService.getMatch(matchId)
+        if (accessController.isUserAllowedToAccessTeam(authentication, matchDto.teamId!!)) {
+            return ResponseEntity.ok(matchDto)
         }
         throw UserForbiddenException()
     }
@@ -29,12 +29,11 @@ open class MatchController @Autowired constructor(private val matchService: Matc
     open fun changeScore(@NotNull @PathVariable("matchId") matchId: Int,
                          @RequestBody resultDto: ResultDto,
                          authentication: Authentication): ResponseEntity<EventDto> {
-        var match = matchService.getMatch(matchId) ?: throw UserForbiddenException()
-        val teamId = match.team.id
-        if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
-            match = matchService.changeScore(match, resultDto)
-            return ResponseEntity.ok(match.toDto())
+        var matchDto = matchService.getMatch(matchId)
+        if (accessController.isUserAllowedToAccessTeam(authentication, matchDto.teamId!!)) {
+            matchDto = matchService.changeScore(matchId, resultDto)
+            return ResponseEntity.ok(matchDto)
         }
-        throw EntityNotFoundException("Match not found")
+        throw NotFoundException("Match not found")
     }
 }

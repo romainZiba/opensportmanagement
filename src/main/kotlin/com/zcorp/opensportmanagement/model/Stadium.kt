@@ -15,6 +15,6 @@ data class Stadium(@Column(name = "name") @NotNull val name: String,
                    @Id @GeneratedValue val id: Int = -1) {
 
     fun toDto(): StadiumDto {
-        return StadiumDto(name, address, city)
+        return StadiumDto(name, address, city, team.id, id)
     }
 }

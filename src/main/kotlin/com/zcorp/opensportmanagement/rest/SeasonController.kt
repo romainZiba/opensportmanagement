@@ -19,9 +19,9 @@ open class SeasonController @Autowired constructor(private val seasonService: Se
     @GetMapping("/{seasonId}")
     fun getSeason(@PathVariable("seasonId") seasonId: Int,
                   authentication: Authentication): SeasonDto {
-        val season = seasonService.getSeason(seasonId) ?: throw UserForbiddenException()
-        if (accessController.isUserAllowedToAccessTeam(authentication, season.team.id)) {
-            return season.toDto()
+        val seasonDto = seasonService.getSeason(seasonId)
+        if (accessController.isUserAllowedToAccessTeam(authentication, seasonDto.teamId!!)) {
+            return seasonDto
         }
         throw UserForbiddenException()
     }
@@ -29,31 +29,21 @@ open class SeasonController @Autowired constructor(private val seasonService: Se
     @DeleteMapping("/{seasonId}")
     fun deleteSeason(@PathVariable("seasonId") seasonId: Int,
                      authentication: Authentication): ResponseEntity<Any> {
-        val season = seasonService.getSeason(seasonId) ?: throw UserForbiddenException()
-        if (accessController.isTeamAdmin(authentication, season.team.id)) {
+        val seasonDto = seasonService.getSeason(seasonId)
+        if (accessController.isTeamAdmin(authentication, seasonDto.teamId!!)) {
             seasonService.deleteSeason(seasonId)
             return ResponseEntity.noContent().build()
         }
         throw UserForbiddenException()
     }
 
-    //TODO
-//    @GetMapping("/{seasonId}/championships")
-//    open fun getChampionships(@PathVariable("seasonId") seasonId: Int, authentication: Authentication): ResponseEntity<List<ChampionshipResource>> {
-//        val season = seasonRepository.getOne(seasonId) ?: throw UserForbiddenException()
-//        if (accessController.isUserAllowedToAccessTeam(authentication, season.team.id)) {
-//            return ResponseEntity.ok(season.championships.map { championship -> ChampionshipResource(championship) })
-//        }
-//        throw UserForbiddenException()
-//    }
-
     @PostMapping("/{seasonId}/championships")
     open fun createChampionship(@PathVariable("seasonId") seasonId: Int,
                                 @RequestBody championshipDto: ChampionshipDto,
                                 authentication: Authentication): ResponseEntity<ChampionshipDto> {
-        val season = seasonService.getSeason(seasonId) ?: throw UserForbiddenException()
-        if (accessController.isTeamAdmin(authentication, season.team.id)) {
-            val championshipDto = seasonService.createChampionship(championshipDto, season)
+        val seasonDto = seasonService.getSeason(seasonId)
+        if (accessController.isTeamAdmin(authentication, seasonDto.teamId!!)) {
+            val championshipDto = seasonService.createChampionship(championshipDto, seasonId)
             return ResponseEntity(championshipDto, HttpStatus.CREATED)
         }
         throw UserForbiddenException()

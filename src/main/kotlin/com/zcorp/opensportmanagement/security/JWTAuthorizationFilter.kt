@@ -26,7 +26,7 @@ class JWTAuthorizationFilter(authManager: AuthenticationManager) : BasicAuthenti
     override fun doFilterInternal(req: HttpServletRequest,
                                   res: HttpServletResponse,
                                   chain: FilterChain) {
-        val cookie = req.cookies.find { cookie -> cookie.name == COOKIE_KEY }
+        val cookie = req.cookies?.find { cookie -> cookie.name == COOKIE_KEY }
 
         if (cookie == null) {
             chain.doFilter(req, res)

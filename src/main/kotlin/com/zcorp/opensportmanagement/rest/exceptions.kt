@@ -1,6 +1,6 @@
 package com.zcorp.opensportmanagement.rest
 
-class EntityNotFoundException(override var message: String) : Exception()
+class NotFoundException(override var message: String) : Exception()
 class EntityAlreadyExistsException(override var message: String) : Exception()
 class UserForbiddenException : Exception("User not allowed")
 class UserAlreadyMemberException : Exception("User already member")

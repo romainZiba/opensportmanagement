@@ -8,28 +8,24 @@ import javax.persistence.*
 @Table(name = "event")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "event_type")
-abstract class AbstractEvent private constructor(val name: String,
-                                                 @ManyToOne @JoinColumn(name = "team_id") val team: Team,
-                                                 var fromDateTime: LocalDateTime,
-                                                 var toDateTime: LocalDateTime,
-                                                 @ManyToMany private val presentMembers: MutableSet<TeamMember> = mutableSetOf(),
-                                                 @ManyToMany private val absentMembers: MutableSet<TeamMember> = mutableSetOf(),
-                                                 @ManyToMany private val waitingMembers: MutableSet<TeamMember> = mutableSetOf(),
-                                                 @GeneratedValue @Id var id: Int = -1) {
+abstract class AbstractEvent protected constructor() {
+
+    lateinit var name: String
+    @ManyToOne @JoinColumn(name = "team_id") lateinit var team: Team
+    lateinit var fromDateTime: LocalDateTime
+    var toDateTime: LocalDateTime? = null
+    @ManyToMany private val presentMembers: MutableSet<TeamMember> = mutableSetOf()
+    @ManyToMany private val absentMembers: MutableSet<TeamMember> = mutableSetOf()
+    @ManyToMany private val waitingMembers: MutableSet<TeamMember> = mutableSetOf()
+    @GeneratedValue @Id var id: Int = -1
+
     @ManyToOne
     var stadium: Stadium? = null
     var place: String? = null
     var maxMembers = MAX_PLAYERS
 
-    constructor(name: String, fromDateTime: LocalDateTime, toDateTime: LocalDateTime, stadium: Stadium,
-                team: Team) : this(name, team, fromDateTime, toDateTime) {
-        this.stadium = stadium
-    }
-
-    constructor(name: String, fromDateTime: LocalDateTime, toDateTime: LocalDateTime, place: String,
-                team: Team) : this(name, team, fromDateTime, toDateTime) {
-        this.place = place
-    }
+    @Column(name = "eventtype")
+    var eventType: EventType ? = null
 
     fun getAbsentMembers(): Set<TeamMember> {
         return absentMembers

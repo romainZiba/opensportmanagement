@@ -4,6 +4,9 @@ spring:
       indent_output: true
       write_dates_as_timestamps: false
       write_durations_as_timestamps: false
+  datasource.url: jdbc:h2:file:~/test
+  datasource.driver-class-name: org.h2.Driver
+
 #  datasource:
 #    url: jdbc:postgresql://localhost:5438/open
 #    username: postgres
@@ -20,7 +23,7 @@ server:
   port: 8090
 #  ssl:
 #    key-store-type: PKCS12
-#    key-store: path/to/keystore.p12
+#    key-store: path/toDate/keystore.p12
 #    key-store-password: changeThisWithYoutOwn
 #    key-alias: tomcat
 #

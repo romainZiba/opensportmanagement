@@ -1,9 +1,6 @@
 package com.zcorp.opensportmanagement.service
 
-import com.nhaarman.mockito_kotlin.any
-import com.nhaarman.mockito_kotlin.times
-import com.nhaarman.mockito_kotlin.verify
-import com.nhaarman.mockito_kotlin.whenever
+import com.nhaarman.mockito_kotlin.*
 import com.zcorp.opensportmanagement.model.Event
 import com.zcorp.opensportmanagement.model.Team
 import com.zcorp.opensportmanagement.model.TeamMember
@@ -12,7 +9,7 @@ import com.zcorp.opensportmanagement.repositories.EventRepository
 import com.zcorp.opensportmanagement.repositories.TeamMemberRepository
 import com.zcorp.opensportmanagement.repositories.TeamRepository
 import com.zcorp.opensportmanagement.repositories.UserRepository
-import com.zcorp.opensportmanagement.rest.EntityNotFoundException
+import com.zcorp.opensportmanagement.rest.NotFoundException
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -39,8 +36,12 @@ class UserServiceTest {
 
     private val mockUser = User(username, firstName, lastName, password, email, phoneNumber)
     private val mockTeam = Team("SuperNam", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "", teamId)
-    private val mockEvent = Event("TheOne", LocalDateTime.of(2018, 1, 1, 10, 0, 0),
-            LocalDateTime.of(2018, 1, 1, 11, 0, 0), "here", mockTeam)
+    private val mockEvent = Event.Builder().name("TheOne")
+            .fromDate(LocalDateTime.of(2018, 1, 1, 10, 0, 0))
+            .toDate(LocalDateTime.of(2018, 1, 1, 11, 0, 0))
+            .place("here")
+            .team(mockTeam)
+            .build()
     private val mockTeamMember = TeamMember(mutableSetOf(TeamMember.Role.ADMIN), mockTeam, "", teamMemberId)
 
 
@@ -72,7 +73,7 @@ class UserServiceTest {
         assertEquals(phoneNumber, user?.phoneNumber)
     }
 
-    @Test(expected = EntityNotFoundException::class)
+    @Test(expected = NotFoundException::class)
     fun userNotExistingJoinTeam() {
         whenever(userRepoMock.findByUsername(any())).thenReturn(null)
         userService.joinTeam("Foo", 1)
@@ -95,7 +96,7 @@ class UserServiceTest {
         verify(userRepoMock, times(1)).save(mockUser)
     }
 
-    @Test(expected = EntityNotFoundException::class)
+    @Test(expected = NotFoundException::class)
     fun userNotExistingParticipateEvent() {
         whenever(eventRepoMock.getOne(any())).thenReturn(mockEvent)
         whenever(userRepoMock.findByUsername(any())).thenReturn(null)

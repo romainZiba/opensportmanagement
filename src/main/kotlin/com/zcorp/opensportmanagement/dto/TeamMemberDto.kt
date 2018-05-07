@@ -7,4 +7,5 @@ data class TeamMemberDto(val username: String,
                          val lastName: String,
                          val roles: Set<TeamMember.Role>,
                          val licenseNumber: String,
-                         val teamId: Int)
+                         val teamId: Int,
+                         val _id: Int)

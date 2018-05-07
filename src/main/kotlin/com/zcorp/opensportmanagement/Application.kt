@@ -1,10 +1,11 @@
 package com.zcorp.opensportmanagement
 
-import com.zcorp.opensportmanagement.dto.EventCreationDto
-import com.zcorp.opensportmanagement.model.*
-import com.zcorp.opensportmanagement.repositories.*
-import com.zcorp.opensportmanagement.service.EventService
-import com.zcorp.opensportmanagement.service.UserService
+import com.zcorp.opensportmanagement.dto.*
+import com.zcorp.opensportmanagement.model.Match
+import com.zcorp.opensportmanagement.model.Season
+import com.zcorp.opensportmanagement.model.Team
+import com.zcorp.opensportmanagement.model.User
+import com.zcorp.opensportmanagement.service.*
 import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -27,92 +28,76 @@ open class Application {
     @Transactional
     open fun init(userService: UserService,
                   eventService: EventService,
-                  teamRepository: TeamRepository,
-                  stadiumRepository: StadiumRepository,
-                  eventRepository: EventRepository,
-                  matchRepository: MatchRepository,
-                  opponentRepository: OpponentRepository,
-                  seasonRepository: SeasonRepository,
-                  championshipRepository: ChampionshipRepository,
-                  userRepository: UserRepository,
-                  teamMemberRepository: TeamMemberRepository) = CommandLineRunner {
+                  teamService: TeamService,
+                  stadiumService: StadiumService,
+                  seasonService: SeasonService,
+                  matchService: MatchService) = CommandLineRunner {
 
-        var team1 = Team("TEAM 1", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS)
-        team1.imgUrl = "http://tsnimages.tsn.ca/ImageProvider/TeamLogo?seoId=san-antonio-spurs&width=500&height=500"
-        team1 = teamRepository.save(team1)
 
-        var team2 = Team("TEAM 2", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS)
-        team2.imgUrl = "http://tsnimages.tsn.ca/ImageProvider/TeamLogo?seoId=san-antonio-spurs&width=140&height=140"
-        team2 = teamRepository.save(team2)
-
-        var userTeam1_2 = User("CR", "Coach", "Rock", bCryptPasswordEncoder().encode("CR"),
+        var adminTeam1And2 = User("CR", "Coach", "Rock", "CR",
                 "CR@caramail.com", "")
-        var userTeam1 = User("PW", "Player", "Wow", bCryptPasswordEncoder().encode("PW"),
+        var userTeam1 = User("PW", "Player", "Wow", "PW",
                 "PW@caramail.com", "")
         var userTeam2 = User("bbb", "Bobb", "Bobbybob",
-                bCryptPasswordEncoder().encode("bbb"), "bbb@caramail.com",
+                "bbb", "bbb@caramail.com",
                 "")
-        userTeam1_2 = userRepository.save(userTeam1_2)
-        userTeam1 = userRepository.save(userTeam1)
-        userTeam2 = userRepository.save(userTeam2)
 
-        userService.joinTeam(userTeam1_2.username, team1.id)
-        userService.joinTeam(userTeam1_2.username, team2.id)
-        userService.joinTeam(userTeam1.username, team1.id)
-        userService.joinTeam(userTeam2.username, team2.id)
+        userService.createUser(adminTeam1And2)
+        userService.createUser(userTeam1)
+        userService.createUser(userTeam2)
 
-        val stadium = stadiumRepository.save(Stadium("LE stade", "2 allée", "Toulouse", team1))
+        var team1Dto = TeamDto("TEAM 1", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "http://tsnimages.tsn.ca/ImageProvider/TeamLogo?seoId=san-antonio-spurs&width=500&height=500")
+        team1Dto = teamService.createTeam(team1Dto, adminTeam1And2.username)
 
-        var opponent = Opponent("TCMS2",
+        var team2Dto = TeamDto("TEAM 2", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "http://tsnimages.tsn.ca/ImageProvider/TeamLogo?seoId=san-antonio-spurs&width=140&height=140")
+        team2Dto = teamService.createTeam(team2Dto, adminTeam1And2.username)
+
+        userService.joinTeam(userTeam1.username, team1Dto._id!!)
+        userService.joinTeam(userTeam2.username, team2Dto._id!!)
+
+        var stadiumDto = StadiumDto("LE stade", "2 allée", "Toulouse")
+        stadiumDto = stadiumService.createStadium(stadiumDto, team1Dto._id!!)
+
+        var opponentDto = OpponentDto("TCMS2",
                 "0159756563",
                 "testmail@gmail.com",
-                "http://tsnimages.tsn.ca/ImageProvider/TeamLogo?seoId=houston-rockets",
-                team1)
-        opponent = opponentRepository.save(opponent)
+                "http://tsnimages.tsn.ca/ImageProvider/TeamLogo?seoId=houston-rockets")
+        opponentDto = teamService.createOpponent(opponentDto, team1Dto._id!!)
 
-        val season = seasonRepository.save(Season("2017-2018",
+        var seasonDto = SeasonDto("2017-2018",
                 LocalDate.of(2017, Month.SEPTEMBER, 1),
                 LocalDate.of(2018, Month.JULY, 31),
-                Season.Status.CURRENT,
-                team1
-        ))
-        val championship = championshipRepository.save(Championship("Championnat 2017-2018", season))
+                Season.Status.CURRENT)
+        seasonDto = teamService.createSeason(seasonDto, team1Dto._id!!)
+
+        var championshipDto = ChampionshipDto("Championnat 2017-2018")
+        championshipDto = seasonService.createChampionship(championshipDto, seasonDto._id!!)
 
 
         (0..4L).forEach({
             val fromDateTime = LocalDateTime.of(LocalDate.now().plusDays(it), LocalTime.of(20, 0))
-            matchRepository.save(Match("Match de championnat",
-                    fromDateTime,
-                    fromDateTime.plusHours(2L),
-                    stadium, opponent, team1, championship))
+            val matchCreationDto = MatchCreationDto("Match de championnat",
+                    fromDateTime, fromDateTime.plusHours(2L), null, stadiumDto._id,
+                    Match.MatchType.CHAMPIONSHIP, championshipDto._id, opponentDto._id, true)
+
+            matchService.createMatch(team1Dto._id!!, matchCreationDto)
         })
         (1..2L).forEach({
             val fromDateTime = LocalDateTime.of(LocalDate.now().minusDays(it), LocalTime.of(20, 0))
-            matchRepository.save(Match("Match de championnat",
-                    fromDateTime,
-                    fromDateTime.plusHours(2L),
-                    stadium, opponent, team1, championship))
+
+            val matchCreationDto = MatchCreationDto("Match de championnat",
+                    fromDateTime, fromDateTime.plusHours(2L), null, stadiumDto._id,
+                    Match.MatchType.CHAMPIONSHIP, championshipDto._id, opponentDto._id, true)
+            matchService.createMatch(team1Dto._id!!, matchCreationDto)
         })
 
         val fromDate = LocalDate.of(2018, 1, 5) // It's a friday
         val toDate = LocalDate.of(2018, 3, 31)
         val fromTime = LocalTime.of(10, 0)
         val toTime = LocalTime.of(11, 0)
-        val dto = EventCreationDto("event", null, null, null, stadium.id, true,
+        val dto = EventCreationDto("event", null, null, null, stadiumDto._id!!, true,
                 mutableSetOf(DayOfWeek.WEDNESDAY, DayOfWeek.TUESDAY), fromTime, toTime, fromDate, toDate)
-        eventService.createEvent(team1.id, dto)
-
-        eventRepository.save(Event("Apéro",
-                LocalDateTime.of(LocalDate.now().plusDays(5L), LocalTime.of(18, 0)),
-                LocalDateTime.of(LocalDate.now().plusDays(5L), LocalTime.of(19, 0)),
-                "2 des champs", team1))
-
-        eventRepository.save(Event("Anniversaire",
-                LocalDateTime.of(LocalDate.now().plusDays(7L), LocalTime.of(18, 0)),
-                LocalDateTime.of(LocalDate.now().plusDays(7L), LocalTime.of(19, 0)),
-                "2 des champs", team1))
-
-
+        eventService.createEvent(team1Dto._id!!, dto)
     }
 
 }

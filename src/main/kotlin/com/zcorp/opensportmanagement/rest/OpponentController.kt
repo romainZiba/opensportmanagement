@@ -20,9 +20,9 @@ open class OpponentController @Autowired constructor(private val opponentService
     @GetMapping("/{opponentId}")
     open fun getOpponent(@PathVariable("opponentId") opponentId: Int,
                          authentication: Authentication): ResponseEntity<OpponentDto> {
-        val opponent = opponentService.getOpponent(opponentId) ?: throw UserForbiddenException()
-        if (accessController.isUserAllowedToAccessTeam(authentication, opponent.team.id)) {
-            return ResponseEntity.ok(opponent.toDto())
+        val opponentDto = opponentService.getOpponent(opponentId)
+        if (accessController.isUserAllowedToAccessTeam(authentication, opponentDto.teamId!!)) {
+            return ResponseEntity.ok(opponentDto)
         }
         throw UserForbiddenException()
     }
@@ -30,8 +30,8 @@ open class OpponentController @Autowired constructor(private val opponentService
     @DeleteMapping("/{opponentId}")
     open fun deleteOpponent(@PathVariable("opponentId") opponentId: Int,
                             authentication: Authentication): ResponseEntity<Any> {
-        val opponent = opponentService.getOpponent(opponentId) ?: throw UserForbiddenException()
-        if (accessController.isTeamAdmin(authentication, opponent.team.id)) {
+        val opponentDto = opponentService.getOpponent(opponentId)
+        if (accessController.isTeamAdmin(authentication, opponentDto.teamId!!)) {
             opponentService.deleteOpponent(opponentId)
             return ResponseEntity.noContent().build()
         }

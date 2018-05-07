@@ -12,6 +12,6 @@ data class Opponent(@Column(name = "name") val name: String,
                     @ManyToOne @JoinColumn(name = "team_id") val team: Team,
                     @Id @GeneratedValue val id: Int = -1) {
     fun toDto(): OpponentDto {
-        return OpponentDto(name, phoneNumber, email, imgUrl)
+        return OpponentDto(name, phoneNumber, email, imgUrl, team.id, id)
     }
 }

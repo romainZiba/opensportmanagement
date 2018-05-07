@@ -20,10 +20,9 @@ open class EventController @Autowired constructor(private val eventService: Even
     @GetMapping("/{eventId}")
     open fun getEvent(@PathVariable("eventId") eventId: Int,
                       authentication: Authentication): ResponseEntity<EventDto> {
-        val event = eventService.getEvent(eventId) ?: throw UserForbiddenException()
-        val team = event.team
-        if (accessController.isUserAllowedToAccessTeam(authentication, team.id)) {
-            return ResponseEntity.ok(event.toDto())
+        val eventDto = eventService.getEvent(eventId)
+        if (accessController.isUserAllowedToAccessTeam(authentication, eventDto.teamId!!)) {
+            return ResponseEntity.ok(eventDto)
         }
         throw UserForbiddenException()
     }
@@ -31,9 +30,8 @@ open class EventController @Autowired constructor(private val eventService: Even
     @DeleteMapping("/{eventId}")
     open fun deleteEvent(@PathVariable("eventId") eventId: Int,
                          authentication: Authentication): ResponseEntity<Any> {
-        val event = eventService.getEvent(eventId) ?: throw UserForbiddenException()
-        val team = event.team
-        if (accessController.isTeamAdmin(authentication, team.id)) {
+        val eventDto = eventService.getEvent(eventId)
+        if (accessController.isTeamAdmin(authentication, eventDto.teamId!!)) {
             eventService.deleteEvent(eventId)
             return ResponseEntity.noContent().build()
         }
@@ -44,12 +42,11 @@ open class EventController @Autowired constructor(private val eventService: Even
     open fun participate(@NotNull @PathVariable("eventId") eventId: Int,
                          @NotNull @PathVariable("present") present: Boolean,
                          authentication: Authentication): ResponseEntity<EventDto> {
-        var event = eventService.getEvent(eventId) ?: throw UserForbiddenException()
-        val teamId = event.team.id
-        if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
-            userService.participate(authentication.name, event.id, present)
-            return ResponseEntity.ok(event.toDto())
+        var eventDto = eventService.getEvent(eventId)
+        if (accessController.isUserAllowedToAccessTeam(authentication, eventDto.teamId!!)) {
+            eventDto = userService.participate(authentication.name, eventId, present)
+            return ResponseEntity.ok(eventDto)
         }
-        throw EntityNotFoundException("Match not found")
+        throw NotFoundException("Match not found")
     }
 }

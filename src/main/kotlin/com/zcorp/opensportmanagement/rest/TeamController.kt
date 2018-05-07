@@ -80,7 +80,7 @@ open class TeamController @Autowired constructor(private val teamService: TeamSe
 
     @PostMapping("/{teamId}/opponents")
     open fun createOpponent(@NotNull @PathVariable("teamId") teamId: Int,
-                            @RequestBody opponentDto: com.zcorp.opensportmanagement.dto.OpponentDto,
+                            @RequestBody opponentDto: OpponentDto,
                             authentication: Authentication): ResponseEntity<OpponentDto> {
 
         if (accessController.isTeamAdmin(authentication, teamId)) {
@@ -138,9 +138,9 @@ open class TeamController @Autowired constructor(private val teamService: TeamSe
     }
 
     /** Handle the error */
-    @ExceptionHandler(EntityNotFoundException::class)
+    @ExceptionHandler(NotFoundException::class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    fun handleError(e: EntityNotFoundException) = e.message
+    fun handleError(e: NotFoundException) = e.message
 
     @ExceptionHandler(EntityAlreadyExistsException::class)
     @ResponseStatus(HttpStatus.CONFLICT)

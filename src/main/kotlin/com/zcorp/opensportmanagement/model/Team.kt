@@ -16,7 +16,7 @@ data class Team(val name: String,
                 @Id @GeneratedValue val id: Int = -1) {
 
     fun toDto(): TeamDto {
-        return TeamDto(id, name, sport, genderKind, ageGroup)
+        return TeamDto(name, sport, genderKind, ageGroup, imgUrl, id)
     }
 
     enum class Sport {

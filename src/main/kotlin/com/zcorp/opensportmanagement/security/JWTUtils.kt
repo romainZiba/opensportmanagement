@@ -16,7 +16,7 @@ class JWTUtils {
 
         fun getAccessCookie(auth: Authentication): Cookie {
             val newToken = JWTUtils.getToken(auth)
-            val cookie = Cookie(COOKIE_KEY, URLEncoder.encode(TOKEN_PREFIX + newToken, URL_ENCODING))
+            val cookie = Cookie(ACCESS_TOKEN_COOKIE_KEY, URLEncoder.encode(TOKEN_PREFIX + newToken, URL_ENCODING))
             cookie.isHttpOnly = true
             cookie.secure = false
             cookie.maxAge = EXPIRATION_TIME

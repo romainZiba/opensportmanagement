@@ -26,13 +26,14 @@ class JWTAuthorizationFilter(authManager: AuthenticationManager) : BasicAuthenti
     override fun doFilterInternal(req: HttpServletRequest,
                                   res: HttpServletResponse,
                                   chain: FilterChain) {
-        val cookie = req.cookies?.find { cookie -> cookie.name == COOKIE_KEY }
+        val authCookie = req.cookies?.find { cookie -> cookie.name == ACCESS_TOKEN_COOKIE_KEY }
+        val insecureCookie = req.cookies?.find { cookie -> cookie.name == INSECURE_COOKIE_KEY }
 
-        if (cookie == null) {
+        if (insecureCookie == null || authCookie == null) {
             chain.doFilter(req, res)
             return
         }
-        val decodedToken = URLDecoder.decode(cookie.value, URL_ENCODING)
+        val decodedToken = URLDecoder.decode(authCookie.value, URL_ENCODING)
         if (!decodedToken.startsWith(TOKEN_PREFIX)) {
             chain.doFilter(req, res)
             return

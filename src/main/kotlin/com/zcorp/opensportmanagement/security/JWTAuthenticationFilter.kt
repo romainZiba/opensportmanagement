@@ -11,6 +11,7 @@ import java.util.*
 import javax.naming.AuthenticationException
 import javax.servlet.FilterChain
 import javax.servlet.ServletException
+import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -45,5 +46,6 @@ class JWTAuthenticationFilter(authManager: AuthenticationManager) : UsernamePass
                                           chain: FilterChain,
                                           auth: Authentication) {
         res.addCookie(JWTUtils.getAccessCookie(auth))
+        res.addCookie(Cookie(INSECURE_COOKIE_KEY, ""))
     }
 }

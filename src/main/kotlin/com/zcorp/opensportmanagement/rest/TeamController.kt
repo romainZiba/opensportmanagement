@@ -137,6 +137,27 @@ open class TeamController @Autowired constructor(private val teamService: TeamSe
         throw UserForbiddenException()
     }
 
+    @GetMapping("/{teamId}/members/me")
+    open fun getMeAsTeamMember(@PathVariable("teamId") teamId: Int,
+                               authentication: Authentication): ResponseEntity<TeamMemberDto> {
+        if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
+            val teamMemberDto = teamService.getTeamMemberByUsername(teamId, authentication.name) ?: throw UserForbiddenException()
+            return ResponseEntity.ok(teamMemberDto)
+        }
+        throw UserForbiddenException()
+    }
+
+    @GetMapping("/{teamId}/members/{memberId}")
+    open fun getTeamMember(@PathVariable("teamId") teamId: Int,
+                           @PathVariable("memberId") memberId: Int,
+                           authentication: Authentication): ResponseEntity<TeamMemberDto> {
+        if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
+            val teamMember = teamService.getTeamMember(teamId, memberId) ?: throw UserForbiddenException()
+            return ResponseEntity.ok(teamMember)
+        }
+        throw UserForbiddenException()
+    }
+
     /** Handle the error */
     @ExceptionHandler(NotFoundException::class)
     @ResponseStatus(HttpStatus.NOT_FOUND)

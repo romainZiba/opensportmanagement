@@ -1,8 +1,14 @@
 package com.zcorp.opensportmanagement.service
 
 import com.zcorp.opensportmanagement.dto.*
-import com.zcorp.opensportmanagement.model.*
-import com.zcorp.opensportmanagement.repositories.*
+import com.zcorp.opensportmanagement.model.Opponent
+import com.zcorp.opensportmanagement.model.Season
+import com.zcorp.opensportmanagement.model.Team
+import com.zcorp.opensportmanagement.model.TeamMember
+import com.zcorp.opensportmanagement.repositories.OpponentRepository
+import com.zcorp.opensportmanagement.repositories.SeasonRepository
+import com.zcorp.opensportmanagement.repositories.TeamRepository
+import com.zcorp.opensportmanagement.repositories.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -80,5 +86,15 @@ open class TeamService @Autowired constructor(private val teamRepository: TeamRe
         val team = teamRepository.getOne(teamId)
         val opponent = Opponent(opponentDto.name, opponentDto.phoneNumber, opponentDto.email, opponentDto.imgUrl, team)
         return opponentRepository.save(opponent).toDto()
+    }
+
+    @Transactional
+    open fun getTeamMember(teamId: Int, memberId: Int): TeamMemberDto? {
+        return teamRepository.getTeamMember(teamId, memberId)?.toDto()
+    }
+
+    @Transactional
+    open fun getTeamMemberByUsername(teamId: Int, name: String): TeamMemberDto? {
+        return teamRepository.getTeamMemberByUserName(teamId, name)?.toDto()
     }
 }

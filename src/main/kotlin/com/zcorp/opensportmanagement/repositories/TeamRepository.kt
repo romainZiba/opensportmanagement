@@ -15,6 +15,9 @@ interface TeamDAO {
     @Query("SELECT m FROM TeamMember m WHERE m.team.id = :teamId")
     fun getTeamMembers(teamId: Int): List<TeamMember>
 
+    @Query("SELECT m FROM TeamMember m WHERE m.id = :memberId AND m.team.id = :teamId")
+    fun getTeamMember(teamId: Int, memberId: Int): TeamMember?
+
     @Query("SELECT s FROM Stadium s WHERE s.team.id = :teamId")
     fun getStadiums(teamId: Int): List<Stadium>
 
@@ -26,4 +29,7 @@ interface TeamDAO {
 
     @Query("SELECT o FROM Opponent o WHERE o.team.id = :teamId")
     fun getOpponents(teamId: Int): List<Opponent>
+
+    @Query("SELECT m FROM TeamMember m WHERE m.user.username = :name AND m.team.id = :teamId")
+    fun getTeamMemberByUserName(teamId: Int, name: String): TeamMember?
 }

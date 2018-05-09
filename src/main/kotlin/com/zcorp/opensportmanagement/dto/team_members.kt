@@ -9,3 +9,5 @@ data class TeamMemberDto(val username: String,
                          val licenseNumber: String,
                          val teamId: Int,
                          val _id: Int)
+
+data class TeamMemberUpdateDto(val licenseNumber: String)

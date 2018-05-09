@@ -1,7 +1,9 @@
 package com.zcorp.opensportmanagement.service
 
 import com.zcorp.opensportmanagement.dto.EventDto
+import com.zcorp.opensportmanagement.dto.TeamMemberDto
 import com.zcorp.opensportmanagement.dto.UserDto
+import com.zcorp.opensportmanagement.dto.UserUpdateDto
 import com.zcorp.opensportmanagement.model.TeamMember
 import com.zcorp.opensportmanagement.model.User
 import com.zcorp.opensportmanagement.repositories.EventRepository
@@ -47,6 +49,16 @@ open class UserService @Autowired constructor(private val teamRepository: TeamRe
     @Transactional
     open fun createUser(user: User): UserDto {
         user.password = bCryptPasswordEncoder.encode(user.password)
+        return userRepository.save(user).toDto()
+    }
+
+    @Transactional
+    open fun updateUserProfile(dto: UserUpdateDto, username: String): UserDto {
+        val user = userRepository.findByUsername(username) ?: throw NotFoundException("User $username does not exist")
+        user.firstName = dto.firstName
+        user.lastName = dto.lastName
+        user.phoneNumber = dto.phoneNumber
+        user.email = dto.email
         return userRepository.save(user).toDto()
     }
 }

@@ -46,6 +46,8 @@ class JWTAuthenticationFilter(authManager: AuthenticationManager) : UsernamePass
                                           chain: FilterChain,
                                           auth: Authentication) {
         res.addCookie(JWTUtils.getAccessCookie(auth))
-        res.addCookie(Cookie(INSECURE_COOKIE_KEY, ""))
+        val cookie = Cookie(INSECURE_COOKIE_KEY, "")
+        cookie.maxAge = EXPIRATION_TIME
+        res.addCookie(cookie)
     }
 }

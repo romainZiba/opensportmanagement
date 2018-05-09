@@ -5,10 +5,8 @@ import com.zcorp.opensportmanagement.model.Opponent
 import com.zcorp.opensportmanagement.model.Season
 import com.zcorp.opensportmanagement.model.Team
 import com.zcorp.opensportmanagement.model.TeamMember
-import com.zcorp.opensportmanagement.repositories.OpponentRepository
-import com.zcorp.opensportmanagement.repositories.SeasonRepository
-import com.zcorp.opensportmanagement.repositories.TeamRepository
-import com.zcorp.opensportmanagement.repositories.UserRepository
+import com.zcorp.opensportmanagement.repositories.*
+import javassist.NotFoundException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -17,6 +15,7 @@ import javax.transaction.Transactional
 
 @Service
 open class TeamService @Autowired constructor(private val teamRepository: TeamRepository,
+                                              private val teamMemberRepository: TeamMemberRepository,
                                               private val userRepository: UserRepository,
                                               private val seasonRepository: SeasonRepository,
                                               private val opponentRepository: OpponentRepository) {
@@ -96,5 +95,12 @@ open class TeamService @Autowired constructor(private val teamRepository: TeamRe
     @Transactional
     open fun getTeamMemberByUsername(teamId: Int, name: String): TeamMemberDto? {
         return teamRepository.getTeamMemberByUserName(teamId, name)?.toDto()
+    }
+
+    @Transactional
+    open fun updateProfile(dto: TeamMemberUpdateDto, teamId: Int, name: String): TeamMemberDto {
+        val teamMember = teamRepository.getTeamMemberByUserName(teamId, name) ?: throw NotFoundException("Team member $name does not exist")
+        teamMember.licenseNumber = dto.licenseNumber
+        return teamMemberRepository.save(teamMember).toDto()
     }
 }

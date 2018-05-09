@@ -147,6 +147,14 @@ open class TeamController @Autowired constructor(private val teamService: TeamSe
         throw UserForbiddenException()
     }
 
+    @PutMapping("/{teamId}/members/me")
+    open fun updateUserInformation(@PathVariable("teamId") teamId: Int,
+                                   @RequestBody dto: TeamMemberUpdateDto,
+                                   authentication: Authentication): ResponseEntity<TeamMemberDto> {
+        val teamMemberDto = teamService.updateProfile(dto, teamId, authentication.name)
+        return ResponseEntity.ok(teamMemberDto)
+    }
+
     @GetMapping("/{teamId}/members/{memberId}")
     open fun getTeamMember(@PathVariable("teamId") teamId: Int,
                            @PathVariable("memberId") memberId: Int,

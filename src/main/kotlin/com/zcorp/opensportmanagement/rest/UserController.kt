@@ -2,6 +2,7 @@ package com.zcorp.opensportmanagement.rest
 
 
 import com.zcorp.opensportmanagement.dto.UserDto
+import com.zcorp.opensportmanagement.dto.UserUpdateDto
 import com.zcorp.opensportmanagement.model.User
 import com.zcorp.opensportmanagement.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
@@ -29,6 +30,13 @@ open class UserController @Autowired constructor(private val userService: UserSe
     @GetMapping("/me")
     open fun whoAmi(authentication: Authentication): ResponseEntity<UserDto> {
         return ResponseEntity.ok(userService.findByUsername(authentication.name) ?: throw UserForbiddenException())
+    }
+
+    @PutMapping("/me")
+    open fun updateUserInformation(@RequestBody dto: UserUpdateDto,
+                                   authentication: Authentication): ResponseEntity<UserDto> {
+        val userDto = userService.updateUserProfile(dto, authentication.name)
+        return ResponseEntity.ok(userDto)
     }
 
     /** Handle the error */

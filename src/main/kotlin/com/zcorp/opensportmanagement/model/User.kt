@@ -10,11 +10,11 @@ import javax.validation.constraints.NotNull
 @Table(name = "app_user")
 @JsonIgnoreProperties("memberOf")
 data class User(@Id @NotNull val username: String,
-                val firstName: String,
-                val lastName: String,
+                var firstName: String,
+                var lastName: String,
                 var password: String,
-                val email: String,
-                val phoneNumber: String?) {
+                var email: String,
+                var phoneNumber: String?) {
 
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL])
     private val memberOf: MutableSet<TeamMember> = mutableSetOf()

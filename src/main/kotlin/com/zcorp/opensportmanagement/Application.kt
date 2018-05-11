@@ -1,5 +1,6 @@
 package com.zcorp.opensportmanagement
 
+import com.zcorp.opensportmanagement.config.OsmProperties
 import com.zcorp.opensportmanagement.dto.*
 import com.zcorp.opensportmanagement.model.Match
 import com.zcorp.opensportmanagement.model.Season
@@ -9,6 +10,7 @@ import com.zcorp.opensportmanagement.service.*
 import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.scheduling.annotation.EnableAsync
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
@@ -17,6 +19,7 @@ import java.time.*
 
 @SpringBootApplication
 @EnableAsync
+@EnableConfigurationProperties(OsmProperties::class)
 open class Application {
 
     @Bean

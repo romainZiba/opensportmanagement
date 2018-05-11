@@ -1,6 +1,7 @@
 package com.zcorp.opensportmanagement.security
 
 import com.zcorp.opensportmanagement.repositories.UserRepository
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
 @Service
+@Qualifier("osm_user_details")
 open class UserDetailsServiceImpl(private val userRepository: UserRepository) : UserDetailsService {
     @Transactional(readOnly = true)
     @Throws(UsernameNotFoundException::class)

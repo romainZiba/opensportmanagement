@@ -3,6 +3,8 @@ package com.zcorp.opensportmanagement.config
 import com.zcorp.opensportmanagement.security.JWTAuthenticationFilter
 import com.zcorp.opensportmanagement.security.JWTAuthorizationFilter
 import com.zcorp.opensportmanagement.security.SIGN_UP_URL
+import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
@@ -20,7 +22,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 @Configuration
 @EnableWebSecurity
-open class WebSecurity(val userDetailsService: UserDetailsService) : WebSecurityConfigurerAdapter() {
+open class WebSecurity(@Qualifier("osm_user_details") private val userDetailsService: UserDetailsService,
+                       private val properties: OsmProperties) : WebSecurityConfigurerAdapter() {
+
 
     @Bean
     open fun bCryptPasswordEncoder(): BCryptPasswordEncoder {
@@ -58,7 +62,7 @@ open class WebSecurity(val userDetailsService: UserDetailsService) : WebSecurity
     open fun corsConfigurationSource(): CorsConfigurationSource {
         val source = UrlBasedCorsConfigurationSource()
         val configuration = CorsConfiguration()
-        configuration.allowedOrigins = listOf("http://127.0.0.1:4200")
+        configuration.allowedOrigins = properties.allowedOrigins
         configuration.allowedMethods = listOf("POST", "PUT", "GET", "OPTIONS", "DELETE")
         configuration.allowedHeaders = listOf("Authorization", "Content-Type")
         configuration.allowCredentials = true

@@ -21,6 +21,7 @@ data class TeamMember(
     }
 
     fun toDto(): TeamMemberDto {
-        return TeamMemberDto(user.username, user.firstName, user.lastName, roles, this.licenseNumber, team.id, id)
+        return TeamMemberDto(user.username, user.firstName, user.lastName, roles, licenseNumber, user.email,
+                user.phoneNumber, team.id, id)
     }
 }

@@ -49,10 +49,10 @@ open class Application {
         userService.createUser(userTeam1)
         userService.createUser(userTeam2)
 
-        var team1Dto = TeamDto("TEAM 1", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "http://tsnimages.tsn.ca/ImageProvider/TeamLogo?seoId=san-antonio-spurs&width=500&height=500")
+        var team1Dto = TeamDto("TEAM 1", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "https://tsnimages.tsn.ca/ImageProvider/TeamLogo?seoId=san-antonio-spurs&width=500&height=500")
         team1Dto = teamService.createTeam(team1Dto, adminTeam1And2.username)
 
-        var team2Dto = TeamDto("TEAM 2", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "http://tsnimages.tsn.ca/ImageProvider/TeamLogo?seoId=san-antonio-spurs&width=140&height=140")
+        var team2Dto = TeamDto("TEAM 2", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "https://tsnimages.tsn.ca/ImageProvider/TeamLogo?seoId=san-antonio-spurs&width=140&height=140")
         team2Dto = teamService.createTeam(team2Dto, adminTeam1And2.username)
 
         userService.joinTeam(userTeam1.username, team1Dto._id!!)
@@ -64,7 +64,7 @@ open class Application {
         var opponentDto = OpponentDto("TCMS2",
                 "0159756563",
                 "testmail@gmail.com",
-                "http://tsnimages.tsn.ca/ImageProvider/TeamLogo?seoId=houston-rockets")
+                "https://tsnimages.tsn.ca/ImageProvider/TeamLogo?seoId=houston-rockets")
         opponentDto = teamService.createOpponent(opponentDto, team1Dto._id!!)
 
         var seasonDto = SeasonDto("2017-2018",

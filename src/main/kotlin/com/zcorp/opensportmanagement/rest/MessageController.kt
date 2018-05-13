@@ -1,48 +1,32 @@
 package com.zcorp.opensportmanagement.rest
 
 import com.zcorp.opensportmanagement.dto.MessageDto
-import com.zcorp.opensportmanagement.messaging.db.RethinkDbService
 import com.zcorp.opensportmanagement.model.Conversation
 import com.zcorp.opensportmanagement.model.Message
+import com.zcorp.opensportmanagement.service.MessagingService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 
 @RestController
-class MessageController {
+@RequestMapping("/conversations")
+class MessageController @Autowired constructor(private val messagingService: MessagingService) {
 
-    @Autowired
-    private lateinit var rethinkDbService: RethinkDbService
-
-    @GetMapping("/conversations")
+    @GetMapping
     fun getConversations(authentication: Authentication): Set<Conversation> {
-        return rethinkDbService.getConversations(authentication.name)
+        return messagingService.getConversations(authentication.name)
     }
 
-    @GetMapping("/conversations/{conversationId}/messages")
-    fun getMessages(@PathVariable("conversationId") conversation: String): List<Message> {
-        //TODO: check if user is allowed to access to this conversation
-        return rethinkDbService.getMessages(conversation)
+    @GetMapping("/{conversationId}/messages")
+    fun getMessages(@PathVariable("conversationId") conversationId: String): List<MessageDto> {
+        //TODO: check if user is allowed to access to this conversationId
+        return messagingService.getMessages(conversationId)
     }
 
-    @PostMapping("/conversations")
-    fun createConversation(@RequestBody message: Message, authentication: Authentication): Message {
-        message.from = authentication.name
-        rethinkDbService.createConversation(message)
-        return message
-    }
-
-    @PostMapping("/conversations/{conversationId}/messages")
+    @PostMapping("/messages")
     fun createMessage(@RequestBody messageDto: MessageDto,
-                      @PathVariable("conversationId") conversationId: String,
-                      authentication: Authentication): Message {
-        var message = Message()
-        message.from = authentication.name
-        message.conversationId = conversationId
-        message.message = messageDto.message
-        message = rethinkDbService.createMessageInConversation(message)
-        return message
+                      authentication: Authentication): MessageDto {
+        //TODO: check if user is allowed to send message to these users
+        return messagingService.createMessage(messageDto, authentication.name)
     }
-
-
 }

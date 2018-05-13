@@ -34,7 +34,8 @@ open class Application {
                   teamService: TeamService,
                   stadiumService: StadiumService,
                   seasonService: SeasonService,
-                  matchService: MatchService) = CommandLineRunner {
+                  matchService: MatchService,
+                  messagingService: MessagingService) = CommandLineRunner {
 
 
         var adminTeam1And2 = User("CR", "Coach", "Rock", "CR",
@@ -85,13 +86,14 @@ open class Application {
 
             matchService.createMatch(team1Dto._id!!, matchCreationDto)
         })
+        var lastDto: EventDto? = null
         (1..2L).forEach({
             val fromDateTime = LocalDateTime.of(LocalDate.now().minusDays(it), LocalTime.of(20, 0))
 
             val matchCreationDto = MatchCreationDto("Match de championnat",
                     fromDateTime, fromDateTime.plusHours(2L), null, stadiumDto._id,
                     Match.MatchType.CHAMPIONSHIP, championshipDto._id, opponentDto._id, true)
-            matchService.createMatch(team1Dto._id!!, matchCreationDto)
+            lastDto = matchService.createMatch(team1Dto._id!!, matchCreationDto)
         })
 
         val fromDate = LocalDate.of(2018, 1, 5) // It's a friday
@@ -101,6 +103,8 @@ open class Application {
         val dto = EventCreationDto("event", null, null, null, stadiumDto._id!!, true,
                 mutableSetOf(DayOfWeek.WEDNESDAY, DayOfWeek.TUESDAY), fromTime, toTime, fromDate, toDate)
         eventService.createEvent(team1Dto._id!!, dto)
+        messagingService.createMessage(MessageDto("Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... "), "CR", lastDto?._id)
+        messagingService.createMessage(MessageDto("Ca roule"), "PW", lastDto?._id)
     }
 
 }

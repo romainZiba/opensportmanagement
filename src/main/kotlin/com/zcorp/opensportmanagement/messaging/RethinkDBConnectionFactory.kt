@@ -1,13 +1,11 @@
-package com.zcorp.opensportmanagement.messaging.db
-
+package com.zcorp.opensportmanagement.messaging
 
 import com.rethinkdb.RethinkDB
 import com.rethinkdb.net.Connection
 import java.util.concurrent.TimeoutException
 
-class RethinkDBConnectionFactory(private val host: String) {
-
-    fun createConnection(): Connection {
+open class RethinkDBConnectionFactory(private val host: String) {
+    open fun createConnection(): Connection {
         try {
             return RethinkDB.r.connection().hostname(host).connect()
         } catch (e: TimeoutException) {

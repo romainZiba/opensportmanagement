@@ -1,8 +1,7 @@
 package com.zcorp.opensportmanagement.messaging
 
 import com.rethinkdb.net.Cursor
-import com.zcorp.opensportmanagement.messaging.db.RethinkDBConnectionFactory
-import com.zcorp.opensportmanagement.messaging.db.RethinkDbService.Companion.table
+import com.zcorp.opensportmanagement.service.MessagingService.Companion.table
 import com.zcorp.opensportmanagement.model.Message
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -28,8 +27,8 @@ open class MessageChangesListener {
 
         while (cursor.hasNext()) {
             val message = cursor.next()
-            log.info("New message: {}", message.message)
-            webSocket.convertAndSend("/topic/" + message.conversationId, message)
+            log.info("New body: {}", message.body)
+            webSocket.convertAndSend("/topic/" + message.conversationId, message.toDto())
         }
     }
 }

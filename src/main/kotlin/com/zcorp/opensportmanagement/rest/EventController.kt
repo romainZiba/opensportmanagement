@@ -1,8 +1,10 @@
 package com.zcorp.opensportmanagement.rest
 
 import com.zcorp.opensportmanagement.dto.EventDto
+import com.zcorp.opensportmanagement.dto.MessageDto
 import com.zcorp.opensportmanagement.security.AccessController
 import com.zcorp.opensportmanagement.service.EventService
+import com.zcorp.opensportmanagement.service.MessagingService
 import com.zcorp.opensportmanagement.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.rest.webmvc.RepositoryRestController
@@ -15,6 +17,7 @@ import javax.validation.constraints.NotNull
 @RequestMapping("/events")
 open class EventController @Autowired constructor(private val eventService: EventService,
                                                   private val userService: UserService,
+                                                  private val messagingService: MessagingService,
                                                   private val accessController: AccessController) {
 
     @GetMapping("/{eventId}")
@@ -48,5 +51,26 @@ open class EventController @Autowired constructor(private val eventService: Even
             return ResponseEntity.ok(eventDto)
         }
         throw NotFoundException("Match not found")
+    }
+
+    @GetMapping("/{eventId}/messages")
+    fun getMessages(@NotNull @PathVariable("eventId") eventId: Int,
+                    authentication: Authentication): ResponseEntity<List<MessageDto>> {
+        val eventDto = eventService.getEvent(eventId)
+        if (accessController.isUserAllowedToAccessTeam(authentication, eventDto.teamId!!)) {
+            return ResponseEntity.ok(messagingService.getMessagesFromEvent(eventId))
+        }
+        throw UserForbiddenException()
+    }
+
+    @PostMapping("/{eventId}/messages")
+    fun createMessage(@NotNull @PathVariable("eventId") eventId: Int,
+                      @RequestBody messageDto: MessageDto,
+                      authentication: Authentication): ResponseEntity<MessageDto> {
+        val eventDto = eventService.getEvent(eventId)
+        if (accessController.isUserAllowedToAccessTeam(authentication, eventDto.teamId!!)) {
+            return ResponseEntity.ok(messagingService.createMessage(messageDto, authentication.name, eventId))
+        }
+        throw UserForbiddenException()
     }
 }

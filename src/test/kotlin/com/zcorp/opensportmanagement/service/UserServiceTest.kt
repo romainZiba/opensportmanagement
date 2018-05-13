@@ -13,7 +13,6 @@ import com.zcorp.opensportmanagement.rest.NotFoundException
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import java.time.LocalDateTime
 
@@ -47,10 +46,10 @@ class UserServiceTest {
 
     @Before
     fun setUp() {
-        userRepoMock = Mockito.mock(UserRepository::class.java)
-        teamMemberRepoMock = Mockito.mock(TeamMemberRepository::class.java)
-        teamRepoMock = Mockito.mock(TeamRepository::class.java)
-        eventRepoMock = Mockito.mock(EventRepository::class.java)
+        userRepoMock = mock()
+        teamMemberRepoMock = mock()
+        teamRepoMock = mock()
+        eventRepoMock = mock()
         userService = UserService(teamRepoMock, teamMemberRepoMock, eventRepoMock, userRepoMock, BCryptPasswordEncoder())
     }
 

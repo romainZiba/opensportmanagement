@@ -2,6 +2,7 @@ package com.zcorp.opensportmanagement.service
 
 import com.zcorp.opensportmanagement.dto.EventDto
 import com.zcorp.opensportmanagement.dto.MatchCreationDto
+import com.zcorp.opensportmanagement.dto.MatchDto
 import com.zcorp.opensportmanagement.dto.ResultDto
 import com.zcorp.opensportmanagement.model.Match
 import com.zcorp.opensportmanagement.repositories.*
@@ -37,7 +38,7 @@ open class MatchService @Autowired constructor(private val matchRepository: Matc
     }
 
     @Transactional
-    open fun createMatch(teamId: Int, dto: MatchCreationDto) {
+    open fun createMatch(teamId: Int, dto: MatchCreationDto): EventDto {
         try {
             val team = teamRepository.getOne(teamId)
             var matchBuilder = Match.Builder()
@@ -68,7 +69,7 @@ open class MatchService @Autowired constructor(private val matchRepository: Matc
                         .opponent(opponent)
                         .isTeamLocal(isTeamLocal)
             }
-            matchRepository.save(matchBuilder.build())
+            return matchRepository.save(matchBuilder.build()).toDto()
         } catch (e: EntityNotFoundException) {
             throw NotFoundException("Team $teamId does not exist")
         }

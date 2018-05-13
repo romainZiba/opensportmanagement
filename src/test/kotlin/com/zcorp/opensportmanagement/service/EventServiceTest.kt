@@ -8,7 +8,7 @@ import com.zcorp.opensportmanagement.model.Team
 import com.zcorp.opensportmanagement.repositories.EventRepository
 import com.zcorp.opensportmanagement.repositories.StadiumRepository
 import com.zcorp.opensportmanagement.repositories.TeamRepository
-import junit.framework.Assert.assertEquals
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
@@ -30,9 +30,9 @@ class EventServiceTest {
 
     @Before
     fun setUp() {
-        eventRepoMock = Mockito.mock(EventRepository::class.java)
-        stadiumRepoMock = Mockito.mock(StadiumRepository::class.java)
-        teamRepoMock = Mockito.mock(TeamRepository::class.java)
+        eventRepoMock = mock()
+        stadiumRepoMock = mock()
+        teamRepoMock = mock()
         eventService = EventService(eventRepoMock, stadiumRepoMock, teamRepoMock)
     }
 

@@ -13,7 +13,6 @@ import junit.framework.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.mockito.AdditionalMatchers.not
-import org.mockito.Mockito
 import java.time.LocalDate
 import javax.persistence.EntityNotFoundException
 
@@ -35,10 +34,10 @@ class ChampionshipServiceTest {
 
     @Before
     fun setUp() {
-        championshipRepoMock = Mockito.mock(ChampionshipRepository::class.java)
-        stadiumRepoMock = Mockito.mock(StadiumRepository::class.java)
-        opponentRepoMock = Mockito.mock(OpponentRepository::class.java)
-        matchRepoMock = Mockito.mock(MatchRepository::class.java)
+        championshipRepoMock = mock()
+        stadiumRepoMock = mock()
+        opponentRepoMock = mock()
+        matchRepoMock = mock()
         championshipService = ChampionshipService(championshipRepoMock, stadiumRepoMock, opponentRepoMock, matchRepoMock)
     }
 

@@ -1,6 +1,7 @@
 package com.zcorp.opensportmanagement.model
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.zcorp.opensportmanagement.dto.MessageDto
 import java.time.OffsetDateTime
 
 /**
@@ -9,10 +10,18 @@ import java.time.OffsetDateTime
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 open class Message {
-    var message: String = ""
-    var from: String = ""
-    var recipients: List<String> = emptyList() // If empty, everyone is targeted
+    fun toDto(): MessageDto {
+        return MessageDto(body, authorUsername, authorFirstName, authorLastName, conversationId, recipients,
+                conversationTopic, time?.toLocalDateTime())
+    }
+
+    var body = ""
+    var authorUsername = ""   // Username of the author
+    var authorFirstName = ""
+    var authorLastName = ""
+    var recipients: List<Int> = emptyList() // If empty, everyone is targeted. The recipients contain list of team member ids
     var time: OffsetDateTime? = null
-    var conversationTopic: String = ""
-    var conversationId: String = ""
+    var conversationTopic = ""
+    var conversationId = ""
+    var teamId: Int? = null
 }

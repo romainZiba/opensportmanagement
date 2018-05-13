@@ -1,12 +1,12 @@
 package com.zcorp.opensportmanagement.service
 
+import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.whenever
 import com.zcorp.opensportmanagement.model.Team
 import com.zcorp.opensportmanagement.repositories.*
-import junit.framework.Assert.assertEquals
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito
 
 
 class TeamServiceTest {
@@ -25,11 +25,11 @@ class TeamServiceTest {
         mockTeams = teamIds.map {
             Team("SuperName $it", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "", it)
         }
-        teamRepoMock = Mockito.mock(TeamRepository::class.java)
-        teamMemberRepoMock = Mockito.mock(TeamMemberRepository::class.java)
-        userRepoMock = Mockito.mock(UserRepository::class.java)
-        seasonRepoMock = Mockito.mock(SeasonRepository::class.java)
-        opponentRepoMock = Mockito.mock(OpponentRepository::class.java)
+        teamRepoMock = mock()
+        teamMemberRepoMock = mock()
+        userRepoMock = mock()
+        seasonRepoMock = mock()
+        opponentRepoMock = mock()
         teamService = TeamService(teamRepoMock, teamMemberRepoMock, userRepoMock, seasonRepoMock, opponentRepoMock)
     }
 

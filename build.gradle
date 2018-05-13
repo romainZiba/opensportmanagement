@@ -59,14 +59,6 @@ dependencies {
     runtime('org.postgresql:postgresql:42.1.4')
     implementation group: 'com.rethinkdb', name: 'rethinkdb-driver', version: '2.3.3'
 
-    runtime("org.springframework.boot:spring-boot-properties-migrator")
-
-    // Client application
-    implementation 'org.webjars:jquery:3.0.0-alpha1'
-    implementation 'org.webjars:sockjs-client:1.0.0'
-    implementation 'org.webjars:stomp-websocket:2.3.3'
-    implementation 'org.webjars:momentjs:2.11.1'
-
     // Tests dependencies
     testImplementation('org.springframework.boot:spring-boot-starter-test')
     testImplementation group: 'junit', name: 'junit', version: '4.11'

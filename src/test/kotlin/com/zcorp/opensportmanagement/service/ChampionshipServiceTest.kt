@@ -8,14 +8,12 @@ import com.zcorp.opensportmanagement.repositories.ChampionshipRepository
 import com.zcorp.opensportmanagement.repositories.MatchRepository
 import com.zcorp.opensportmanagement.repositories.OpponentRepository
 import com.zcorp.opensportmanagement.repositories.StadiumRepository
-import com.zcorp.opensportmanagement.rest.NotFoundException
 import io.kotlintest.shouldBe
 import io.kotlintest.shouldThrow
 import io.kotlintest.specs.StringSpec
 import org.mockito.AdditionalMatchers.not
 import java.time.LocalDate
 import javax.persistence.EntityNotFoundException
-
 
 class ChampionshipServiceTest : StringSpec() {
     private val championshipRepoMock: ChampionshipRepository = mock()

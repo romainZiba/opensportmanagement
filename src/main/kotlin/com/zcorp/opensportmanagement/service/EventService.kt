@@ -7,7 +7,6 @@ import com.zcorp.opensportmanagement.repositories.EventRepository
 import com.zcorp.opensportmanagement.repositories.StadiumRepository
 import com.zcorp.opensportmanagement.repositories.TeamMemberRepository
 import com.zcorp.opensportmanagement.repositories.TeamRepository
-import com.zcorp.opensportmanagement.rest.NotFoundException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -82,6 +81,9 @@ open class EventService @Autowired constructor(private val eventRepository: Even
         try {
             val event = eventRepository.getOne(eventId)
             val teamMember = teamMemberRepository.findByUsername(username, event.team.id) ?: throw NotFoundException("Team member $username does not exist")
+            if (event.fromDateTime.isBefore(LocalDateTime.now())) {
+                throw PastEventException(eventId)
+            }
             event.participate(teamMember, present)
             return eventRepository.save(event).toDto()
         } catch (e: EntityNotFoundException) {

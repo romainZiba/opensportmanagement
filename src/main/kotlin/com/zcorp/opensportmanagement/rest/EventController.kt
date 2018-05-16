@@ -5,6 +5,7 @@ import com.zcorp.opensportmanagement.dto.MessageDto
 import com.zcorp.opensportmanagement.security.AccessController
 import com.zcorp.opensportmanagement.service.EventService
 import com.zcorp.opensportmanagement.service.MessagingService
+import com.zcorp.opensportmanagement.service.NotFoundException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.rest.webmvc.RepositoryRestController
 import org.springframework.http.ResponseEntity

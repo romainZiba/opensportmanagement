@@ -12,7 +12,6 @@ import com.zcorp.opensportmanagement.messaging.RethinkDBConnectionFactory
 import com.zcorp.opensportmanagement.model.Conversation
 import com.zcorp.opensportmanagement.model.Message
 import com.zcorp.opensportmanagement.rest.MessageController
-import com.zcorp.opensportmanagement.rest.NotFoundException
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Autowired

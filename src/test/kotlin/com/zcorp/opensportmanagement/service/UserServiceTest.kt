@@ -5,7 +5,6 @@ import com.zcorp.opensportmanagement.model.Team
 import com.zcorp.opensportmanagement.model.User
 import com.zcorp.opensportmanagement.repositories.TeamRepository
 import com.zcorp.opensportmanagement.repositories.UserRepository
-import com.zcorp.opensportmanagement.rest.NotFoundException
 import io.kotlintest.shouldBe
 import io.kotlintest.shouldThrow
 import io.kotlintest.specs.StringSpec

@@ -1,16 +1,11 @@
 package com.zcorp.opensportmanagement.service
 
-import com.zcorp.opensportmanagement.dto.EventDto
-import com.zcorp.opensportmanagement.dto.TeamMemberDto
 import com.zcorp.opensportmanagement.dto.UserDto
 import com.zcorp.opensportmanagement.dto.UserUpdateDto
 import com.zcorp.opensportmanagement.model.TeamMember
 import com.zcorp.opensportmanagement.model.User
-import com.zcorp.opensportmanagement.repositories.EventRepository
-import com.zcorp.opensportmanagement.repositories.TeamMemberRepository
 import com.zcorp.opensportmanagement.repositories.TeamRepository
 import com.zcorp.opensportmanagement.repositories.UserRepository
-import com.zcorp.opensportmanagement.rest.NotFoundException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service

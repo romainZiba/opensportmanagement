@@ -4,6 +4,7 @@ import com.zcorp.opensportmanagement.dto.EventDto
 import com.zcorp.opensportmanagement.dto.ResultDto
 import com.zcorp.opensportmanagement.security.AccessController
 import com.zcorp.opensportmanagement.service.MatchService
+import com.zcorp.opensportmanagement.service.NotFoundException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.rest.webmvc.RepositoryRestController
 import org.springframework.http.ResponseEntity

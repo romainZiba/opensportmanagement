@@ -6,7 +6,6 @@ import com.zcorp.opensportmanagement.model.Season
 import com.zcorp.opensportmanagement.model.Team
 import com.zcorp.opensportmanagement.model.TeamMember
 import com.zcorp.opensportmanagement.repositories.*
-import javassist.NotFoundException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -37,7 +36,7 @@ open class TeamService @Autowired constructor(private val teamRepository: TeamRe
 
     @Transactional
     open fun createTeam(teamDto: TeamDto, creatorUsername: String): TeamDto {
-        val user = userRepository.findByUsername(creatorUsername) ?: throw UserNotFoundException()
+        val user = userRepository.findByUsername(creatorUsername) ?: throw NotFoundException("User $creatorUsername does not exist")
         var team = Team(teamDto.name, teamDto.sport, teamDto.genderKind, teamDto.ageGroup, teamDto.imgUrl)
         team = teamRepository.save(team)
         val teamMember = TeamMember(mutableSetOf(TeamMember.Role.ADMIN), team)

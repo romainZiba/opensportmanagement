@@ -2,8 +2,7 @@ package com.zcorp.opensportmanagement.rest
 
 import com.zcorp.opensportmanagement.dto.*
 import com.zcorp.opensportmanagement.security.AccessController
-import com.zcorp.opensportmanagement.service.EventService
-import com.zcorp.opensportmanagement.service.TeamService
+import com.zcorp.opensportmanagement.service.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Pageable
 import org.springframework.data.rest.webmvc.RepositoryRestController
@@ -165,22 +164,4 @@ open class TeamController @Autowired constructor(private val teamService: TeamSe
         }
         throw UserForbiddenException()
     }
-
-    /** Handle the error */
-    @ExceptionHandler(NotFoundException::class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    fun handleError(e: NotFoundException) = e.message
-
-    @ExceptionHandler(EntityAlreadyExistsException::class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    fun handleError(e: EntityAlreadyExistsException) = e.message
-
-    @ExceptionHandler(UserForbiddenException::class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    fun handleError(e: UserForbiddenException) = e.message
-
-    @ExceptionHandler(UserAlreadyMemberException::class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    fun handleError(e: UserAlreadyMemberException) = e.message
-
 }

@@ -4,6 +4,7 @@ package com.zcorp.opensportmanagement.rest
 import com.zcorp.opensportmanagement.dto.UserDto
 import com.zcorp.opensportmanagement.dto.UserUpdateDto
 import com.zcorp.opensportmanagement.model.User
+import com.zcorp.opensportmanagement.service.NotFoundException
 import com.zcorp.opensportmanagement.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.rest.webmvc.RepositoryRestController
@@ -38,13 +39,4 @@ open class UserController @Autowired constructor(private val userService: UserSe
         val userDto = userService.updateUserProfile(dto, authentication.name)
         return ResponseEntity.ok(userDto)
     }
-
-    /** Handle the error */
-    @ExceptionHandler(NotFoundException::class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    fun handleError(e: NotFoundException) = e.message
-
-    @ExceptionHandler(EntityAlreadyExistsException::class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    fun handleError(e: EntityAlreadyExistsException) = e.message
 }

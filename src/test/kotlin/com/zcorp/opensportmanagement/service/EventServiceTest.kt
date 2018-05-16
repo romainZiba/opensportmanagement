@@ -7,7 +7,6 @@ import com.zcorp.opensportmanagement.repositories.EventRepository
 import com.zcorp.opensportmanagement.repositories.StadiumRepository
 import com.zcorp.opensportmanagement.repositories.TeamMemberRepository
 import com.zcorp.opensportmanagement.repositories.TeamRepository
-import com.zcorp.opensportmanagement.rest.NotFoundException
 import io.kotlintest.shouldBe
 import io.kotlintest.shouldThrow
 import io.kotlintest.specs.StringSpec
@@ -22,8 +21,8 @@ class EventServiceTest: StringSpec() {
     private val mockTeam = Team("SuperNam", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "", teamId)
     private val mockStadium = Stadium("The stadium", "", "Toulouse", mockTeam, stadiumId)
     private val mockEvent = Event.Builder().name("TheOne")
-            .fromDate(LocalDateTime.of(2018, 1, 1, 10, 0, 0))
-            .toDate(LocalDateTime.of(2018, 1, 1, 11, 0, 0))
+            .fromDate(LocalDateTime.now().plusMinutes(2L))
+            .toDate(LocalDateTime.now().plusMinutes(5L))
             .place("here")
             .team(mockTeam)
             .build()
@@ -127,14 +126,28 @@ class EventServiceTest: StringSpec() {
         }
 
         "user trying to participate to an event that does not exist should not be possible" {
+            whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
+            whenever(eventRepoMock.getOne(any())).thenThrow(javax.persistence.EntityNotFoundException())
             shouldThrow<NotFoundException> {
-                whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
-                whenever(eventRepoMock.getOne(any())).thenThrow(javax.persistence.EntityNotFoundException())
                 eventService.participate(username, eventId, true)
             }
         }
 
-        "user trying to participate to a future event should be possible" {
+        "user trying to participate to a past event should not be possible" {
+            val pastEvent = Event.Builder().name("TheOne")
+                    .fromDate(LocalDateTime.of(2018, 1, 1, 10, 0, 0))
+                    .toDate(LocalDateTime.of(2018, 1, 1, 11, 0, 0))
+                    .place("here")
+                    .team(mockTeam)
+                    .build()
+            whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
+            whenever(eventRepoMock.getOne(any())).thenReturn(pastEvent)
+            shouldThrow<PastEventException> {
+                eventService.participate(username, eventId, true)
+            }
+        }
+
+        "user trying to participate to a future event should add him in the present members" {
             mockEvent.id = eventId
             mockTeamMember.user = mockUser
             whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
@@ -163,7 +176,7 @@ class EventServiceTest: StringSpec() {
             eventDto.visitorTeamScore shouldBe null
         }
 
-        "user trying to participate to a future event already full should add him in the waiting list" {
+        "user trying to participate to a future event already full should add him in the waiting members" {
             mockEvent.id = eventId
             mockEvent.maxMembers = 0
             mockTeamMember.user = mockUser

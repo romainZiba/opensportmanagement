@@ -2,7 +2,6 @@ package com.zcorp.opensportmanagement.service
 
 import com.zcorp.opensportmanagement.dto.EventDto
 import com.zcorp.opensportmanagement.dto.MatchCreationDto
-import com.zcorp.opensportmanagement.dto.MatchDto
 import com.zcorp.opensportmanagement.dto.ResultDto
 import com.zcorp.opensportmanagement.model.Match
 import com.zcorp.opensportmanagement.repositories.*

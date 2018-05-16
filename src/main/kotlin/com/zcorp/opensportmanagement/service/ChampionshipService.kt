@@ -1,7 +1,7 @@
 package com.zcorp.opensportmanagement.service
 
 import com.zcorp.opensportmanagement.dto.ChampionshipDto
-import com.zcorp.opensportmanagement.dto.MatchDto
+import com.zcorp.opensportmanagement.dto.MatchCreationDto
 import com.zcorp.opensportmanagement.model.Match
 import com.zcorp.opensportmanagement.repositories.ChampionshipRepository
 import com.zcorp.opensportmanagement.repositories.MatchRepository
@@ -9,6 +9,7 @@ import com.zcorp.opensportmanagement.repositories.OpponentRepository
 import com.zcorp.opensportmanagement.repositories.StadiumRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 import javax.persistence.EntityNotFoundException
 import javax.transaction.Transactional
 
@@ -34,26 +35,29 @@ open class ChampionshipService @Autowired constructor(private val championshipRe
     }
 
     @Transactional
-    open fun createMatch(matchDto: MatchDto, championshipId: Int): Match {
+    open fun createMatch(dto: MatchCreationDto, championshipId: Int): Match {
         try {
             val championship = championshipRepository.getOne(championshipId)
-            val opponentName = matchDto.opponentName
-            val stadiumName = matchDto.stadiumName
-            val stadium = stadiumRepository.findByName(stadiumName) ?: throw NotFoundException("Stadium $stadiumName does not exist")
-            val opponent = opponentRepository.findByName(opponentName) ?: throw NotFoundException("Opponent $opponentName does not exist")
+            val opponentId = dto.opponentId ?: throw MissingParameterException("opponentId")
+            val stadiumId = dto.stadiumId ?: throw MissingParameterException("stadiumId")
+            val stadium = stadiumRepository.getOne(stadiumId)
+            val opponent = opponentRepository.getOne(opponentId)
+            if (dto.fromDate.isBefore(LocalDateTime.now())) {
+                throw PastEventException()
+            }
             val match = Match.Builder()
-                    .name(matchDto.name)
-                    .fromDate( matchDto.fromDateTime)
-                    .toDate(matchDto.toDateTime)
+                    .name(dto.name)
+                    .fromDate(dto.fromDate)
+                    .toDate(dto.toDate)
                     .stadium(stadium)
                     .opponent(opponent)
                     .team(championship.season.team)
                     .championship(championship)
+                    .type(dto.matchType)
                     .build()
             return matchRepository.save(match)
         } catch (e: EntityNotFoundException) {
-            throw NotFoundException("Championship $championshipId does not exist")
+            throw NotFoundException(e.message ?: "")
         }
-
     }
 }

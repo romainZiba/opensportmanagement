@@ -9,9 +9,9 @@ data class MatchDto(val _id: Int, val name: String, val description: String, val
 
 data class MatchCreationDto(val name: String,
                             val fromDate: LocalDateTime,
-                            val toDate: LocalDateTime?,
-                            val place: String?,
-                            val stadiumId: Int?,
+                            val toDate: LocalDateTime? = null,
+                            val place: String? = null,
+                            val stadiumId: Int? = null,
                             val matchType: Match.MatchType,
                             val championshipId: Int? = null,
                             var opponentId: Int? = null,

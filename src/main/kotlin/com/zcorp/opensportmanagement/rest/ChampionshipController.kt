@@ -2,6 +2,7 @@ package com.zcorp.opensportmanagement.rest
 
 import com.zcorp.opensportmanagement.dto.ChampionshipDto
 import com.zcorp.opensportmanagement.dto.EventDto
+import com.zcorp.opensportmanagement.dto.MatchCreationDto
 import com.zcorp.opensportmanagement.dto.MatchDto
 import com.zcorp.opensportmanagement.security.AccessController
 import com.zcorp.opensportmanagement.service.ChampionshipService
@@ -41,11 +42,11 @@ open class ChampionshipController @Autowired constructor(private val championshi
 
     @PostMapping("/{championshipId}/matches")
     open fun createMatch(@NotNull @PathVariable("championshipId") championshipId: Int,
-                         @RequestBody matchDto: MatchDto,
+                         @RequestBody dto: MatchCreationDto,
                          authentication: Authentication): ResponseEntity<EventDto> {
         val championshipDto = championshipService.getChampionship(championshipId)
         if (accessController.isTeamAdmin(authentication, championshipDto.teamId!!)) {
-            val match = championshipService.createMatch(matchDto, championshipId)
+            val match = championshipService.createMatch(dto, championshipId)
             return ResponseEntity(match.toDto(), HttpStatus.CREATED)
         }
         throw UserForbiddenException()

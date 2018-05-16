@@ -2,111 +2,196 @@ package com.zcorp.opensportmanagement.service
 
 import com.nhaarman.mockito_kotlin.*
 import com.zcorp.opensportmanagement.dto.EventCreationDto
-import com.zcorp.opensportmanagement.model.Event
-import com.zcorp.opensportmanagement.model.Stadium
-import com.zcorp.opensportmanagement.model.Team
+import com.zcorp.opensportmanagement.model.*
 import com.zcorp.opensportmanagement.repositories.EventRepository
 import com.zcorp.opensportmanagement.repositories.StadiumRepository
+import com.zcorp.opensportmanagement.repositories.TeamMemberRepository
 import com.zcorp.opensportmanagement.repositories.TeamRepository
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Test
-import org.mockito.Mockito
+import com.zcorp.opensportmanagement.rest.NotFoundException
+import io.kotlintest.shouldBe
+import io.kotlintest.shouldThrow
+import io.kotlintest.specs.StringSpec
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 
-
-class EventServiceTest {
-    private lateinit var eventService: EventService
-    private lateinit var eventRepoMock: EventRepository
-    private lateinit var stadiumRepoMock: StadiumRepository
-    private lateinit var teamRepoMock: TeamRepository
+class EventServiceTest: StringSpec() {
     private val teamId = 5
     private val stadiumId = 1
     private val mockTeam = Team("SuperNam", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "", teamId)
     private val mockStadium = Stadium("The stadium", "", "Toulouse", mockTeam, stadiumId)
+    private val mockEvent = Event.Builder().name("TheOne")
+            .fromDate(LocalDateTime.of(2018, 1, 1, 10, 0, 0))
+            .toDate(LocalDateTime.of(2018, 1, 1, 11, 0, 0))
+            .place("here")
+            .team(mockTeam)
+            .build()
+    private val teamMemberId = 12
+    private val username = "username"
+    private val firstName = "firstname"
+    private val lastName = "ln"
+    private val password = "whatever"
+    private val email = "this@camail.com"
+    private val phoneNumber = "55965"
+    private val eventId = 7
 
-    @Before
-    fun setUp() {
-        eventRepoMock = mock()
-        stadiumRepoMock = mock()
-        teamRepoMock = mock()
-        eventService = EventService(eventRepoMock, stadiumRepoMock, teamRepoMock)
-    }
+    private val mockUser = User(username, firstName, lastName, password, email, phoneNumber)
+    private val mockTeamMember = TeamMember(mutableSetOf(TeamMember.Role.ADMIN), mockTeam, "", teamMemberId)
 
-    @Test
-    fun createPunctualEvent() {
-        whenever(teamRepoMock.getOne(any())).thenReturn(mockTeam)
-        whenever(stadiumRepoMock.getOne(any())).thenReturn(mockStadium)
-        val fromDate = LocalDateTime.of(2018, 1, 1, 0, 0)
-        val toDate = LocalDateTime.of(2018, 1, 1, 10, 0)
-        val dto = EventCreationDto("event", fromDate, toDate, null, mockStadium.id, false,
-                null, null, null, null, null)
-        eventService.createEvent(teamId, dto)
-        argumentCaptor<Event>().apply {
-            verify(eventRepoMock, times(1)).save(capture())
-            assertEquals(1, allValues.size)
-            assertEquals("event", firstValue.name)
-            assertEquals(fromDate, firstValue.fromDateTime)
-            assertEquals(toDate, firstValue.toDateTime)
-            assertEquals(null, firstValue.place)
-            assertEquals(mockStadium, firstValue.stadium)
-            assertEquals(mockTeam, firstValue.team)
+    private val eventRepoMock: EventRepository = mock()
+    private val stadiumRepoMock: StadiumRepository = mock()
+    private val teamRepoMock: TeamRepository = mock()
+    private val teamMemberRepoMock: TeamMemberRepository = mock()
+    private val eventService = EventService(eventRepoMock, teamMemberRepoMock, stadiumRepoMock, teamRepoMock)
+
+    override fun isInstancePerTest() = true
+
+    init {
+        "create punctual event should work" {
+            whenever(teamRepoMock.getOne(any())).thenReturn(mockTeam)
+            whenever(stadiumRepoMock.getOne(any())).thenReturn(mockStadium)
+            val fromDate = LocalDateTime.of(2018, 1, 1, 0, 0)
+            val toDate = LocalDateTime.of(2018, 1, 1, 10, 0)
+            val dto = EventCreationDto("event", fromDate, toDate, null, mockStadium.id, false,
+                    null, null, null, null, null)
+            eventService.createEvent(teamId, dto)
+            argumentCaptor<Event>().apply {
+                verify(eventRepoMock, times(1)).save(capture())
+                allValues.size shouldBe 1
+                firstValue.name shouldBe "event"
+                firstValue.fromDateTime shouldBe fromDate
+                firstValue.toDateTime shouldBe toDate
+                firstValue.place shouldBe null
+                firstValue.stadium shouldBe mockStadium
+                firstValue.team shouldBe mockTeam
+            }
+        }
+
+        "create recurrent event should produce one event" {
+            whenever(teamRepoMock.getOne(any())).thenReturn(mockTeam)
+            whenever(stadiumRepoMock.getOne(any())).thenReturn(mockStadium)
+            val fromDate = LocalDate.of(2018, 1, 1)
+            val toDate = LocalDate.of(2018, 1, 8)
+            val fromTime = LocalTime.of(10, 0)
+            val toTime = LocalTime.of(11, 0)
+            val dto = EventCreationDto("event", null, null, null, mockStadium.id, true,
+                    mutableSetOf(DayOfWeek.WEDNESDAY), fromTime, toTime, fromDate, toDate)
+            eventService.createEvent(teamId, dto)
+            argumentCaptor<List<Event>>().apply {
+                verify(eventRepoMock, times(1)).saveAll(capture())
+                allValues.size shouldBe 1
+                firstValue.size shouldBe 1
+                val event = firstValue[0]
+                val expectedDate = LocalDate.of(2018, 1, 3)
+                event.name shouldBe "event"
+                event.fromDateTime shouldBe LocalDateTime.of(expectedDate, fromTime)
+                event.toDateTime shouldBe LocalDateTime.of(expectedDate, toTime)
+                event.place shouldBe null
+                event.stadium shouldBe mockStadium
+                event.team shouldBe mockTeam
+            }
+        }
+
+        "create recurrent event should produce several events" {
+            whenever(teamRepoMock.getOne(any())).thenReturn(mockTeam)
+            whenever(stadiumRepoMock.getOne(any())).thenReturn(mockStadium)
+            val fromDate = LocalDate.of(2018, 1, 5) // It's a friday
+            val toDate = LocalDate.of(2018, 3, 31)
+            val fromTime = LocalTime.of(10, 0)
+            val toTime = LocalTime.of(11, 0)
+            val dto = EventCreationDto("event", null, null, null, mockStadium.id, true,
+                    mutableSetOf(DayOfWeek.WEDNESDAY, DayOfWeek.TUESDAY), fromTime, toTime, fromDate, toDate)
+            eventService.createEvent(teamId, dto)
+            argumentCaptor<List<Event>>().apply {
+                verify(eventRepoMock, times(1)).saveAll(capture())
+                allValues.size shouldBe 1
+                firstValue.size shouldBe 24
+                val event = firstValue[0]
+                val expectedDate = LocalDate.of(2018, 1, 9)
+                event.name shouldBe "event"
+                event.fromDateTime shouldBe LocalDateTime.of(expectedDate, fromTime)
+                event.toDateTime shouldBe LocalDateTime.of(expectedDate, toTime)
+                event.place shouldBe null
+                event.stadium shouldBe mockStadium
+                event.team shouldBe mockTeam
+            }
+        }
+
+        "user that does not exist trying to participate to an event should not be possible" {
+            shouldThrow<NotFoundException> {
+                whenever(eventRepoMock.getOne(any())).thenReturn(mockEvent)
+                whenever(teamMemberRepoMock.findByUsername(any(), any())).thenReturn(null)
+                eventService.participate("Foo", eventId, true)
+            }
+        }
+
+        "user trying to participate to an event that does not exist should not be possible" {
+            shouldThrow<NotFoundException> {
+                whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
+                whenever(eventRepoMock.getOne(any())).thenThrow(javax.persistence.EntityNotFoundException())
+                eventService.participate(username, eventId, true)
+            }
+        }
+
+        "user trying to participate to a future event should be possible" {
+            mockEvent.id = eventId
+            mockTeamMember.user = mockUser
+            whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
+            whenever(eventRepoMock.getOne(any())).thenReturn(mockEvent)
+            whenever(eventRepoMock.save(mockEvent)).thenReturn(mockEvent)
+            whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
+            val eventDto = eventService.participate(username, eventId, true)
+            mockEvent.getPresentMembers().size shouldBe 1
+            mockEvent.getAbsentMembers().size shouldBe 0
+            mockEvent.getWaitingMembers().size shouldBe 0
+            verify(eventRepoMock, times(1)).save(mockEvent)
+            eventDto.name shouldBe mockEvent.name
+            eventDto._id shouldBe mockEvent.id
+            eventDto.absentMembers shouldBe emptyList<TeamMember>()
+            eventDto.waitingMembers shouldBe emptyList<TeamMember>()
+            eventDto.presentMembers shouldBe listOf(mockTeamMember.toDto())
+            eventDto.fromDate shouldBe mockEvent.fromDateTime
+            eventDto.toDate shouldBe mockEvent.toDateTime
+            eventDto.place shouldBe mockEvent.place
+            eventDto.isDone shouldBe null
+            eventDto.localTeamName shouldBe null
+            eventDto.localTeamScore shouldBe null
+            eventDto.localTeamImgUrl shouldBe null
+            eventDto.visitorTeamImgUrl shouldBe null
+            eventDto.visitorTeamName shouldBe null
+            eventDto.visitorTeamScore shouldBe null
+        }
+
+        "user trying to participate to a future event already full should add him in the waiting list" {
+            mockEvent.id = eventId
+            mockEvent.maxMembers = 0
+            mockTeamMember.user = mockUser
+            whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
+            whenever(eventRepoMock.getOne(any())).thenReturn(mockEvent)
+            whenever(eventRepoMock.save(mockEvent)).thenReturn(mockEvent)
+            whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
+            mockEvent.getPresentMembers().size shouldBe 0
+            val eventDto = eventService.participate(username, eventId, true)
+            mockEvent.getPresentMembers().size shouldBe 0
+            mockEvent.getAbsentMembers().size shouldBe 0
+            mockEvent.getWaitingMembers().size shouldBe 1
+            verify(eventRepoMock, times(1)).save(mockEvent)
+            eventDto.name shouldBe mockEvent.name
+            eventDto._id shouldBe mockEvent.id
+            eventDto.absentMembers shouldBe emptyList<TeamMember>()
+            eventDto.presentMembers shouldBe emptyList<TeamMember>()
+            eventDto.waitingMembers shouldBe listOf(mockTeamMember.toDto())
+            eventDto.fromDate shouldBe mockEvent.fromDateTime
+            eventDto.toDate shouldBe mockEvent.toDateTime
+            eventDto.place shouldBe mockEvent.place
+            eventDto.isDone shouldBe null
+            eventDto.localTeamName shouldBe null
+            eventDto.localTeamScore shouldBe null
+            eventDto.localTeamImgUrl shouldBe null
+            eventDto.visitorTeamImgUrl shouldBe null
+            eventDto.visitorTeamName shouldBe null
+            eventDto.visitorTeamScore shouldBe null
         }
     }
-
-    @Test
-    fun createRecurrentEventOneDate() {
-        whenever(teamRepoMock.getOne(any())).thenReturn(mockTeam)
-        whenever(stadiumRepoMock.getOne(any())).thenReturn(mockStadium)
-        val fromDate = LocalDate.of(2018, 1, 1)
-        val toDate = LocalDate.of(2018, 1, 8)
-        val fromTime = LocalTime.of(10, 0)
-        val toTime = LocalTime.of(11, 0)
-        val dto = EventCreationDto("event", null, null, null, mockStadium.id, true,
-                mutableSetOf(DayOfWeek.WEDNESDAY), fromTime, toTime, fromDate, toDate)
-        eventService.createEvent(teamId, dto)
-        argumentCaptor<List<Event>>().apply {
-            verify(eventRepoMock, times(1)).saveAll(capture())
-            assertEquals(1, allValues.size)
-            assertEquals(1, firstValue.size)
-            val event = firstValue[0]
-            val expectedDate = LocalDate.of(2018, 1, 3)
-            assertEquals("event", event.name)
-            assertEquals(LocalDateTime.of(expectedDate, fromTime), event.fromDateTime)
-            assertEquals(LocalDateTime.of(expectedDate, toTime), event.toDateTime)
-            assertEquals(null, event.place)
-            assertEquals(mockStadium, event.stadium)
-            assertEquals(mockTeam, event.team)
-        }
-    }
-
-    @Test
-    fun createRecurrentEventSeveralDates() {
-        whenever(teamRepoMock.getOne(any())).thenReturn(mockTeam)
-        whenever(stadiumRepoMock.getOne(any())).thenReturn(mockStadium)
-        val fromDate = LocalDate.of(2018, 1, 5) // It's a friday
-        val toDate = LocalDate.of(2018, 3, 31)
-        val fromTime = LocalTime.of(10, 0)
-        val toTime = LocalTime.of(11, 0)
-        val dto = EventCreationDto("event", null, null, null, mockStadium.id, true,
-                mutableSetOf(DayOfWeek.WEDNESDAY, DayOfWeek.TUESDAY), fromTime, toTime, fromDate, toDate)
-        eventService.createEvent(teamId, dto)
-        argumentCaptor<List<Event>>().apply {
-            verify(eventRepoMock, times(1)).saveAll(capture())
-            assertEquals(1, allValues.size)
-            assertEquals(24, firstValue.size)
-            val event = firstValue[0]
-            val expectedDate = LocalDate.of(2018, 1, 9)
-            assertEquals("event", event.name)
-            assertEquals(LocalDateTime.of(expectedDate, fromTime), event.fromDateTime)
-            assertEquals(LocalDateTime.of(expectedDate, toTime), event.toDateTime)
-            assertEquals(null, event.place)
-            assertEquals(mockStadium, event.stadium)
-            assertEquals(mockTeam, event.team)
-        }
-    }
-
 }

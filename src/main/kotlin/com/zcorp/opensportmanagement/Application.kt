@@ -34,8 +34,7 @@ open class Application {
                   teamService: TeamService,
                   stadiumService: StadiumService,
                   seasonService: SeasonService,
-                  matchService: MatchService,
-                  messagingService: MessagingService) = CommandLineRunner {
+                  matchService: MatchService) = CommandLineRunner {
 
 
         var adminTeam1And2 = User("CR", "Coach", "Rock", "CR",
@@ -103,8 +102,6 @@ open class Application {
         val dto = EventCreationDto("event", null, null, null, stadiumDto._id!!, true,
                 mutableSetOf(DayOfWeek.WEDNESDAY, DayOfWeek.TUESDAY), fromTime, toTime, fromDate, toDate)
         eventService.createEvent(team1Dto._id!!, dto)
-        messagingService.createMessage(MessageDto("Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... Pour cet évènement blabla... "), "CR", lastDto?._id)
-        messagingService.createMessage(MessageDto("Ca roule"), "PW", lastDto?._id)
     }
 
 }

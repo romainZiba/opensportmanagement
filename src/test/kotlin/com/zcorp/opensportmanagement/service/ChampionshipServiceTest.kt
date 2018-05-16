@@ -9,57 +9,50 @@ import com.zcorp.opensportmanagement.repositories.MatchRepository
 import com.zcorp.opensportmanagement.repositories.OpponentRepository
 import com.zcorp.opensportmanagement.repositories.StadiumRepository
 import com.zcorp.opensportmanagement.rest.NotFoundException
-import junit.framework.Assert.assertEquals
-import org.junit.Before
-import org.junit.Test
+import io.kotlintest.shouldBe
+import io.kotlintest.shouldThrow
+import io.kotlintest.specs.StringSpec
 import org.mockito.AdditionalMatchers.not
 import java.time.LocalDate
 import javax.persistence.EntityNotFoundException
 
 
-class ChampionshipServiceTest {
-    private lateinit var championshipService: ChampionshipService
-    private lateinit var championshipRepoMock: ChampionshipRepository
-    private lateinit var stadiumRepoMock: StadiumRepository
-    private lateinit var opponentRepoMock: OpponentRepository
-    private lateinit var matchRepoMock: MatchRepository
+class ChampionshipServiceTest : StringSpec() {
+    private val championshipRepoMock: ChampionshipRepository = mock()
+    private val stadiumRepoMock: StadiumRepository = mock()
+    private val opponentRepoMock: OpponentRepository = mock()
+    private val matchRepoMock: MatchRepository = mock()
+    private val championshipService = ChampionshipService(championshipRepoMock, stadiumRepoMock, opponentRepoMock, matchRepoMock)
 
     private val championshipId = 17
-    private val stadiumId = 1
     private val teamId = 19
     private val seasonId = 230
     private val mockTeam = Team("SuperNam", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "", teamId)
     private val mockSeason = Season("Season", LocalDate.of(2018, 1, 1), LocalDate.of(2018, 9, 29), Season.Status.CURRENT, mockTeam, seasonId)
     private val mockChampionship = Championship("Champ", mockSeason, championshipId)
 
-    @Before
-    fun setUp() {
-        championshipRepoMock = mock()
-        stadiumRepoMock = mock()
-        opponentRepoMock = mock()
-        matchRepoMock = mock()
-        championshipService = ChampionshipService(championshipRepoMock, stadiumRepoMock, opponentRepoMock, matchRepoMock)
-    }
+    override fun isInstancePerTest() = true
 
-    @Test
-    fun getExistingChampionship() {
-        whenever(championshipRepoMock.getOne(championshipId)).thenReturn(mockChampionship)
-        val c = championshipService.getChampionship(championshipId)
-        assertEquals(mockChampionship.toDto(), c)
-    }
+    init {
+        "get championship that exists should be possible" {
+            whenever(championshipRepoMock.getOne(championshipId)).thenReturn(mockChampionship)
+            val c = championshipService.getChampionship(championshipId)
+            c shouldBe mockChampionship.toDto()
+        }
 
-    @Test(expected = NotFoundException::class)
-    fun getNotExistingChampionship() {
-        whenever(championshipRepoMock.getOne(not(eq(championshipId)))).thenThrow(EntityNotFoundException())
-        championshipService.getChampionship(championshipId + 1)
-    }
+        "get championship that does not exist should not be possible" {
+            whenever(championshipRepoMock.getOne(not(eq(championshipId)))).thenThrow(EntityNotFoundException())
+            shouldThrow<NotFoundException> {
+                championshipService.getChampionship(championshipId + 1)
+            }
+        }
 
-    @Test
-    fun deleteChampionship() {
-        whenever(matchRepoMock.deleteAllMatches(championshipId)).thenReturn(5)
-        doNothing().whenever(championshipRepoMock).deleteById(championshipId)
-        championshipService.deleteChampionship(championshipId)
-        verify(matchRepoMock, times(1)).deleteAllMatches(championshipId)
-        verify(championshipRepoMock, times(1)).deleteById(championshipId)
+        "delete championship that exists should be possible" {
+            whenever(matchRepoMock.deleteAllMatches(championshipId)).thenReturn(5)
+            doNothing().whenever(championshipRepoMock).deleteById(championshipId)
+            championshipService.deleteChampionship(championshipId)
+            verify(matchRepoMock, times(1)).deleteAllMatches(championshipId)
+            verify(championshipRepoMock, times(1)).deleteById(championshipId)
+        }
     }
 }

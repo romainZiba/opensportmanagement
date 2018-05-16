@@ -5,7 +5,6 @@ import com.zcorp.opensportmanagement.dto.MessageDto
 import com.zcorp.opensportmanagement.security.AccessController
 import com.zcorp.opensportmanagement.service.EventService
 import com.zcorp.opensportmanagement.service.MessagingService
-import com.zcorp.opensportmanagement.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.rest.webmvc.RepositoryRestController
 import org.springframework.http.ResponseEntity
@@ -16,7 +15,6 @@ import javax.validation.constraints.NotNull
 @RepositoryRestController
 @RequestMapping("/events")
 open class EventController @Autowired constructor(private val eventService: EventService,
-                                                  private val userService: UserService,
                                                   private val messagingService: MessagingService,
                                                   private val accessController: AccessController) {
 
@@ -47,7 +45,7 @@ open class EventController @Autowired constructor(private val eventService: Even
                          authentication: Authentication): ResponseEntity<EventDto> {
         var eventDto = eventService.getEvent(eventId)
         if (accessController.isUserAllowedToAccessTeam(authentication, eventDto.teamId!!)) {
-            eventDto = userService.participate(authentication.name, eventId, present)
+            eventDto = eventService.participate(authentication.name, eventId, present)
             return ResponseEntity.ok(eventDto)
         }
         throw NotFoundException("Match not found")

@@ -17,18 +17,18 @@ spring:
 #    hibernate:
 #      ddl-auto: create
 #    database-platform: org.hibernate.dialect.PostgreSQLDialect
-logging:
-  level:
-    org.springframework.messaging: trace
-    org.springframework.web.socket: trace
+#logging:
+#  level:
+#    org.springframework.messaging: trace
+#    org.springframework.web.socket: trace
 rethinkdb:
   dbhost: '127.0.0.1'
 server:
   port: 8090
   ssl:
     key-store-type: PKCS12
-    key-store: yourstore
-    key-store-password: pass
+    key-store: /home/romainz/opensportmanagement/cert/keystore.p12
+    key-store-password: linkin666
     key-alias: tomcat
 opensportmanagement:
   allowedOrigins:

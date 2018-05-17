@@ -3,7 +3,6 @@ package com.zcorp.opensportmanagement.rest
 import com.zcorp.opensportmanagement.dto.ChampionshipDto
 import com.zcorp.opensportmanagement.dto.EventDto
 import com.zcorp.opensportmanagement.dto.MatchCreationDto
-import com.zcorp.opensportmanagement.dto.MatchDto
 import com.zcorp.opensportmanagement.security.AccessController
 import com.zcorp.opensportmanagement.service.ChampionshipService
 import org.springframework.beans.factory.annotation.Autowired

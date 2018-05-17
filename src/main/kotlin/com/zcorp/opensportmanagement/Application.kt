@@ -32,7 +32,7 @@ open class Application {
     open fun init(userService: UserService,
                   eventService: EventService,
                   teamService: TeamService,
-                  stadiumService: StadiumService,
+                  placeService: PlaceService,
                   seasonService: SeasonService,
                   matchService: MatchService) = CommandLineRunner {
 
@@ -58,8 +58,8 @@ open class Application {
         userService.joinTeam(userTeam1.username, team1Dto._id!!)
         userService.joinTeam(userTeam2.username, team2Dto._id!!)
 
-        var stadiumDto = StadiumDto("LE stade", "2 allée", "Toulouse")
-        stadiumDto = stadiumService.createStadium(stadiumDto, team1Dto._id!!)
+        var placeDto = PlaceDto("LE stade", "2 allée", "Toulouse")
+        placeDto = placeService.createPlace(placeDto, team1Dto._id!!)
 
         var opponentDto = OpponentDto("TCMS2",
                 "0159756563",
@@ -80,7 +80,7 @@ open class Application {
         (0..4L).forEach({
             val fromDateTime = LocalDateTime.of(LocalDate.now().plusDays(it), LocalTime.of(20, 0))
             val matchCreationDto = MatchCreationDto("Match de championnat",
-                    fromDateTime, fromDateTime.plusHours(2L), null, stadiumDto._id,
+                    fromDateTime, fromDateTime.plusHours(2L), placeDto._id!!,
                     Match.MatchType.CHAMPIONSHIP, championshipDto._id, opponentDto._id, true)
 
             matchService.createMatch(team1Dto._id!!, matchCreationDto)
@@ -90,7 +90,7 @@ open class Application {
             val fromDateTime = LocalDateTime.of(LocalDate.now().minusDays(it), LocalTime.of(20, 0))
 
             val matchCreationDto = MatchCreationDto("Match de championnat",
-                    fromDateTime, fromDateTime.plusHours(2L), null, stadiumDto._id,
+                    fromDateTime, fromDateTime.plusHours(2L), placeDto._id!!,
                     Match.MatchType.CHAMPIONSHIP, championshipDto._id, opponentDto._id, true)
             lastDto = matchService.createMatch(team1Dto._id!!, matchCreationDto)
         })
@@ -99,7 +99,7 @@ open class Application {
         val toDate = LocalDate.of(2018, 3, 31)
         val fromTime = LocalTime.of(10, 0)
         val toTime = LocalTime.of(11, 0)
-        val dto = EventCreationDto("event", null, null, null, stadiumDto._id!!, true,
+        val dto = EventCreationDto("event", null, null, placeDto._id!!, true,
                 mutableSetOf(DayOfWeek.WEDNESDAY, DayOfWeek.TUESDAY), fromTime, toTime, fromDate, toDate)
         eventService.createEvent(team1Dto._id!!, dto)
     }

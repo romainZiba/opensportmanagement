@@ -4,7 +4,7 @@ import com.nhaarman.mockito_kotlin.*
 import com.zcorp.opensportmanagement.dto.EventCreationDto
 import com.zcorp.opensportmanagement.model.*
 import com.zcorp.opensportmanagement.repositories.EventRepository
-import com.zcorp.opensportmanagement.repositories.StadiumRepository
+import com.zcorp.opensportmanagement.repositories.PlaceRepository
 import com.zcorp.opensportmanagement.repositories.TeamMemberRepository
 import com.zcorp.opensportmanagement.repositories.TeamRepository
 import io.kotlintest.shouldBe
@@ -17,13 +17,13 @@ import java.time.LocalTime
 
 class EventServiceTest: StringSpec() {
     private val teamId = 5
-    private val stadiumId = 1
+    private val placeId = 1
     private val mockTeam = Team("SuperNam", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "", teamId)
-    private val mockStadium = Stadium("The stadium", "", "Toulouse", mockTeam, stadiumId)
+    private val mockPlace = Place("The place", "", "Toulouse", mockTeam, placeId)
     private val mockEvent = Event.Builder().name("TheOne")
             .fromDate(LocalDateTime.now().plusMinutes(2L))
             .toDate(LocalDateTime.now().plusMinutes(5L))
-            .place("here")
+            .place(mockPlace)
             .team(mockTeam)
             .build()
     private val teamMemberId = 12
@@ -39,20 +39,20 @@ class EventServiceTest: StringSpec() {
     private val mockTeamMember = TeamMember(mutableSetOf(TeamMember.Role.ADMIN), mockTeam, "", teamMemberId)
 
     private val eventRepoMock: EventRepository = mock()
-    private val stadiumRepoMock: StadiumRepository = mock()
+    private val placeRepoMock: PlaceRepository = mock()
     private val teamRepoMock: TeamRepository = mock()
     private val teamMemberRepoMock: TeamMemberRepository = mock()
-    private val eventService = EventService(eventRepoMock, teamMemberRepoMock, stadiumRepoMock, teamRepoMock)
+    private val eventService = EventService(eventRepoMock, teamMemberRepoMock, placeRepoMock, teamRepoMock)
 
     override fun isInstancePerTest() = true
 
     init {
         "create punctual event should work" {
             whenever(teamRepoMock.getOne(any())).thenReturn(mockTeam)
-            whenever(stadiumRepoMock.getOne(any())).thenReturn(mockStadium)
+            whenever(placeRepoMock.getOne(any())).thenReturn(mockPlace)
             val fromDate = LocalDateTime.of(2018, 1, 1, 0, 0)
             val toDate = LocalDateTime.of(2018, 1, 1, 10, 0)
-            val dto = EventCreationDto("event", fromDate, toDate, null, mockStadium.id, false,
+            val dto = EventCreationDto("event", fromDate, toDate, mockPlace.id, false,
                     null, null, null, null, null)
             eventService.createEvent(teamId, dto)
             argumentCaptor<Event>().apply {
@@ -61,20 +61,19 @@ class EventServiceTest: StringSpec() {
                 firstValue.name shouldBe "event"
                 firstValue.fromDateTime shouldBe fromDate
                 firstValue.toDateTime shouldBe toDate
-                firstValue.place shouldBe null
-                firstValue.stadium shouldBe mockStadium
+                firstValue.place shouldBe mockPlace
                 firstValue.team shouldBe mockTeam
             }
         }
 
         "create recurrent event should produce one event" {
             whenever(teamRepoMock.getOne(any())).thenReturn(mockTeam)
-            whenever(stadiumRepoMock.getOne(any())).thenReturn(mockStadium)
+            whenever(placeRepoMock.getOne(any())).thenReturn(mockPlace)
             val fromDate = LocalDate.of(2018, 1, 1)
             val toDate = LocalDate.of(2018, 1, 8)
             val fromTime = LocalTime.of(10, 0)
             val toTime = LocalTime.of(11, 0)
-            val dto = EventCreationDto("event", null, null, null, mockStadium.id, true,
+            val dto = EventCreationDto("event", null, null, mockPlace.id, true,
                     mutableSetOf(DayOfWeek.WEDNESDAY), fromTime, toTime, fromDate, toDate)
             eventService.createEvent(teamId, dto)
             argumentCaptor<List<Event>>().apply {
@@ -86,20 +85,19 @@ class EventServiceTest: StringSpec() {
                 event.name shouldBe "event"
                 event.fromDateTime shouldBe LocalDateTime.of(expectedDate, fromTime)
                 event.toDateTime shouldBe LocalDateTime.of(expectedDate, toTime)
-                event.place shouldBe null
-                event.stadium shouldBe mockStadium
+                event.place shouldBe mockPlace
                 event.team shouldBe mockTeam
             }
         }
 
         "create recurrent event should produce several events" {
             whenever(teamRepoMock.getOne(any())).thenReturn(mockTeam)
-            whenever(stadiumRepoMock.getOne(any())).thenReturn(mockStadium)
+            whenever(placeRepoMock.getOne(any())).thenReturn(mockPlace)
             val fromDate = LocalDate.of(2018, 1, 5) // It's a friday
             val toDate = LocalDate.of(2018, 3, 31)
             val fromTime = LocalTime.of(10, 0)
             val toTime = LocalTime.of(11, 0)
-            val dto = EventCreationDto("event", null, null, null, mockStadium.id, true,
+            val dto = EventCreationDto("event", null, null, mockPlace.id, true,
                     mutableSetOf(DayOfWeek.WEDNESDAY, DayOfWeek.TUESDAY), fromTime, toTime, fromDate, toDate)
             eventService.createEvent(teamId, dto)
             argumentCaptor<List<Event>>().apply {
@@ -111,8 +109,7 @@ class EventServiceTest: StringSpec() {
                 event.name shouldBe "event"
                 event.fromDateTime shouldBe LocalDateTime.of(expectedDate, fromTime)
                 event.toDateTime shouldBe LocalDateTime.of(expectedDate, toTime)
-                event.place shouldBe null
-                event.stadium shouldBe mockStadium
+                event.place shouldBe mockPlace
                 event.team shouldBe mockTeam
             }
         }
@@ -137,7 +134,7 @@ class EventServiceTest: StringSpec() {
             val pastEvent = Event.Builder().name("TheOne")
                     .fromDate(LocalDateTime.of(2018, 1, 1, 10, 0, 0))
                     .toDate(LocalDateTime.of(2018, 1, 1, 11, 0, 0))
-                    .place("here")
+                    .place(mockPlace)
                     .team(mockTeam)
                     .build()
             whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
@@ -166,7 +163,7 @@ class EventServiceTest: StringSpec() {
             eventDto.presentMembers shouldBe listOf(mockTeamMember.toDto())
             eventDto.fromDate shouldBe mockEvent.fromDateTime
             eventDto.toDate shouldBe mockEvent.toDateTime
-            eventDto.place shouldBe mockEvent.place
+            eventDto.placeId shouldBe mockEvent.place.id
             eventDto.isDone shouldBe null
             eventDto.localTeamName shouldBe null
             eventDto.localTeamScore shouldBe null
@@ -197,7 +194,7 @@ class EventServiceTest: StringSpec() {
             eventDto.waitingMembers shouldBe listOf(mockTeamMember.toDto())
             eventDto.fromDate shouldBe mockEvent.fromDateTime
             eventDto.toDate shouldBe mockEvent.toDateTime
-            eventDto.place shouldBe mockEvent.place
+            eventDto.placeId shouldBe mockEvent.place.id
             eventDto.isDone shouldBe null
             eventDto.localTeamName shouldBe null
             eventDto.localTeamScore shouldBe null

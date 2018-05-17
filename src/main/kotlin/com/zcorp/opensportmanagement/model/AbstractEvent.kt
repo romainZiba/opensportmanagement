@@ -20,8 +20,7 @@ abstract class AbstractEvent protected constructor() {
     @GeneratedValue @Id var id: Int = -1
 
     @ManyToOne
-    var stadium: Stadium? = null
-    var place: String? = null
+    lateinit var place: Place
     var maxMembers = MAX_PLAYERS
 
     @Column(name = "eventtype")

@@ -4,7 +4,7 @@ import com.zcorp.opensportmanagement.dto.EventCreationDto
 import com.zcorp.opensportmanagement.dto.EventDto
 import com.zcorp.opensportmanagement.model.Event
 import com.zcorp.opensportmanagement.repositories.EventRepository
-import com.zcorp.opensportmanagement.repositories.StadiumRepository
+import com.zcorp.opensportmanagement.repositories.PlaceRepository
 import com.zcorp.opensportmanagement.repositories.TeamMemberRepository
 import com.zcorp.opensportmanagement.repositories.TeamRepository
 import org.springframework.beans.factory.annotation.Autowired
@@ -17,7 +17,7 @@ import javax.transaction.Transactional
 @Service
 open class EventService @Autowired constructor(private val eventRepository: EventRepository,
                                                private val teamMemberRepository: TeamMemberRepository,
-                                               private val stadiumRepository: StadiumRepository,
+                                               private val placeRepository: PlaceRepository,
                                                private val teamRepository: TeamRepository) {
 
     @Transactional
@@ -39,13 +39,8 @@ open class EventService @Autowired constructor(private val eventRepository: Even
         try {
             val team = teamRepository.getOne(teamId)
             val eventBuilder = Event.Builder().name(dto.name).team(team)
-            if (dto.stadiumId != null) {
-                val stadium = stadiumRepository.getOne(dto.stadiumId) ?: throw EntityNotFoundException()
-                eventBuilder.stadium(stadium)
-            } else {
-                val place = dto.place ?: throw MissingParameterException("place")
-                eventBuilder.place(place)
-            }
+            val place = placeRepository.getOne(dto.placeId) ?: throw NotFoundException("Place ${dto.placeId} does not exist")
+            eventBuilder.place(place)
             if (dto.isRecurrent) {
                 val fromDate = dto.recurrenceFromDate ?: throw MissingParameterException("recurrenceFromDate")
                 val toDate = dto.recurrenceToDate ?: throw MissingParameterException("recurrenceToDate")

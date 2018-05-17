@@ -30,7 +30,6 @@ class Match private constructor(builder: Builder) : AbstractEvent() {
         this.team = builder.team
         this.fromDateTime = builder.fromDateTime
         this.toDateTime = builder.toDateTime
-        this.stadium = builder.stadium
         this.place = builder.place
         this.maxMembers = builder.maxMembers
         this.opponent = builder.opponent
@@ -41,8 +40,7 @@ class Match private constructor(builder: Builder) : AbstractEvent() {
 
     override fun toDto(): EventDto {
         val eventDto = EventDto(this.id, this.name, this.fromDateTime, this.toDateTime,
-                this.place,
-                this.stadium?.id,
+                this.place.id,
                 this.getPresentMembers().map { it.toDto() }.toList(),
                 this.getAbsentMembers().map { it.toDto() }.toList(),
                 this.getWaitingMembers().map { it.toDto() }.toList(),
@@ -77,8 +75,7 @@ class Match private constructor(builder: Builder) : AbstractEvent() {
         lateinit var team: Team
         lateinit var fromDateTime: LocalDateTime
         var toDateTime: LocalDateTime? = null
-        var stadium: Stadium? = null
-        var place: String? = null
+        lateinit var place: Place
         var maxMembers: Int = MAX_PLAYERS
         lateinit var opponent: Opponent
         lateinit var championship: Championship
@@ -106,12 +103,7 @@ class Match private constructor(builder: Builder) : AbstractEvent() {
             return this
         }
 
-        fun stadium(s: Stadium): Builder {
-            this.stadium = s
-            return this
-        }
-
-        fun place(p: String): Builder {
+        fun place(p: Place): Builder {
             this.place = p
             return this
         }

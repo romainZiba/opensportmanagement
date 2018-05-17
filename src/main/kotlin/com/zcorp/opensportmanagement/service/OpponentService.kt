@@ -2,7 +2,6 @@ package com.zcorp.opensportmanagement.service
 
 import com.zcorp.opensportmanagement.dto.OpponentDto
 import com.zcorp.opensportmanagement.repositories.OpponentRepository
-import javassist.NotFoundException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import javax.persistence.EntityNotFoundException

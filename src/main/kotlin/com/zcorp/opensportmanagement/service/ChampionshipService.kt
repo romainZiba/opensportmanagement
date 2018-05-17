@@ -6,7 +6,7 @@ import com.zcorp.opensportmanagement.model.Match
 import com.zcorp.opensportmanagement.repositories.ChampionshipRepository
 import com.zcorp.opensportmanagement.repositories.MatchRepository
 import com.zcorp.opensportmanagement.repositories.OpponentRepository
-import com.zcorp.opensportmanagement.repositories.StadiumRepository
+import com.zcorp.opensportmanagement.repositories.PlaceRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -15,7 +15,7 @@ import javax.transaction.Transactional
 
 @Service
 open class ChampionshipService @Autowired constructor(private val championshipRepository: ChampionshipRepository,
-                                                      private val stadiumRepository: StadiumRepository,
+                                                      private val placeRepository: PlaceRepository,
                                                       private val opponentRepository: OpponentRepository,
                                                       private val matchRepository: MatchRepository) {
 
@@ -39,8 +39,8 @@ open class ChampionshipService @Autowired constructor(private val championshipRe
         try {
             val championship = championshipRepository.getOne(championshipId)
             val opponentId = dto.opponentId ?: throw MissingParameterException("opponentId")
-            val stadiumId = dto.stadiumId ?: throw MissingParameterException("stadiumId")
-            val stadium = stadiumRepository.getOne(stadiumId)
+            val stadiumId = dto.placeId ?: throw MissingParameterException("placeId")
+            val stadium = placeRepository.getOne(stadiumId)
             val opponent = opponentRepository.getOne(opponentId)
             if (dto.fromDate.isBefore(LocalDateTime.now())) {
                 throw PastEventException()
@@ -49,7 +49,7 @@ open class ChampionshipService @Autowired constructor(private val championshipRe
                     .name(dto.name)
                     .fromDate(dto.fromDate)
                     .toDate(dto.toDate)
-                    .stadium(stadium)
+                    .place(stadium)
                     .opponent(opponent)
                     .team(championship.season.team)
                     .championship(championship)

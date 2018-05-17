@@ -51,7 +51,7 @@ open class TeamService @Autowired constructor(private val teamRepository: TeamRe
     }
 
     @Transactional
-    open fun getStadiums(teamId: Int): List<StadiumDto> {
+    open fun getStadiums(teamId: Int): List<PlaceDto> {
         return teamRepository.getStadiums(teamId).map { it.toDto() }
     }
 

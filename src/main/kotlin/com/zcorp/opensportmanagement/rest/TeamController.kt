@@ -120,7 +120,7 @@ open class TeamController @Autowired constructor(private val teamService: TeamSe
     }
 
     @GetMapping("/{teamId}/stadiums")
-    open fun getStadiums(@PathVariable("teamId") teamId: Int, authentication: Authentication): ResponseEntity<List<StadiumDto>> {
+    open fun getStadiums(@PathVariable("teamId") teamId: Int, authentication: Authentication): ResponseEntity<List<PlaceDto>> {
         if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
             val stadiums = teamService.getStadiums(teamId)
             return ResponseEntity.ok(stadiums)

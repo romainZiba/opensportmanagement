@@ -5,7 +5,6 @@ import com.zcorp.opensportmanagement.dto.MatchCreationDto
 import com.zcorp.opensportmanagement.dto.ResultDto
 import com.zcorp.opensportmanagement.model.Match
 import com.zcorp.opensportmanagement.repositories.*
-import javassist.NotFoundException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import javax.persistence.EntityNotFoundException
@@ -14,7 +13,7 @@ import javax.transaction.Transactional
 @Service
 open class MatchService @Autowired constructor(private val matchRepository: MatchRepository,
                                                private val teamRepository: TeamRepository,
-                                               private val stadiumRepository: StadiumRepository,
+                                               private val placeRepository: PlaceRepository,
                                                private val championshipRepository: ChampionshipRepository,
                                                private val opponentRepository: OpponentRepository) {
 
@@ -48,13 +47,8 @@ open class MatchService @Autowired constructor(private val matchRepository: Matc
                     .team(team)
                     .type(dto.matchType)
 
-            matchBuilder = if (dto.stadiumId != null) {
-                val stadium = stadiumRepository.getOne(dto.stadiumId) ?: throw EntityNotFoundException()
-                matchBuilder.stadium(stadium)
-            } else {
-                val p = dto.place ?: throw MissingParameterException("place")
-                matchBuilder.place(p)
-            }
+            val stadium = placeRepository.getOne(dto.placeId) ?: throw NotFoundException("Place ${dto.placeId} does not exist")
+            matchBuilder.place(stadium)
 
             if (dto.matchType != Match.MatchType.BETWEEN_US) {
                 val championshipId = dto.championshipId ?: throw MissingParameterException("championshipId")

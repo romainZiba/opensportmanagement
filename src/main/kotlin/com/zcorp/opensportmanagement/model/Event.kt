@@ -15,15 +15,13 @@ class Event private constructor(builder: Builder) : AbstractEvent() {
         this.team = builder.team
         this.fromDateTime = builder.fromDateTime
         this.toDateTime = builder.toDateTime
-        this.stadium = builder.stadium
         this.place = builder.place
         this.maxMembers = builder.maxMembers
     }
 
     override fun toDto(): EventDto {
         return EventDto(this.id, this.name, this.fromDateTime, this.toDateTime,
-                this.place,
-                this.stadium?.id,
+                this.place.id,
                 this.getPresentMembers().map { it.toDto() }.toList(),
                 this.getAbsentMembers().map { it.toDto() }.toList(),
                 this.getWaitingMembers().map { it.toDto() }.toList(),
@@ -36,8 +34,7 @@ class Event private constructor(builder: Builder) : AbstractEvent() {
         lateinit var team: Team
         lateinit var fromDateTime: LocalDateTime
         var toDateTime: LocalDateTime? = null
-        var stadium: Stadium? = null
-        var place: String? = null
+        lateinit var place: Place
         var maxMembers: Int = MAX_PLAYERS
 
         fun name(n: String): Builder {
@@ -60,12 +57,7 @@ class Event private constructor(builder: Builder) : AbstractEvent() {
             return this
         }
 
-        fun stadium(s: Stadium): Builder {
-            this.stadium = s
-            return this
-        }
-
-        fun place(p: String): Builder {
+        fun place(p: Place): Builder {
             this.place = p
             return this
         }

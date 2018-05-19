@@ -50,17 +50,17 @@ class EventServiceTest: StringSpec() {
         "create punctual event should work" {
             whenever(teamRepoMock.getOne(any())).thenReturn(mockTeam)
             whenever(placeRepoMock.getOne(any())).thenReturn(mockPlace)
-            val fromDate = LocalDateTime.of(2018, 1, 1, 0, 0)
-            val toDate = LocalDateTime.of(2018, 1, 1, 10, 0)
-            val dto = EventCreationDto("event", fromDate, toDate, mockPlace.id, false,
-                    null, null, null, null, null)
+            val fromDateTime = LocalDateTime.of(2018, 1, 1, 0, 0)
+            val toDateTime = LocalDateTime.of(2018, 1, 1, 10, 0)
+            val dto = EventCreationDto("event", fromDateTime.toLocalDate(), toDateTime.toLocalDate(),
+                    fromDateTime.toLocalTime(), toDateTime.toLocalTime(), mockPlace.id)
             eventService.createEvent(teamId, dto)
             argumentCaptor<Event>().apply {
                 verify(eventRepoMock, times(1)).save(capture())
                 allValues.size shouldBe 1
                 firstValue.name shouldBe "event"
-                firstValue.fromDateTime shouldBe fromDate
-                firstValue.toDateTime shouldBe toDate
+                firstValue.fromDateTime shouldBe fromDateTime
+                firstValue.toDateTime shouldBe toDateTime
                 firstValue.place shouldBe mockPlace
                 firstValue.team shouldBe mockTeam
             }
@@ -73,8 +73,8 @@ class EventServiceTest: StringSpec() {
             val toDate = LocalDate.of(2018, 1, 8)
             val fromTime = LocalTime.of(10, 0)
             val toTime = LocalTime.of(11, 0)
-            val dto = EventCreationDto("event", null, null, mockPlace.id, true,
-                    mutableSetOf(DayOfWeek.WEDNESDAY), fromTime, toTime, fromDate, toDate)
+            val dto = EventCreationDto("event", fromDate, toDate, fromTime, toTime, mockPlace.id,
+                    true, mutableSetOf(DayOfWeek.WEDNESDAY))
             eventService.createEvent(teamId, dto)
             argumentCaptor<List<Event>>().apply {
                 verify(eventRepoMock, times(1)).saveAll(capture())
@@ -97,8 +97,8 @@ class EventServiceTest: StringSpec() {
             val toDate = LocalDate.of(2018, 3, 31)
             val fromTime = LocalTime.of(10, 0)
             val toTime = LocalTime.of(11, 0)
-            val dto = EventCreationDto("event", null, null, mockPlace.id, true,
-                    mutableSetOf(DayOfWeek.WEDNESDAY, DayOfWeek.TUESDAY), fromTime, toTime, fromDate, toDate)
+            val dto = EventCreationDto("event", fromDate, toDate, fromTime, toTime, mockPlace.id,
+                    true, mutableSetOf(DayOfWeek.WEDNESDAY, DayOfWeek.TUESDAY))
             eventService.createEvent(teamId, dto)
             argumentCaptor<List<Event>>().apply {
                 verify(eventRepoMock, times(1)).saveAll(capture())
@@ -161,8 +161,8 @@ class EventServiceTest: StringSpec() {
             eventDto.absentMembers shouldBe emptyList<TeamMember>()
             eventDto.waitingMembers shouldBe emptyList<TeamMember>()
             eventDto.presentMembers shouldBe listOf(mockTeamMember.toDto())
-            eventDto.fromDate shouldBe mockEvent.fromDateTime
-            eventDto.toDate shouldBe mockEvent.toDateTime
+            eventDto.fromDateTime shouldBe mockEvent.fromDateTime
+            eventDto.toDateTime shouldBe mockEvent.toDateTime
             eventDto.placeId shouldBe mockEvent.place.id
             eventDto.isDone shouldBe null
             eventDto.localTeamName shouldBe null
@@ -192,8 +192,8 @@ class EventServiceTest: StringSpec() {
             eventDto.absentMembers shouldBe emptyList<TeamMember>()
             eventDto.presentMembers shouldBe emptyList<TeamMember>()
             eventDto.waitingMembers shouldBe listOf(mockTeamMember.toDto())
-            eventDto.fromDate shouldBe mockEvent.fromDateTime
-            eventDto.toDate shouldBe mockEvent.toDateTime
+            eventDto.fromDateTime shouldBe mockEvent.fromDateTime
+            eventDto.toDateTime shouldBe mockEvent.toDateTime
             eventDto.placeId shouldBe mockEvent.place.id
             eventDto.isDone shouldBe null
             eventDto.localTeamName shouldBe null

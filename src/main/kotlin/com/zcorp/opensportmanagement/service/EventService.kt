@@ -39,21 +39,16 @@ open class EventService @Autowired constructor(private val eventRepository: Even
         try {
             val team = teamRepository.getOne(teamId)
             val eventBuilder = Event.Builder().name(dto.name).team(team)
-            val place = placeRepository.getOne(dto.placeId) ?: throw NotFoundException("Place ${dto.placeId} does not exist")
+            val place = placeRepository.getOne(dto.placeId)
             eventBuilder.place(place)
             if (dto.isRecurrent) {
-                val fromDate = dto.recurrenceFromDate ?: throw MissingParameterException("recurrenceFromDate")
-                val toDate = dto.recurrenceToDate ?: throw MissingParameterException("recurrenceToDate")
-                val fromTime = dto.recurrenceFromTime ?: throw MissingParameterException("recurrenceFromTime")
-                val toTime = dto.recurrenceToTime ?: throw MissingParameterException("recurrenceToTime")
-                val daysOfWeek = dto.recurrenceDays ?: throw MissingParameterException("recurrenceDays")
-
-                var currentDate = fromDate
+                val daysOfWeek = dto.recurrenceDays
+                var currentDate = dto.fromDate
                 val events = mutableListOf<Event>()
-                while (!currentDate.isAfter(toDate)) {
+                while (!currentDate.isAfter(dto.toDate)) {
                     if (daysOfWeek.contains(currentDate.dayOfWeek)) {
-                        eventBuilder.fromDate(LocalDateTime.of(currentDate, fromTime))
-                                .toDate(LocalDateTime.of(currentDate, toTime))
+                        eventBuilder.fromDate(LocalDateTime.of(currentDate, dto.fromTime))
+                                .toDate(LocalDateTime.of(currentDate, dto.toTime))
                         events.add(eventBuilder.build())
 
                     }
@@ -61,13 +56,13 @@ open class EventService @Autowired constructor(private val eventRepository: Even
                 }
                 eventRepository.saveAll(events)
             } else {
-                val fromDateTime = dto.fromDate ?: throw MissingParameterException("fromDate")
-                val toDateTime = dto.toDate ?: throw MissingParameterException("toDate")
+                val fromDateTime = LocalDateTime.of(dto.fromDate, dto.fromTime)
+                val toDateTime = LocalDateTime.of(dto.toDate, dto.toTime)
                 eventBuilder.fromDate(fromDateTime).toDate(toDateTime)
                 eventRepository.save(eventBuilder.build())
             }
-        } catch (e: EntityNotFoundException) {
-            throw NotFoundException("Team $teamId does not exist")
+        } catch (e: Exception) {
+            throw NotFoundException(e.message ?: "")
         }
     }
 

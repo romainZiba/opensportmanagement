@@ -99,8 +99,8 @@ open class Application {
         val toDate = LocalDate.of(2018, 3, 31)
         val fromTime = LocalTime.of(10, 0)
         val toTime = LocalTime.of(11, 0)
-        val dto = EventCreationDto("event", null, null, placeDto._id!!, true,
-                mutableSetOf(DayOfWeek.WEDNESDAY, DayOfWeek.TUESDAY), fromTime, toTime, fromDate, toDate)
+        val dto = EventCreationDto("event", fromDate, toDate, fromTime, toTime, placeDto._id!!, true,
+                mutableSetOf(DayOfWeek.WEDNESDAY, DayOfWeek.TUESDAY))
         eventService.createEvent(team1Dto._id!!, dto)
     }
 

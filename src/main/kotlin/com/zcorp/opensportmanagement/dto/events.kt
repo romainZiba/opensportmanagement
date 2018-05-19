@@ -8,8 +8,8 @@ import java.time.LocalTime
 
 data class EventDto(val _id: Int,
                     val name: String,
-                    val fromDate: LocalDateTime,
-                    val toDate: LocalDateTime?,
+                    val fromDateTime: LocalDateTime,
+                    val toDateTime: LocalDateTime?,
                     val placeId: Int,
                     val presentMembers: List<TeamMemberDto>,
                     val absentMembers: List<TeamMemberDto>,
@@ -21,20 +21,13 @@ data class EventDto(val _id: Int,
                     var visitorTeamImgUrl: String? = null,
                     var visitorTeamScore: Int? = null,
                     var localTeamScore: Int? = null,
-                    var isDone: Boolean? = null,
-                    var reccurenceDays: MutableSet<DayOfWeek>? = null,
-                    var recurrenceFromTime: LocalTime? = null,
-                    val recurrenceToTime: LocalTime? = null,
-                    var recurrenceFromDate: LocalDate? = null,
-                    val recurrenceToDate: LocalDate? = null)
+                    var isDone: Boolean? = null)
 
 data class EventCreationDto(val name: String,
-                            val fromDate: LocalDateTime?,
-                            val toDate: LocalDateTime?,
+                            val fromDate: LocalDate,
+                            val toDate: LocalDate,
+                            var fromTime: LocalTime,
+                            val toTime: LocalTime,
                             val placeId: Int,
-                            val isRecurrent: Boolean,
-                            var recurrenceDays: MutableSet<DayOfWeek>?,
-                            var recurrenceFromTime: LocalTime?,
-                            val recurrenceToTime: LocalTime?,
-                            var recurrenceFromDate: LocalDate?,
-                            val recurrenceToDate: LocalDate?)
+                            val isRecurrent: Boolean = false,
+                            var recurrenceDays: MutableSet<DayOfWeek> = mutableSetOf())

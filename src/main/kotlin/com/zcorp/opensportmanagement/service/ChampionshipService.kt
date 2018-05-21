@@ -10,7 +10,6 @@ import com.zcorp.opensportmanagement.repositories.PlaceRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
-import javax.persistence.EntityNotFoundException
 import javax.transaction.Transactional
 
 @Service
@@ -22,12 +21,11 @@ open class ChampionshipService @Autowired constructor(
 ) {
 
     @Transactional
+    @Throws(NotFoundException::class)
     open fun getChampionship(championshipId: Int): ChampionshipDto {
-        try {
-            return championshipRepository.getOne(championshipId).toDto()
-        } catch (e: EntityNotFoundException) {
-            throw NotFoundException("Championship $championshipId does not exist")
-        }
+        return championshipRepository.findById(championshipId)
+                .map { it.toDto() }
+                .orElseThrow { NotFoundException("Championship $championshipId does not exist") }
     }
 
     @Transactional
@@ -38,28 +36,20 @@ open class ChampionshipService @Autowired constructor(
 
     @Transactional
     open fun createMatch(dto: MatchCreationDto, championshipId: Int): Match {
-        try {
-            val championship = championshipRepository.getOne(championshipId)
-            val opponentId = dto.opponentId ?: throw MissingParameterException("opponentId")
-            val stadiumId = dto.placeId ?: throw MissingParameterException("placeId")
-            val stadium = placeRepository.getOne(stadiumId)
-            val opponent = opponentRepository.getOne(opponentId)
-            if (dto.fromDate.isBefore(LocalDateTime.now())) {
-                throw PastEventException()
-            }
-            val match = Match.Builder()
-                    .name(dto.name)
-                    .fromDate(dto.fromDate)
-                    .toDate(dto.toDate)
-                    .place(stadium)
-                    .opponent(opponent)
-                    .team(championship.season.team)
-                    .championship(championship)
-                    .type(dto.matchType)
-                    .build()
-            return matchRepository.save(match)
-        } catch (e: EntityNotFoundException) {
-            throw NotFoundException(e.message ?: "")
+        val championship = championshipRepository.findById(championshipId)
+                .orElseThrow { NotFoundException("Championship $championshipId does not exist") }
+        val opponentId = dto.opponentId ?: throw MissingParameterException("opponentId")
+        val stadiumId = dto.placeId
+        val stadium = placeRepository.findById(stadiumId)
+                .orElseThrow { NotFoundException("Stadium $stadiumId does not exist") }
+        val opponent = opponentRepository.findById(opponentId)
+                .orElseThrow { NotFoundException("Opponent $opponentId does not exist") }
+        if (dto.fromDate.isBefore(LocalDateTime.now())) {
+            throw PastEventException()
         }
+        val match = Match.Builder().name(dto.name).fromDate(dto.fromDate).toDate(dto.toDate).place(stadium)
+                .opponent(opponent).team(championship.season.team).championship(championship).type(dto.matchType)
+                .build()
+        return matchRepository.save(match)
     }
 }

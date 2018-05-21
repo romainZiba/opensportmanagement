@@ -34,7 +34,7 @@ open class WebSecurity(
         http.cors().and().authorizeRequests()
                 .antMatchers("/").permitAll()
                 .antMatchers(HttpMethod.POST, SIGN_UP_URL).permitAll()
-//                .antMatchers("/h2-console/**").permitAll()
+                // TODO: remove the following permit all
                 .antMatchers("/img/**").permitAll()
                 .antMatchers("/css/**").permitAll()
                 .antMatchers("/js/**").permitAll()

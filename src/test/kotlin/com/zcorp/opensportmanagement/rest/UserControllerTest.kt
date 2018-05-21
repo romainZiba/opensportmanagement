@@ -1,34 +1,57 @@
 package com.zcorp.opensportmanagement.rest
 
-import com.zcorp.opensportmanagement.repositories.UserRepository
-import org.junit.Ignore
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.nhaarman.mockito_kotlin.whenever
+import com.zcorp.opensportmanagement.dto.UserDto
+import com.zcorp.opensportmanagement.service.UserService
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.http.MediaType
+import org.springframework.security.test.context.support.WithMockUser
+import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 @RunWith(SpringRunner::class)
 @WebMvcTest(UserController::class)
+@ContextConfiguration
 class UserControllerTest {
 
     @Autowired
-    private lateinit var mvc: MockMvc
+    private lateinit var mockMvc: MockMvc
 
     @MockBean
-    private lateinit var userRepository: UserRepository
+    private lateinit var userService: UserService
+
+    private val username = "toto"
+    private val userDto = UserDto("toto", "sacred", username, "", "")
 
     @Test
-    @Throws(Exception::class)
-    @Ignore // Not working yet
-    fun getAccount() {
-        this.mvc.perform(get("/users/me")
-                .accept(MediaType.parseMediaType("application/json;charset=UTF-8")))
-                .andExpect(status().isUnauthorized)
+    fun `GET on 'users-me' when unauthenticated should return a response with status 'UNAUTHORIZED'`() {
+        this.mockMvc.perform(get("/users/me")).andExpect(status().isUnauthorized)
+    }
+
+    @Test
+    @WithMockUser("toto")
+    fun `GET on 'users-me' when authenticated should return a response with status 'OK'`() {
+        whenever(userService.findByUsername(username)).thenReturn(userDto)
+        this.mockMvc.perform(
+                get("/users/me"))
+                .andExpect(status().isOk)
+                .andExpect(MockMvcResultMatchers.content().json(jacksonObjectMapper().writeValueAsString(userDto)))
+    }
+
+    @Test
+    @WithMockUser("toto")
+    fun `GET on 'users-me' when an user does not exist should return a response with status 'FORBIDDEN'`() {
+        whenever(userService.findByUsername(username)).thenReturn(null)
+        this.mockMvc.perform(
+                get("/users/me"))
+                .andExpect(status().isForbidden)
     }
 }

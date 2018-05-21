@@ -2,7 +2,7 @@ package com.zcorp.opensportmanagement.repositories
 
 import com.zcorp.opensportmanagement.model.Championship
 import org.springframework.data.jpa.repository.JpaRepository
+import javax.transaction.Transactional
 
-interface ChampionshipRepository : JpaRepository<Championship, Int> {
-    fun findByName(name: String): Championship?
-}
+@Transactional(Transactional.TxType.MANDATORY)
+interface ChampionshipRepository : JpaRepository<Championship, Int>

@@ -13,6 +13,7 @@ import io.kotlintest.specs.StringSpec
 import org.mockito.AdditionalMatchers.not
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.*
 import javax.persistence.EntityNotFoundException
 
 class ChampionshipServiceTest : StringSpec() {
@@ -37,13 +38,13 @@ class ChampionshipServiceTest : StringSpec() {
 
     init {
         "get championship that exists should be possible" {
-            whenever(championshipRepoMock.getOne(championshipId)).thenReturn(mockChampionship)
+            whenever(championshipRepoMock.findById(championshipId)).thenReturn(Optional.of(mockChampionship))
             val c = championshipService.getChampionship(championshipId)
             c shouldBe mockChampionship.toDto()
         }
 
         "get championship that does not exist should not be possible" {
-            whenever(championshipRepoMock.getOne(not(eq(championshipId)))).thenThrow(EntityNotFoundException())
+            whenever(championshipRepoMock.findById(not(eq(championshipId)))).thenReturn(Optional.empty())
             shouldThrow<NotFoundException> {
                 championshipService.getChampionship(championshipId + 1)
             }
@@ -60,7 +61,7 @@ class ChampionshipServiceTest : StringSpec() {
         "create match for a championship that does not exist should not be possible" {
             val matchDto = MatchCreationDto("match", LocalDateTime.of(2018, 1, 1, 19, 50),
                     matchType = Match.MatchType.CHAMPIONSHIP, placeId = placeId)
-            whenever(championshipRepoMock.getOne(championshipId)).thenThrow(EntityNotFoundException())
+            whenever(championshipRepoMock.findById(championshipId)).thenReturn(Optional.empty())
             shouldThrow<NotFoundException> {
                 championshipService.createMatch(matchDto, championshipId)
             }
@@ -69,8 +70,8 @@ class ChampionshipServiceTest : StringSpec() {
         "create match with a place that does not exist should not be possible" {
             val matchDto = MatchCreationDto("match", LocalDateTime.of(2018, 1, 1, 19, 50),
                     matchType = Match.MatchType.CHAMPIONSHIP, placeId = placeId, opponentId = opponentId)
-            whenever(championshipRepoMock.getOne(championshipId)).thenReturn(mockChampionship)
-            whenever(placeRepoMock.getOne(placeId)).thenThrow(EntityNotFoundException())
+            whenever(championshipRepoMock.findById(championshipId)).thenReturn(Optional.of(mockChampionship))
+            whenever(placeRepoMock.findById(placeId)).thenReturn(Optional.empty())
             shouldThrow<NotFoundException> {
                 championshipService.createMatch(matchDto, championshipId)
             }
@@ -79,9 +80,9 @@ class ChampionshipServiceTest : StringSpec() {
         "create match with an opponent that does not exist should not be possible" {
             val matchDto = MatchCreationDto("match", LocalDateTime.of(2018, 1, 1, 19, 50),
                     matchType = Match.MatchType.CHAMPIONSHIP, placeId = placeId, opponentId = opponentId)
-            whenever(championshipRepoMock.getOne(championshipId)).thenReturn(mockChampionship)
-            whenever(placeRepoMock.getOne(placeId)).thenReturn(mockStadium)
-            whenever(opponentRepoMock.getOne(opponentId)).thenThrow(EntityNotFoundException())
+            whenever(championshipRepoMock.findById(championshipId)).thenReturn(Optional.of(mockChampionship))
+            whenever(placeRepoMock.findById(placeId)).thenReturn(Optional.of(mockStadium))
+            whenever(opponentRepoMock.findById(opponentId)).thenReturn(Optional.empty())
             shouldThrow<NotFoundException> {
                 championshipService.createMatch(matchDto, championshipId)
             }
@@ -90,9 +91,9 @@ class ChampionshipServiceTest : StringSpec() {
         "create match in the past should not be possible" {
             val dto = MatchCreationDto("match", LocalDateTime.of(2018, 1, 1, 19, 50),
                     matchType = Match.MatchType.CHAMPIONSHIP, opponentId = opponentId, placeId = placeId)
-            whenever(championshipRepoMock.getOne(championshipId)).thenReturn(mockChampionship)
-            whenever(placeRepoMock.getOne(placeId)).thenReturn(mockStadium)
-            whenever(opponentRepoMock.getOne(opponentId)).thenReturn(mockOpponent)
+            whenever(championshipRepoMock.findById(championshipId)).thenReturn(Optional.of(mockChampionship))
+            whenever(placeRepoMock.findById(placeId)).thenReturn(Optional.of(mockStadium))
+            whenever(opponentRepoMock.findById(opponentId)).thenReturn(Optional.of(mockOpponent))
             shouldThrow<PastEventException> {
                 championshipService.createMatch(dto, championshipId)
             }
@@ -101,9 +102,9 @@ class ChampionshipServiceTest : StringSpec() {
         "create match sometimes work" {
             val dto = MatchCreationDto("match", LocalDateTime.now().plusDays(7),
                     matchType = Match.MatchType.CHAMPIONSHIP, opponentId = opponentId, placeId = placeId)
-            whenever(championshipRepoMock.getOne(championshipId)).thenReturn(mockChampionship)
-            whenever(placeRepoMock.getOne(placeId)).thenReturn(mockStadium)
-            whenever(opponentRepoMock.getOne(opponentId)).thenReturn(mockOpponent)
+            whenever(championshipRepoMock.findById(championshipId)).thenReturn(Optional.of(mockChampionship))
+            whenever(placeRepoMock.findById(placeId)).thenReturn(Optional.of(mockStadium))
+            whenever(opponentRepoMock.findById(opponentId)).thenReturn(Optional.of(mockOpponent))
             whenever(matchRepoMock.save<Match>(any())).thenAnswer { it.arguments[0] }
             val match = championshipService.createMatch(dto, championshipId)
             match.championship shouldBe mockChampionship

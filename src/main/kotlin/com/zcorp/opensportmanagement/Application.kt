@@ -46,12 +46,12 @@ open class Application {
     @Bean
     @Transactional
     open fun init(
-            userService: UserService,
-            eventService: EventService,
-            teamService: TeamService,
-            placeService: PlaceService,
-            seasonService: SeasonService,
-            matchService: MatchService
+        userService: UserService,
+        eventService: EventService,
+        teamService: TeamService,
+        placeService: PlaceService,
+        seasonService: SeasonService,
+        matchService: MatchService
     ) = CommandLineRunner {
 
         var adminTeam1And2 = User("CR", "Coach", "Rock", "CR",

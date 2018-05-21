@@ -23,6 +23,7 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.util.Optional
 
 class EventServiceTest : StringSpec() {
     private val teamId = 5
@@ -57,8 +58,8 @@ class EventServiceTest : StringSpec() {
 
     init {
         "create punctual event should work" {
-            whenever(teamRepoMock.getOne(any())).thenReturn(mockTeam)
-            whenever(placeRepoMock.getOne(any())).thenReturn(mockPlace)
+            whenever(teamRepoMock.findById(any())).thenReturn(Optional.of(mockTeam))
+            whenever(placeRepoMock.findById(any())).thenReturn(Optional.of(mockPlace))
             val fromDateTime = LocalDateTime.of(2018, 1, 1, 0, 0)
             val toDateTime = LocalDateTime.of(2018, 1, 1, 10, 0)
             val dto = EventCreationDto("event", fromDateTime.toLocalDate(), toDateTime.toLocalDate(),
@@ -76,8 +77,8 @@ class EventServiceTest : StringSpec() {
         }
 
         "create recurrent event should produce one event" {
-            whenever(teamRepoMock.getOne(any())).thenReturn(mockTeam)
-            whenever(placeRepoMock.getOne(any())).thenReturn(mockPlace)
+            whenever(teamRepoMock.findById(any())).thenReturn(Optional.of(mockTeam))
+            whenever(placeRepoMock.findById(any())).thenReturn(Optional.of(mockPlace))
             val fromDate = LocalDate.of(2018, 1, 1)
             val toDate = LocalDate.of(2018, 1, 8)
             val fromTime = LocalTime.of(10, 0)
@@ -100,8 +101,8 @@ class EventServiceTest : StringSpec() {
         }
 
         "create recurrent event should produce several events" {
-            whenever(teamRepoMock.getOne(any())).thenReturn(mockTeam)
-            whenever(placeRepoMock.getOne(any())).thenReturn(mockPlace)
+            whenever(teamRepoMock.findById(any())).thenReturn(Optional.of(mockTeam))
+            whenever(placeRepoMock.findById(any())).thenReturn(Optional.of(mockPlace))
             val fromDate = LocalDate.of(2018, 1, 5) // It's a friday
             val toDate = LocalDate.of(2018, 3, 31)
             val fromTime = LocalTime.of(10, 0)
@@ -125,7 +126,7 @@ class EventServiceTest : StringSpec() {
 
         "user that does not exist trying to participate to an event should not be possible" {
             shouldThrow<NotFoundException> {
-                whenever(eventRepoMock.getOne(any())).thenReturn(mockEvent)
+                whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
                 whenever(teamMemberRepoMock.findByUsername(any(), any())).thenReturn(null)
                 eventService.participate("Foo", eventId, true)
             }
@@ -133,7 +134,7 @@ class EventServiceTest : StringSpec() {
 
         "user trying to participate to an event that does not exist should not be possible" {
             whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
-            whenever(eventRepoMock.getOne(any())).thenThrow(javax.persistence.EntityNotFoundException())
+            whenever(eventRepoMock.findById(any())).thenReturn(Optional.empty())
             shouldThrow<NotFoundException> {
                 eventService.participate(username, eventId, true)
             }
@@ -147,7 +148,7 @@ class EventServiceTest : StringSpec() {
                     .team(mockTeam)
                     .build()
             whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
-            whenever(eventRepoMock.getOne(any())).thenReturn(pastEvent)
+            whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(pastEvent))
             shouldThrow<PastEventException> {
                 eventService.participate(username, eventId, true)
             }
@@ -157,7 +158,7 @@ class EventServiceTest : StringSpec() {
             mockEvent.id = eventId
             mockTeamMember.user = mockUser
             whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
-            whenever(eventRepoMock.getOne(any())).thenReturn(mockEvent)
+            whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
             whenever(eventRepoMock.save(mockEvent)).thenReturn(mockEvent)
             whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
             val eventDto = eventService.participate(username, eventId, true)
@@ -187,7 +188,7 @@ class EventServiceTest : StringSpec() {
             mockEvent.maxMembers = 0
             mockTeamMember.user = mockUser
             whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
-            whenever(eventRepoMock.getOne(any())).thenReturn(mockEvent)
+            whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
             whenever(eventRepoMock.save(mockEvent)).thenReturn(mockEvent)
             whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
             mockEvent.getPresentMembers().size shouldBe 0

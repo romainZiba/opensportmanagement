@@ -43,7 +43,9 @@ open class TeamService @Autowired constructor(
 
     @Transactional
     open fun getTeam(teamId: Int): TeamDto {
-        return teamRepository.getOne(teamId).toDto()
+        return teamRepository.findById(teamId)
+                .map { it.toDto() }
+                .orElseThrow { NotFoundException("Team $teamId does not exist") }
     }
 
     @Transactional
@@ -74,7 +76,8 @@ open class TeamService @Autowired constructor(
 
     @Transactional
     open fun createSeason(seasonDto: SeasonDto, teamId: Int): SeasonDto {
-        val team = teamRepository.getOne(teamId)
+        val team = teamRepository.findById(teamId)
+                .orElseThrow { NotFoundException("Team $teamId does not exist") }
         var season = Season(seasonDto.name, seasonDto.fromDate, seasonDto.toDate, seasonDto.status, team)
         season = seasonRepository.save(season)
         return season.toDto()
@@ -92,7 +95,8 @@ open class TeamService @Autowired constructor(
 
     @Transactional
     open fun createOpponent(opponentDto: OpponentDto, teamId: Int): OpponentDto {
-        val team = teamRepository.getOne(teamId)
+        val team = teamRepository.findById(teamId)
+                .orElseThrow { NotFoundException("Team $teamId does not exist") }
         val opponent = Opponent(opponentDto.name, opponentDto.phoneNumber, opponentDto.email, opponentDto.imgUrl, team)
         return opponentRepository.save(opponent).toDto()
     }

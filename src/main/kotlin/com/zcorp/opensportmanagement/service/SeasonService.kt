@@ -7,7 +7,6 @@ import com.zcorp.opensportmanagement.repositories.ChampionshipRepository
 import com.zcorp.opensportmanagement.repositories.SeasonRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import javax.persistence.EntityNotFoundException
 import javax.transaction.Transactional
 
 @Service
@@ -18,11 +17,9 @@ open class SeasonService @Autowired constructor(
 
     @Transactional
     open fun getSeason(seasonId: Int): SeasonDto {
-        try {
-            return seasonRepository.getOne(seasonId).toDto()
-        } catch (e: EntityNotFoundException) {
-            throw NotFoundException("Season $seasonId does not exist")
-        }
+        return seasonRepository.findById(seasonId)
+                .map { it.toDto() }
+                .orElseThrow { NotFoundException("Season $seasonId does not exist") }
     }
 
     @Transactional
@@ -33,7 +30,8 @@ open class SeasonService @Autowired constructor(
 
     @Transactional
     open fun createChampionship(championshipDto: ChampionshipDto, seasonId: Int): ChampionshipDto {
-        val season = seasonRepository.getOne(seasonId)
+        val season = seasonRepository.findById(seasonId)
+                .orElseThrow { NotFoundException("Season $seasonId does not exist") }
         val championship = Championship(championshipDto.name, season)
         return championshipRepository.save(championship).toDto()
     }

@@ -10,7 +10,6 @@ import com.zcorp.opensportmanagement.repositories.TeamRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
-import javax.persistence.EntityNotFoundException
 import javax.persistence.NoResultException
 import javax.transaction.Transactional
 
@@ -38,47 +37,42 @@ open class EventService @Autowired constructor(
 
     @Transactional
     open fun createEvent(teamId: Int, dto: EventCreationDto) {
-        try {
-            val team = teamRepository.getOne(teamId)
-            val eventBuilder = Event.Builder().name(dto.name).team(team)
-            val place = placeRepository.getOne(dto.placeId)
-            eventBuilder.place(place)
-            if (dto.isRecurrent) {
-                val daysOfWeek = dto.recurrenceDays
-                var currentDate = dto.fromDate
-                val events = mutableListOf<Event>()
-                while (!currentDate.isAfter(dto.toDate)) {
-                    if (daysOfWeek.contains(currentDate.dayOfWeek)) {
-                        eventBuilder.fromDate(LocalDateTime.of(currentDate, dto.fromTime))
-                                .toDate(LocalDateTime.of(currentDate, dto.toTime))
-                        events.add(eventBuilder.build())
-                    }
-                    currentDate = currentDate.plusDays(1)
+        val team = teamRepository.findById(teamId)
+                .orElseThrow { NotFoundException("Team $teamId does not exist") }
+        val eventBuilder = Event.Builder().name(dto.name).team(team)
+        val placeId = dto.placeId
+        val place = placeRepository.findById(placeId)
+                .orElseThrow { NotFoundException("Place $placeId does not exist") }
+        eventBuilder.place(place)
+        if (dto.isRecurrent) {
+            val daysOfWeek = dto.recurrenceDays
+            var currentDate = dto.fromDate
+            val events = mutableListOf<Event>()
+            while (!currentDate.isAfter(dto.toDate)) {
+                if (daysOfWeek.contains(currentDate.dayOfWeek)) {
+                    eventBuilder.fromDate(LocalDateTime.of(currentDate, dto.fromTime))
+                            .toDate(LocalDateTime.of(currentDate, dto.toTime))
+                    events.add(eventBuilder.build())
                 }
-                eventRepository.saveAll(events)
-            } else {
-                val fromDateTime = LocalDateTime.of(dto.fromDate, dto.fromTime)
-                val toDateTime = LocalDateTime.of(dto.toDate, dto.toTime)
-                eventBuilder.fromDate(fromDateTime).toDate(toDateTime)
-                eventRepository.save(eventBuilder.build())
+                currentDate = currentDate.plusDays(1)
             }
-        } catch (e: Exception) {
-            throw NotFoundException(e.message ?: "")
+            eventRepository.saveAll(events)
+        } else {
+            val fromDateTime = LocalDateTime.of(dto.fromDate, dto.fromTime)
+            val toDateTime = LocalDateTime.of(dto.toDate, dto.toTime)
+            eventBuilder.fromDate(fromDateTime).toDate(toDateTime)
+            eventRepository.save(eventBuilder.build())
         }
     }
 
     @Transactional
     open fun participate(username: String, eventId: Int, present: Boolean): EventDto {
-        try {
-            val event = eventRepository.getOne(eventId)
-            val teamMember = teamMemberRepository.findByUsername(username, event.team.id) ?: throw NotFoundException("Team member $username does not exist")
-            if (event.fromDateTime.isBefore(LocalDateTime.now())) {
-                throw PastEventException(eventId)
-            }
-            event.participate(teamMember, present)
-            return eventRepository.save(event).toDto()
-        } catch (e: EntityNotFoundException) {
-            throw NotFoundException("Event $eventId does not exist")
+        val event = eventRepository.findById(eventId).orElseThrow { NotFoundException("Event $eventId does not exist") }
+        val teamMember = teamMemberRepository.findByUsername(username, event.team.id) ?: throw NotFoundException("Team member $username does not exist")
+        if (event.fromDateTime.isBefore(LocalDateTime.now())) {
+            throw PastEventException(eventId)
         }
+        event.participate(teamMember, present)
+        return eventRepository.save(event).toDto()
     }
 }

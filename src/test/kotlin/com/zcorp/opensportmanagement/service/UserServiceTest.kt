@@ -13,6 +13,7 @@ import io.kotlintest.shouldBe
 import io.kotlintest.shouldThrow
 import io.kotlintest.specs.StringSpec
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import java.util.Optional
 
 class UserServiceTest : StringSpec() {
     private val teamId = 5
@@ -56,7 +57,7 @@ class UserServiceTest : StringSpec() {
 
         "user trying to join a team that does not exist should not be possible" {
             whenever(userRepoMock.findByUsername(mockUser.username)).thenReturn(mockUser)
-            whenever(teamRepoMock.getOne(any())).thenThrow(javax.persistence.EntityNotFoundException())
+            whenever(teamRepoMock.findById(any())).thenReturn(Optional.empty())
             shouldThrow<NotFoundException> {
                 userService.joinTeam(username, 1)
             }
@@ -64,7 +65,7 @@ class UserServiceTest : StringSpec() {
 
         "user trying to join a team should be possible" {
             whenever(userRepoMock.findByUsername(mockUser.username)).thenReturn(mockUser)
-            whenever(teamRepoMock.getOne(any())).thenReturn(mockTeam)
+            whenever(teamRepoMock.findById(any())).thenReturn(Optional.of(mockTeam))
             mockUser.getMemberOf().size shouldBe 0
             userService.joinTeam(username, teamId)
             mockUser.getMemberOf().size shouldBe 1

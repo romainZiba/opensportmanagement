@@ -3,7 +3,11 @@ package com.zcorp.opensportmanagement.service
 import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.whenever
 import com.zcorp.opensportmanagement.model.Team
-import com.zcorp.opensportmanagement.repositories.*
+import com.zcorp.opensportmanagement.repositories.OpponentRepository
+import com.zcorp.opensportmanagement.repositories.SeasonRepository
+import com.zcorp.opensportmanagement.repositories.TeamMemberRepository
+import com.zcorp.opensportmanagement.repositories.TeamRepository
+import com.zcorp.opensportmanagement.repositories.UserRepository
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 

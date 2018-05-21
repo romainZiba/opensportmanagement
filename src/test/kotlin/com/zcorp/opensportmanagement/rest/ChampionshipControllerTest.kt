@@ -1,9 +1,7 @@
 package com.zcorp.opensportmanagement.rest
 
 import com.nhaarman.mockito_kotlin.any
-import com.nhaarman.mockito_kotlin.doThrow
 import com.nhaarman.mockito_kotlin.whenever
-import com.zcorp.opensportmanagement.dto.UserDto
 import com.zcorp.opensportmanagement.security.AccessController
 import com.zcorp.opensportmanagement.service.ChampionshipService
 import com.zcorp.opensportmanagement.service.NotFoundException
@@ -19,7 +17,6 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-
 
 @RunWith(SpringRunner::class)
 @WebMvcTest(ChampionshipController::class)

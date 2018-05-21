@@ -1,8 +1,19 @@
 package com.zcorp.opensportmanagement.service
 
-import com.nhaarman.mockito_kotlin.*
+import com.nhaarman.mockito_kotlin.any
+import com.nhaarman.mockito_kotlin.doNothing
+import com.nhaarman.mockito_kotlin.eq
+import com.nhaarman.mockito_kotlin.mock
+import com.nhaarman.mockito_kotlin.times
+import com.nhaarman.mockito_kotlin.verify
+import com.nhaarman.mockito_kotlin.whenever
 import com.zcorp.opensportmanagement.dto.MatchCreationDto
-import com.zcorp.opensportmanagement.model.*
+import com.zcorp.opensportmanagement.model.Championship
+import com.zcorp.opensportmanagement.model.Match
+import com.zcorp.opensportmanagement.model.Opponent
+import com.zcorp.opensportmanagement.model.Place
+import com.zcorp.opensportmanagement.model.Season
+import com.zcorp.opensportmanagement.model.Team
 import com.zcorp.opensportmanagement.repositories.ChampionshipRepository
 import com.zcorp.opensportmanagement.repositories.MatchRepository
 import com.zcorp.opensportmanagement.repositories.OpponentRepository
@@ -13,8 +24,7 @@ import io.kotlintest.specs.StringSpec
 import org.mockito.AdditionalMatchers.not
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
-import javax.persistence.EntityNotFoundException
+import java.util.Optional
 
 class ChampionshipServiceTest : StringSpec() {
     private val championshipRepoMock: ChampionshipRepository = mock()

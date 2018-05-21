@@ -2,7 +2,11 @@ package com.zcorp.opensportmanagement.model
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.zcorp.opensportmanagement.dto.UserDto
-import javax.persistence.*
+import javax.persistence.CascadeType
+import javax.persistence.Entity
+import javax.persistence.Id
+import javax.persistence.OneToMany
+import javax.persistence.Table
 import javax.validation.constraints.NotNull
 
 @Entity

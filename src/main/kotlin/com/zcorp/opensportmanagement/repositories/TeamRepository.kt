@@ -1,6 +1,11 @@
 package com.zcorp.opensportmanagement.repositories
 
-import com.zcorp.opensportmanagement.model.*
+import com.zcorp.opensportmanagement.model.AbstractEvent
+import com.zcorp.opensportmanagement.model.Opponent
+import com.zcorp.opensportmanagement.model.Place
+import com.zcorp.opensportmanagement.model.Season
+import com.zcorp.opensportmanagement.model.Team
+import com.zcorp.opensportmanagement.model.TeamMember
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository

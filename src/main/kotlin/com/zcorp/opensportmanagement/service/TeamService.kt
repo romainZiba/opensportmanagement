@@ -1,11 +1,21 @@
 package com.zcorp.opensportmanagement.service
 
-import com.zcorp.opensportmanagement.dto.*
+import com.zcorp.opensportmanagement.dto.EventDto
+import com.zcorp.opensportmanagement.dto.OpponentDto
+import com.zcorp.opensportmanagement.dto.PlaceDto
+import com.zcorp.opensportmanagement.dto.SeasonDto
+import com.zcorp.opensportmanagement.dto.TeamDto
+import com.zcorp.opensportmanagement.dto.TeamMemberDto
+import com.zcorp.opensportmanagement.dto.TeamMemberUpdateDto
 import com.zcorp.opensportmanagement.model.Opponent
 import com.zcorp.opensportmanagement.model.Season
 import com.zcorp.opensportmanagement.model.Team
 import com.zcorp.opensportmanagement.model.TeamMember
-import com.zcorp.opensportmanagement.repositories.*
+import com.zcorp.opensportmanagement.repositories.OpponentRepository
+import com.zcorp.opensportmanagement.repositories.SeasonRepository
+import com.zcorp.opensportmanagement.repositories.TeamMemberRepository
+import com.zcorp.opensportmanagement.repositories.TeamRepository
+import com.zcorp.opensportmanagement.repositories.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable

@@ -1,8 +1,16 @@
 package com.zcorp.opensportmanagement.rest
 
-import com.zcorp.opensportmanagement.dto.*
+import com.zcorp.opensportmanagement.dto.EventCreationDto
+import com.zcorp.opensportmanagement.dto.EventDto
+import com.zcorp.opensportmanagement.dto.OpponentDto
+import com.zcorp.opensportmanagement.dto.PlaceDto
+import com.zcorp.opensportmanagement.dto.SeasonDto
+import com.zcorp.opensportmanagement.dto.TeamDto
+import com.zcorp.opensportmanagement.dto.TeamMemberDto
+import com.zcorp.opensportmanagement.dto.TeamMemberUpdateDto
 import com.zcorp.opensportmanagement.security.AccessController
-import com.zcorp.opensportmanagement.service.*
+import com.zcorp.opensportmanagement.service.EventService
+import com.zcorp.opensportmanagement.service.TeamService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Pageable
 import org.springframework.data.rest.webmvc.RepositoryRestController
@@ -12,7 +20,13 @@ import org.springframework.hateoas.Resource
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
 import javax.validation.constraints.NotNull
 
 @RepositoryRestController

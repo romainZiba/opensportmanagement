@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.User
 import java.net.URLEncoder
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-import java.util.*
+import java.util.Date
 import javax.servlet.http.Cookie
 
 class JWTUtils {

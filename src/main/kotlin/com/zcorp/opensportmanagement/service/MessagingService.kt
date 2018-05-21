@@ -17,7 +17,7 @@ import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.time.OffsetDateTime
-import java.util.*
+import java.util.UUID
 
 /**
  * This class is used to access the Rethink database

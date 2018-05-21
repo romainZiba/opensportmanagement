@@ -15,10 +15,12 @@ import javax.persistence.NoResultException
 import javax.transaction.Transactional
 
 @Service
-open class EventService @Autowired constructor(private val eventRepository: EventRepository,
-                                               private val teamMemberRepository: TeamMemberRepository,
-                                               private val placeRepository: PlaceRepository,
-                                               private val teamRepository: TeamRepository) {
+open class EventService @Autowired constructor(
+    private val eventRepository: EventRepository,
+    private val teamMemberRepository: TeamMemberRepository,
+    private val placeRepository: PlaceRepository,
+    private val teamRepository: TeamRepository
+) {
 
     @Transactional
     open fun getEvent(eventId: Int): EventDto {
@@ -50,7 +52,6 @@ open class EventService @Autowired constructor(private val eventRepository: Even
                         eventBuilder.fromDate(LocalDateTime.of(currentDate, dto.fromTime))
                                 .toDate(LocalDateTime.of(currentDate, dto.toTime))
                         events.add(eventBuilder.build())
-
                     }
                     currentDate = currentDate.plusDays(1)
                 }

@@ -16,16 +16,16 @@ import javax.servlet.ServletException
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-
 class JWTAuthorizationFilter(authManager: AuthenticationManager) : BasicAuthenticationFilter(authManager) {
 
     private val LOG = LoggerFactory.getLogger(JWTAuthorizationFilter::class.java)
 
-
     @Throws(IOException::class, ServletException::class)
-    override fun doFilterInternal(req: HttpServletRequest,
-                                  res: HttpServletResponse,
-                                  chain: FilterChain) {
+    override fun doFilterInternal(
+        req: HttpServletRequest,
+        res: HttpServletResponse,
+        chain: FilterChain
+    ) {
         val authCookie = req.cookies?.find { cookie -> cookie.name == ACCESS_TOKEN_COOKIE_KEY }
         val insecureCookie = req.cookies?.find { cookie -> cookie.name == INSECURE_COOKIE_KEY }
 
@@ -77,7 +77,6 @@ class JWTAuthorizationFilter(authManager: AuthenticationManager) : BasicAuthenti
             } catch (e: ExpiredJwtException) {
                 LOG.error("Token expired ", e)
             }
-
         }
         return null
     }

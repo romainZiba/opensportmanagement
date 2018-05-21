@@ -11,11 +11,13 @@ import javax.persistence.EntityNotFoundException
 import javax.transaction.Transactional
 
 @Service
-open class MatchService @Autowired constructor(private val matchRepository: MatchRepository,
-                                               private val teamRepository: TeamRepository,
-                                               private val placeRepository: PlaceRepository,
-                                               private val championshipRepository: ChampionshipRepository,
-                                               private val opponentRepository: OpponentRepository) {
+open class MatchService @Autowired constructor(
+    private val matchRepository: MatchRepository,
+    private val teamRepository: TeamRepository,
+    private val placeRepository: PlaceRepository,
+    private val championshipRepository: ChampionshipRepository,
+    private val opponentRepository: OpponentRepository
+) {
 
     @Transactional
     open fun getMatch(matchId: Int): EventDto {
@@ -66,6 +68,5 @@ open class MatchService @Autowired constructor(private val matchRepository: Matc
         } catch (e: EntityNotFoundException) {
             throw NotFoundException("Team $teamId does not exist")
         }
-
     }
 }

@@ -10,8 +10,10 @@ import javax.persistence.EntityNotFoundException
 import javax.transaction.Transactional
 
 @Service
-open class PlaceService @Autowired constructor(private val placeRepository: PlaceRepository,
-                                               private val teamRepository: TeamRepository) {
+open class PlaceService @Autowired constructor(
+    private val placeRepository: PlaceRepository,
+    private val teamRepository: TeamRepository
+) {
 
     @Transactional
     open fun getPlace(placeId: Int): PlaceDto {

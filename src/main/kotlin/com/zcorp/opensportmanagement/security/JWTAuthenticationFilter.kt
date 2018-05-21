@@ -15,7 +15,6 @@ import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-
 class JWTAuthenticationFilter(authManager: AuthenticationManager) : UsernamePasswordAuthenticationFilter() {
 
     init {
@@ -23,8 +22,10 @@ class JWTAuthenticationFilter(authManager: AuthenticationManager) : UsernamePass
     }
 
     @Throws(AuthenticationException::class)
-    override fun attemptAuthentication(req: HttpServletRequest,
-                                       res: HttpServletResponse?): Authentication {
+    override fun attemptAuthentication(
+        req: HttpServletRequest,
+        res: HttpServletResponse?
+    ): Authentication {
         try {
             val creds = ObjectMapper().readValue(req.inputStream, com.zcorp.opensportmanagement.model.User::class.java)
 
@@ -37,14 +38,15 @@ class JWTAuthenticationFilter(authManager: AuthenticationManager) : UsernamePass
         } catch (e: IOException) {
             throw RuntimeException(e)
         }
-
     }
 
     @Throws(IOException::class, ServletException::class)
-    override fun successfulAuthentication(req: HttpServletRequest,
-                                          res: HttpServletResponse,
-                                          chain: FilterChain,
-                                          auth: Authentication) {
+    override fun successfulAuthentication(
+        req: HttpServletRequest,
+        res: HttpServletResponse,
+        chain: FilterChain,
+        auth: Authentication
+    ) {
         res.addCookie(JWTUtils.getAccessCookie(auth))
         val cookie = Cookie(INSECURE_COOKIE_KEY, "")
         cookie.maxAge = EXPIRATION_TIME

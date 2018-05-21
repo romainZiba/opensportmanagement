@@ -86,12 +86,7 @@ abstract class AbstractEvent protected constructor() {
         const val match = "MATCH"
         const val training = "TRAINING"
         const val other = "OTHER"
-        //TODO: handle configuration of this parameter
+        // TODO: handle configuration of this parameter
         const val MAX_PLAYERS: Int = 10
-
     }
 }
-
-
-
-

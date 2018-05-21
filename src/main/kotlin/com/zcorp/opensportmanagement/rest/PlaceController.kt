@@ -13,12 +13,16 @@ import org.springframework.web.bind.annotation.RequestMapping
 
 @RepositoryRestController
 @RequestMapping("/places")
-open class PlaceController @Autowired constructor(private val placeService: PlaceService,
-                                                  private val accessController: AccessController) {
+open class PlaceController @Autowired constructor(
+    private val placeService: PlaceService,
+    private val accessController: AccessController
+) {
 
     @GetMapping("/{placeId}")
-    open fun getPlace(@PathVariable("placeId") stadiumId: Int,
-                      authentication: Authentication): ResponseEntity<PlaceDto> {
+    open fun getPlace(
+        @PathVariable("placeId") stadiumId: Int,
+        authentication: Authentication
+    ): ResponseEntity<PlaceDto> {
         val stadiumDto = placeService.getPlace(stadiumId)
         if (accessController.isUserAllowedToAccessTeam(authentication, stadiumDto.teamId!!)) {
             return ResponseEntity.ok(stadiumDto)

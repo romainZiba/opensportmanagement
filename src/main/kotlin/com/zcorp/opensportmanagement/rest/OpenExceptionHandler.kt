@@ -13,7 +13,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 @ControllerAdvice
 @RestController
-open class OpenExceptionHandler: ResponseEntityExceptionHandler() {
+open class OpenExceptionHandler : ResponseEntityExceptionHandler() {
     @ExceptionHandler(NotFoundException::class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     fun handleError(e: NotFoundException) = e.message
@@ -41,5 +41,4 @@ open class OpenExceptionHandler: ResponseEntityExceptionHandler() {
     @ExceptionHandler(PastEventException::class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     fun handleError(e: PastEventException) = e.message
-
 }

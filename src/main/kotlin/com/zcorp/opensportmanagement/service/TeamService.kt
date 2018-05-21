@@ -13,11 +13,13 @@ import org.springframework.stereotype.Service
 import javax.transaction.Transactional
 
 @Service
-open class TeamService @Autowired constructor(private val teamRepository: TeamRepository,
-                                              private val teamMemberRepository: TeamMemberRepository,
-                                              private val userRepository: UserRepository,
-                                              private val seasonRepository: SeasonRepository,
-                                              private val opponentRepository: OpponentRepository) {
+open class TeamService @Autowired constructor(
+    private val teamRepository: TeamRepository,
+    private val teamMemberRepository: TeamMemberRepository,
+    private val userRepository: UserRepository,
+    private val seasonRepository: SeasonRepository,
+    private val opponentRepository: OpponentRepository
+) {
 
     @Transactional
     open fun getTeamMembers(teamId: Int): List<TeamMemberDto> {
@@ -59,7 +61,6 @@ open class TeamService @Autowired constructor(private val teamRepository: TeamRe
     open fun getSeasons(teamId: Int): List<SeasonDto> {
         return teamRepository.getSeasons(teamId).map { it.toDto() }
     }
-
 
     @Transactional
     open fun createSeason(seasonDto: SeasonDto, teamId: Int): SeasonDto {

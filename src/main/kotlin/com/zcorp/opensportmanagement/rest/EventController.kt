@@ -15,13 +15,17 @@ import javax.validation.constraints.NotNull
 
 @RepositoryRestController
 @RequestMapping("/events")
-open class EventController @Autowired constructor(private val eventService: EventService,
-                                                  private val messagingService: MessagingService,
-                                                  private val accessController: AccessController) {
+open class EventController @Autowired constructor(
+    private val eventService: EventService,
+    private val messagingService: MessagingService,
+    private val accessController: AccessController
+) {
 
     @GetMapping("/{eventId}")
-    open fun getEvent(@PathVariable("eventId") eventId: Int,
-                      authentication: Authentication): ResponseEntity<EventDto> {
+    open fun getEvent(
+        @PathVariable("eventId") eventId: Int,
+        authentication: Authentication
+    ): ResponseEntity<EventDto> {
         val eventDto = eventService.getEvent(eventId)
         if (accessController.isUserAllowedToAccessTeam(authentication, eventDto.teamId!!)) {
             return ResponseEntity.ok(eventDto)
@@ -30,8 +34,10 @@ open class EventController @Autowired constructor(private val eventService: Even
     }
 
     @DeleteMapping("/{eventId}")
-    open fun deleteEvent(@PathVariable("eventId") eventId: Int,
-                         authentication: Authentication): ResponseEntity<Any> {
+    open fun deleteEvent(
+        @PathVariable("eventId") eventId: Int,
+        authentication: Authentication
+    ): ResponseEntity<Any> {
         val eventDto = eventService.getEvent(eventId)
         if (accessController.isTeamAdmin(authentication, eventDto.teamId!!)) {
             eventService.deleteEvent(eventId)
@@ -41,9 +47,11 @@ open class EventController @Autowired constructor(private val eventService: Even
     }
 
     @PutMapping("/{eventId}/{present}")
-    open fun participate(@NotNull @PathVariable("eventId") eventId: Int,
-                         @NotNull @PathVariable("present") present: Boolean,
-                         authentication: Authentication): ResponseEntity<EventDto> {
+    open fun participate(
+        @NotNull @PathVariable("eventId") eventId: Int,
+        @NotNull @PathVariable("present") present: Boolean,
+        authentication: Authentication
+    ): ResponseEntity<EventDto> {
         var eventDto = eventService.getEvent(eventId)
         if (accessController.isUserAllowedToAccessTeam(authentication, eventDto.teamId!!)) {
             eventDto = eventService.participate(authentication.name, eventId, present)
@@ -53,8 +61,10 @@ open class EventController @Autowired constructor(private val eventService: Even
     }
 
     @GetMapping("/{eventId}/messages")
-    fun getMessages(@NotNull @PathVariable("eventId") eventId: Int,
-                    authentication: Authentication): ResponseEntity<List<MessageDto>> {
+    fun getMessages(
+        @NotNull @PathVariable("eventId") eventId: Int,
+        authentication: Authentication
+    ): ResponseEntity<List<MessageDto>> {
         val eventDto = eventService.getEvent(eventId)
         if (accessController.isUserAllowedToAccessTeam(authentication, eventDto.teamId!!)) {
             return ResponseEntity.ok(messagingService.getMessagesFromEvent(eventId))
@@ -63,9 +73,11 @@ open class EventController @Autowired constructor(private val eventService: Even
     }
 
     @PostMapping("/{eventId}/messages")
-    fun createMessage(@NotNull @PathVariable("eventId") eventId: Int,
-                      @RequestBody messageDto: MessageDto,
-                      authentication: Authentication): ResponseEntity<MessageDto> {
+    fun createMessage(
+        @NotNull @PathVariable("eventId") eventId: Int,
+        @RequestBody messageDto: MessageDto,
+        authentication: Authentication
+    ): ResponseEntity<MessageDto> {
         val eventDto = eventService.getEvent(eventId)
         if (accessController.isUserAllowedToAccessTeam(authentication, eventDto.teamId!!)) {
             return ResponseEntity.ok(messagingService.createMessage(messageDto, authentication.name, eventId))

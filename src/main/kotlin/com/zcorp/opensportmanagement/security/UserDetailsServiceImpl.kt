@@ -22,5 +22,4 @@ open class UserDetailsServiceImpl(private val userRepository: UserRepository) : 
                 user.password,
                 user.getMemberOf().mapTo(LinkedList<GrantedAuthority>()) { OpenGrantedAuthority(it.team.id, it.roles) })
     }
-
 }

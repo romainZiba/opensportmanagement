@@ -14,8 +14,10 @@ import javax.validation.constraints.NotNull
 
 @RepositoryRestController
 @RequestMapping("/matches")
-open class MatchController @Autowired constructor(private val matchService: MatchService,
-                                                  private val accessController: AccessController) {
+open class MatchController @Autowired constructor(
+    private val matchService: MatchService,
+    private val accessController: AccessController
+) {
 
     @GetMapping("/{matchId}")
     open fun getMatch(@PathVariable matchId: Int, authentication: Authentication): ResponseEntity<EventDto> {
@@ -27,9 +29,11 @@ open class MatchController @Autowired constructor(private val matchService: Matc
     }
 
     @PutMapping("/{matchId}/score")
-    open fun changeScore(@NotNull @PathVariable("matchId") matchId: Int,
-                         @RequestBody resultDto: ResultDto,
-                         authentication: Authentication): ResponseEntity<EventDto> {
+    open fun changeScore(
+        @NotNull @PathVariable("matchId") matchId: Int,
+        @RequestBody resultDto: ResultDto,
+        authentication: Authentication
+    ): ResponseEntity<EventDto> {
         var matchDto = matchService.getMatch(matchId)
         if (accessController.isUserAllowedToAccessTeam(authentication, matchDto.teamId!!)) {
             matchDto = matchService.changeScore(matchId, resultDto)

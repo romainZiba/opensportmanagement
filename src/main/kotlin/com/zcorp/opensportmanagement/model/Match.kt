@@ -82,7 +82,6 @@ class Match private constructor(builder: Builder) : AbstractEvent() {
         lateinit var type: MatchType
         var isTeamLocal: Boolean = true
 
-
         fun name(n: String): Builder {
             this.name = n
             return this
@@ -138,8 +137,3 @@ class Match private constructor(builder: Builder) : AbstractEvent() {
         }
     }
 }
-
-
-
-
-

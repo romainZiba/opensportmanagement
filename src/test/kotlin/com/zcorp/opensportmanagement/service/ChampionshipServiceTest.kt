@@ -58,7 +58,7 @@ class ChampionshipServiceTest : StringSpec() {
         }
 
         "create match for a championship that does not exist should not be possible" {
-            val matchDto = MatchCreationDto("match", LocalDateTime.of(2018,1,1,19,50),
+            val matchDto = MatchCreationDto("match", LocalDateTime.of(2018, 1, 1, 19, 50),
                     matchType = Match.MatchType.CHAMPIONSHIP, placeId = placeId)
             whenever(championshipRepoMock.getOne(championshipId)).thenThrow(EntityNotFoundException())
             shouldThrow<NotFoundException> {
@@ -67,7 +67,7 @@ class ChampionshipServiceTest : StringSpec() {
         }
 
         "create match with a place that does not exist should not be possible" {
-            val matchDto = MatchCreationDto("match", LocalDateTime.of(2018,1,1,19,50),
+            val matchDto = MatchCreationDto("match", LocalDateTime.of(2018, 1, 1, 19, 50),
                     matchType = Match.MatchType.CHAMPIONSHIP, placeId = placeId, opponentId = opponentId)
             whenever(championshipRepoMock.getOne(championshipId)).thenReturn(mockChampionship)
             whenever(placeRepoMock.getOne(placeId)).thenThrow(EntityNotFoundException())
@@ -77,7 +77,7 @@ class ChampionshipServiceTest : StringSpec() {
         }
 
         "create match with an opponent that does not exist should not be possible" {
-            val matchDto = MatchCreationDto("match", LocalDateTime.of(2018,1,1,19,50),
+            val matchDto = MatchCreationDto("match", LocalDateTime.of(2018, 1, 1, 19, 50),
                     matchType = Match.MatchType.CHAMPIONSHIP, placeId = placeId, opponentId = opponentId)
             whenever(championshipRepoMock.getOne(championshipId)).thenReturn(mockChampionship)
             whenever(placeRepoMock.getOne(placeId)).thenReturn(mockStadium)
@@ -88,7 +88,7 @@ class ChampionshipServiceTest : StringSpec() {
         }
 
         "create match in the past should not be possible" {
-            val dto = MatchCreationDto("match", LocalDateTime.of(2018,1,1,19,50),
+            val dto = MatchCreationDto("match", LocalDateTime.of(2018, 1, 1, 19, 50),
                     matchType = Match.MatchType.CHAMPIONSHIP, opponentId = opponentId, placeId = placeId)
             whenever(championshipRepoMock.getOne(championshipId)).thenReturn(mockChampionship)
             whenever(placeRepoMock.getOne(placeId)).thenReturn(mockStadium)

@@ -1,7 +1,6 @@
 package com.zcorp.opensportmanagement.model
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.annotation.JsonManagedReference
 import com.zcorp.opensportmanagement.dto.UserDto
 import javax.persistence.*
 import javax.validation.constraints.NotNull
@@ -9,12 +8,14 @@ import javax.validation.constraints.NotNull
 @Entity
 @Table(name = "app_user")
 @JsonIgnoreProperties("memberOf")
-data class User(@Id @NotNull val username: String,
-                var firstName: String,
-                var lastName: String,
-                var password: String,
-                var email: String,
-                var phoneNumber: String?) {
+data class User(
+    @Id @NotNull val username: String,
+    var firstName: String,
+    var lastName: String,
+    var password: String,
+    var email: String,
+    var phoneNumber: String?
+) {
 
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL])
     private val memberOf: MutableSet<TeamMember> = mutableSetOf()
@@ -36,4 +37,3 @@ data class User(@Id @NotNull val username: String,
         return UserDto(firstName, lastName, username, email, phoneNumber)
     }
 }
-

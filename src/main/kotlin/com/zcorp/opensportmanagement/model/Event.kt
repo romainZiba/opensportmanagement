@@ -30,7 +30,7 @@ class Event private constructor(builder: Builder) : AbstractEvent() {
 
     class Builder {
         lateinit var name: String
-        var eventType: EventType ?= null
+        var eventType: EventType ? = null
         lateinit var team: Team
         lateinit var fromDateTime: LocalDateTime
         var toDateTime: LocalDateTime? = null

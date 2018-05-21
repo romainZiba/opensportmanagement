@@ -11,11 +11,10 @@ interface EventDAO {
     fun getEventById(id: Int): AbstractEvent
 }
 
-class EventRepositoryImpl(@PersistenceContext private val em: EntityManager): EventDAO {
+class EventRepositoryImpl(@PersistenceContext private val em: EntityManager) : EventDAO {
     override fun getEventById(id: Int): AbstractEvent {
         return em.createQuery("SELECT event FROM AbstractEvent event WHERE event.id = :id", AbstractEvent::class.java)
                 .setParameter("id", id)
                 .singleResult
     }
-
 }

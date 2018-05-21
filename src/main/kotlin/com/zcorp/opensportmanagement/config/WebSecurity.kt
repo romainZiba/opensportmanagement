@@ -4,7 +4,6 @@ import com.zcorp.opensportmanagement.security.JWTAuthenticationFilter
 import com.zcorp.opensportmanagement.security.JWTAuthorizationFilter
 import com.zcorp.opensportmanagement.security.SIGN_UP_URL
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
@@ -19,12 +18,12 @@ import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
-
 @Configuration
 @EnableWebSecurity
-open class WebSecurity(@Qualifier("osm_user_details") private val userDetailsService: UserDetailsService,
-                       private val properties: OsmProperties) : WebSecurityConfigurerAdapter() {
-
+open class WebSecurity(
+    @Qualifier("osm_user_details") private val userDetailsService: UserDetailsService,
+    private val properties: OsmProperties
+) : WebSecurityConfigurerAdapter() {
 
     @Bean
     open fun bCryptPasswordEncoder(): BCryptPasswordEncoder {
@@ -51,7 +50,6 @@ open class WebSecurity(@Qualifier("osm_user_details") private val userDetailsSer
 
         http.csrf().disable()
         http.headers().frameOptions().disable()
-
     }
 
     override fun configure(auth: AuthenticationManagerBuilder?) {

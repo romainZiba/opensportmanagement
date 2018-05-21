@@ -10,8 +10,7 @@ import io.kotlintest.shouldThrow
 import io.kotlintest.specs.StringSpec
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 
-
-class UserServiceTest: StringSpec() {
+class UserServiceTest : StringSpec() {
     private val teamId = 5
     private val username = "username"
     private val firstName = "firstname"

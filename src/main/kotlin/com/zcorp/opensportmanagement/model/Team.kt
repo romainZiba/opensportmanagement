@@ -8,12 +8,14 @@ import javax.persistence.Table
 
 @Entity
 @Table(name = "team")
-data class Team(val name: String,
-                val sport: Sport,
-                val genderKind: Gender,
-                val ageGroup: AgeGroup,
-                var imgUrl: String = "",
-                @Id @GeneratedValue val id: Int = -1) {
+data class Team(
+    val name: String,
+    val sport: Sport,
+    val genderKind: Gender,
+    val ageGroup: AgeGroup,
+    var imgUrl: String = "",
+    @Id @GeneratedValue val id: Int = -1
+) {
 
     fun toDto(): TeamDto {
         return TeamDto(name, sport, genderKind, ageGroup, imgUrl, id)

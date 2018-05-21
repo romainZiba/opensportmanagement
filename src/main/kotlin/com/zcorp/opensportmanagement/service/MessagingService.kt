@@ -25,9 +25,10 @@ import java.util.*
  */
 @Service
 class MessagingService @Autowired constructor(
-        private val userService: UserService,
-        private val connectionFactory: RethinkDBConnectionFactory,
-        private val messageChangesListener: MessageChangesListener) : InitializingBean {
+    private val userService: UserService,
+    private val connectionFactory: RethinkDBConnectionFactory,
+    private val messageChangesListener: MessageChangesListener
+) : InitializingBean {
 
     private val log = LoggerFactory.getLogger(MessageController::class.java)
 
@@ -102,7 +103,6 @@ class MessagingService @Autowired constructor(
         if (eventId == null) {
             conversationId = messageDto.conversationId ?: UUID.randomUUID().toString()
             conversationTopic = messageDto.conversationTopic ?: "New subject"
-
         } else {
             if (messageDto.conversationId != null) {
                 throw UnexpectedParameterException("conversationId")

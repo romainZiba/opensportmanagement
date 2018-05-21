@@ -15,12 +15,13 @@ import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 import javax.validation.constraints.NotNull
 
-
 @RepositoryRestController
 @RequestMapping("/teams")
-open class TeamController @Autowired constructor(private val teamService: TeamService,
-                                                 private val eventService: EventService,
-                                                 private val accessController: AccessController) {
+open class TeamController @Autowired constructor(
+    private val teamService: TeamService,
+    private val eventService: EventService,
+    private val accessController: AccessController
+) {
 
     @GetMapping
     open fun getTeams(authentication: Authentication): ResponseEntity<List<TeamDto>> {
@@ -29,8 +30,10 @@ open class TeamController @Autowired constructor(private val teamService: TeamSe
     }
 
     @PostMapping
-    open fun createTeam(@RequestBody teamDto: TeamDto,
-                        authentication: Authentication): ResponseEntity<TeamDto> {
+    open fun createTeam(
+        @RequestBody teamDto: TeamDto,
+        authentication: Authentication
+    ): ResponseEntity<TeamDto> {
         val teamDto = teamService.createTeam(teamDto, authentication.name)
         return ResponseEntity(teamDto, HttpStatus.CREATED)
     }
@@ -53,12 +56,13 @@ open class TeamController @Autowired constructor(private val teamService: TeamSe
         throw UserForbiddenException()
     }
 
-
     @GetMapping("/{teamId}/events")
-    open fun getEvents(@PathVariable("teamId") teamId: Int,
-                       pageable: Pageable,
-                       authentication: Authentication,
-                       assembler: PagedResourcesAssembler<EventDto>): ResponseEntity<PagedResources<Resource<EventDto>>> {
+    open fun getEvents(
+        @PathVariable("teamId") teamId: Int,
+        pageable: Pageable,
+        authentication: Authentication,
+        assembler: PagedResourcesAssembler<EventDto>
+    ): ResponseEntity<PagedResources<Resource<EventDto>>> {
         if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
             val eventsPage = teamService.getEvents(teamId, pageable)
             return ResponseEntity.ok(assembler.toResource(eventsPage))
@@ -67,9 +71,11 @@ open class TeamController @Autowired constructor(private val teamService: TeamSe
     }
 
     @PostMapping("/{teamId}/events")
-    open fun createEvent(@PathVariable("teamId") teamId: Int,
-                         @RequestBody eventDto: EventCreationDto,
-                         authentication: Authentication): ResponseEntity<EventDto> {
+    open fun createEvent(
+        @PathVariable("teamId") teamId: Int,
+        @RequestBody eventDto: EventCreationDto,
+        authentication: Authentication
+    ): ResponseEntity<EventDto> {
         if (accessController.isTeamAdmin(authentication, teamId)) {
             eventService.createEvent(teamId, eventDto)
             return ResponseEntity(null, HttpStatus.CREATED)
@@ -78,9 +84,11 @@ open class TeamController @Autowired constructor(private val teamService: TeamSe
     }
 
     @PostMapping("/{teamId}/opponents")
-    open fun createOpponent(@NotNull @PathVariable("teamId") teamId: Int,
-                            @RequestBody opponentDto: OpponentDto,
-                            authentication: Authentication): ResponseEntity<OpponentDto> {
+    open fun createOpponent(
+        @NotNull @PathVariable("teamId") teamId: Int,
+        @RequestBody opponentDto: OpponentDto,
+        authentication: Authentication
+    ): ResponseEntity<OpponentDto> {
 
         if (accessController.isTeamAdmin(authentication, teamId)) {
             val opponent = teamService.createOpponent(opponentDto, teamId)
@@ -99,8 +107,10 @@ open class TeamController @Autowired constructor(private val teamService: TeamSe
     }
 
     @GetMapping("/{teamId}/seasons")
-    open fun getSeasons(@PathVariable("teamId") teamId: Int,
-                        authentication: Authentication): ResponseEntity<List<SeasonDto>> {
+    open fun getSeasons(
+        @PathVariable("teamId") teamId: Int,
+        authentication: Authentication
+    ): ResponseEntity<List<SeasonDto>> {
         if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
             val seasons = teamService.getSeasons(teamId)
             return ResponseEntity.ok(seasons)
@@ -109,9 +119,11 @@ open class TeamController @Autowired constructor(private val teamService: TeamSe
     }
 
     @PostMapping("/{teamId}/seasons")
-    open fun createSeason(@NotNull @PathVariable("teamId") teamId: Int,
-                          @RequestBody seasonDto: SeasonDto,
-                          authentication: Authentication): ResponseEntity<SeasonDto> {
+    open fun createSeason(
+        @NotNull @PathVariable("teamId") teamId: Int,
+        @RequestBody seasonDto: SeasonDto,
+        authentication: Authentication
+    ): ResponseEntity<SeasonDto> {
         if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
             val season = teamService.createSeason(seasonDto, teamId)
             return ResponseEntity(season, HttpStatus.CREATED)
@@ -137,8 +149,10 @@ open class TeamController @Autowired constructor(private val teamService: TeamSe
     }
 
     @GetMapping("/{teamId}/members/me")
-    open fun getMeAsTeamMember(@PathVariable("teamId") teamId: Int,
-                               authentication: Authentication): ResponseEntity<TeamMemberDto> {
+    open fun getMeAsTeamMember(
+        @PathVariable("teamId") teamId: Int,
+        authentication: Authentication
+    ): ResponseEntity<TeamMemberDto> {
         if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
             val teamMemberDto = teamService.getTeamMemberByUsername(teamId, authentication.name) ?: throw UserForbiddenException()
             return ResponseEntity.ok(teamMemberDto)
@@ -147,17 +161,21 @@ open class TeamController @Autowired constructor(private val teamService: TeamSe
     }
 
     @PutMapping("/{teamId}/members/me")
-    open fun updateUserInformation(@PathVariable("teamId") teamId: Int,
-                                   @RequestBody dto: TeamMemberUpdateDto,
-                                   authentication: Authentication): ResponseEntity<TeamMemberDto> {
+    open fun updateUserInformation(
+        @PathVariable("teamId") teamId: Int,
+        @RequestBody dto: TeamMemberUpdateDto,
+        authentication: Authentication
+    ): ResponseEntity<TeamMemberDto> {
         val teamMemberDto = teamService.updateProfile(dto, teamId, authentication.name)
         return ResponseEntity.ok(teamMemberDto)
     }
 
     @GetMapping("/{teamId}/members/{memberId}")
-    open fun getTeamMember(@PathVariable("teamId") teamId: Int,
-                           @PathVariable("memberId") memberId: Int,
-                           authentication: Authentication): ResponseEntity<TeamMemberDto> {
+    open fun getTeamMember(
+        @PathVariable("teamId") teamId: Int,
+        @PathVariable("memberId") memberId: Int,
+        authentication: Authentication
+    ): ResponseEntity<TeamMemberDto> {
         if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
             val teamMember = teamService.getTeamMember(teamId, memberId) ?: throw UserForbiddenException()
             return ResponseEntity.ok(teamMember)

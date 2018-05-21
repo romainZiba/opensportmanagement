@@ -29,13 +29,14 @@ open class Application {
 
     @Bean
     @Transactional
-    open fun init(userService: UserService,
-                  eventService: EventService,
-                  teamService: TeamService,
-                  placeService: PlaceService,
-                  seasonService: SeasonService,
-                  matchService: MatchService) = CommandLineRunner {
-
+    open fun init(
+        userService: UserService,
+        eventService: EventService,
+        teamService: TeamService,
+        placeService: PlaceService,
+        seasonService: SeasonService,
+        matchService: MatchService
+    ) = CommandLineRunner {
 
         var adminTeam1And2 = User("CR", "Coach", "Rock", "CR",
                 "CR@caramail.com", "")
@@ -76,7 +77,6 @@ open class Application {
         var championshipDto = ChampionshipDto("Championnat 2017-2018")
         championshipDto = seasonService.createChampionship(championshipDto, seasonDto._id!!)
 
-
         (0..4L).forEach({
             val fromDateTime = LocalDateTime.of(LocalDate.now().plusDays(it), LocalTime.of(20, 0))
             val matchCreationDto = MatchCreationDto("Match de championnat",
@@ -103,7 +103,6 @@ open class Application {
                 mutableSetOf(DayOfWeek.WEDNESDAY, DayOfWeek.TUESDAY))
         eventService.createEvent(team1Dto._id!!, dto)
     }
-
 }
 
 fun main(args: Array<String>) {

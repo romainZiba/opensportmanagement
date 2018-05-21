@@ -13,10 +13,11 @@ import javax.persistence.EntityNotFoundException
 import javax.transaction.Transactional
 
 @Service
-open class UserService @Autowired constructor(private val teamRepository: TeamRepository,
-                                              private val userRepository: UserRepository,
-                                              private val bCryptPasswordEncoder: BCryptPasswordEncoder) {
-
+open class UserService @Autowired constructor(
+    private val teamRepository: TeamRepository,
+    private val userRepository: UserRepository,
+    private val bCryptPasswordEncoder: BCryptPasswordEncoder
+) {
 
     @Transactional
     open fun findByUsername(username: String): UserDto? {
@@ -34,7 +35,6 @@ open class UserService @Autowired constructor(private val teamRepository: TeamRe
         } catch (e: EntityNotFoundException) {
             throw NotFoundException("Team $teamId does not exist")
         }
-
     }
 
     @Transactional

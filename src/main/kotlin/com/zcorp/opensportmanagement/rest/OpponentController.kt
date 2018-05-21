@@ -14,12 +14,16 @@ import org.springframework.web.bind.annotation.RequestMapping
 
 @RepositoryRestController
 @RequestMapping("/opponents")
-open class OpponentController @Autowired constructor(private val opponentService: OpponentService,
-                                                     private val accessController: AccessController) {
+open class OpponentController @Autowired constructor(
+    private val opponentService: OpponentService,
+    private val accessController: AccessController
+) {
 
     @GetMapping("/{opponentId}")
-    open fun getOpponent(@PathVariable("opponentId") opponentId: Int,
-                         authentication: Authentication): ResponseEntity<OpponentDto> {
+    open fun getOpponent(
+        @PathVariable("opponentId") opponentId: Int,
+        authentication: Authentication
+    ): ResponseEntity<OpponentDto> {
         val opponentDto = opponentService.getOpponent(opponentId)
         if (accessController.isUserAllowedToAccessTeam(authentication, opponentDto.teamId!!)) {
             return ResponseEntity.ok(opponentDto)
@@ -28,8 +32,10 @@ open class OpponentController @Autowired constructor(private val opponentService
     }
 
     @DeleteMapping("/{opponentId}")
-    open fun deleteOpponent(@PathVariable("opponentId") opponentId: Int,
-                            authentication: Authentication): ResponseEntity<Any> {
+    open fun deleteOpponent(
+        @PathVariable("opponentId") opponentId: Int,
+        authentication: Authentication
+    ): ResponseEntity<Any> {
         val opponentDto = opponentService.getOpponent(opponentId)
         if (accessController.isTeamAdmin(authentication, opponentDto.teamId!!)) {
             opponentService.deleteOpponent(opponentId)

@@ -1,10 +1,8 @@
 package com.zcorp.opensportmanagement.rest
 
-
 import com.zcorp.opensportmanagement.dto.UserDto
 import com.zcorp.opensportmanagement.dto.UserUpdateDto
 import com.zcorp.opensportmanagement.model.User
-import com.zcorp.opensportmanagement.service.NotFoundException
 import com.zcorp.opensportmanagement.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.rest.webmvc.RepositoryRestController
@@ -13,7 +11,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
-
 
 @RepositoryRestController
 @RequestMapping("/users")
@@ -34,8 +31,10 @@ open class UserController @Autowired constructor(private val userService: UserSe
     }
 
     @PutMapping("/me")
-    open fun updateUserInformation(@RequestBody dto: UserUpdateDto,
-                                   authentication: Authentication): ResponseEntity<UserDto> {
+    open fun updateUserInformation(
+        @RequestBody dto: UserUpdateDto,
+        authentication: Authentication
+    ): ResponseEntity<UserDto> {
         val userDto = userService.updateUserProfile(dto, authentication.name)
         return ResponseEntity.ok(userDto)
     }

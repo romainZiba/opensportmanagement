@@ -11,8 +11,10 @@ import javax.persistence.EntityNotFoundException
 import javax.transaction.Transactional
 
 @Service
-open class SeasonService @Autowired constructor(private val seasonRepository: SeasonRepository,
-                                                private val championshipRepository: ChampionshipRepository) {
+open class SeasonService @Autowired constructor(
+    private val seasonRepository: SeasonRepository,
+    private val championshipRepository: ChampionshipRepository
+) {
 
     @Transactional
     open fun getSeason(seasonId: Int): SeasonDto {

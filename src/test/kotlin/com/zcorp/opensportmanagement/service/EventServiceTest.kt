@@ -15,7 +15,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 
-class EventServiceTest: StringSpec() {
+class EventServiceTest : StringSpec() {
     private val teamId = 5
     private val placeId = 1
     private val mockTeam = Team("SuperNam", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "", teamId)

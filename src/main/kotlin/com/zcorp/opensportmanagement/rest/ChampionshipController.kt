@@ -15,12 +15,16 @@ import javax.validation.constraints.NotNull
 
 @RepositoryRestController
 @RequestMapping("/championships")
-open class ChampionshipController @Autowired constructor(private val championshipService: ChampionshipService,
-                                                         private val accessController: AccessController) {
+open class ChampionshipController @Autowired constructor(
+    private val championshipService: ChampionshipService,
+    private val accessController: AccessController
+) {
 
     @GetMapping("/{championshipId}")
-    open fun getChampionship(@PathVariable("championshipId") championshipId: Int,
-                             authentication: Authentication): ResponseEntity<ChampionshipDto> {
+    open fun getChampionship(
+        @PathVariable("championshipId") championshipId: Int,
+        authentication: Authentication
+    ): ResponseEntity<ChampionshipDto> {
         val championshipDto = championshipService.getChampionship(championshipId)
         if (accessController.isUserAllowedToAccessTeam(authentication, championshipDto.teamId!!)) {
             return ResponseEntity.ok(championshipDto)
@@ -29,8 +33,10 @@ open class ChampionshipController @Autowired constructor(private val championshi
     }
 
     @DeleteMapping("/{championshipId}")
-    open fun deleteChampionship(@PathVariable("championshipId") championshipId: Int,
-                                authentication: Authentication): ResponseEntity<Any> {
+    open fun deleteChampionship(
+        @PathVariable("championshipId") championshipId: Int,
+        authentication: Authentication
+    ): ResponseEntity<Any> {
         val championshipDto = championshipService.getChampionship(championshipId)
         if (accessController.isTeamAdmin(authentication, championshipDto.teamId!!)) {
             championshipService.deleteChampionship(championshipId)
@@ -40,9 +46,11 @@ open class ChampionshipController @Autowired constructor(private val championshi
     }
 
     @PostMapping("/{championshipId}/matches")
-    open fun createMatch(@NotNull @PathVariable("championshipId") championshipId: Int,
-                         @RequestBody dto: MatchCreationDto,
-                         authentication: Authentication): ResponseEntity<EventDto> {
+    open fun createMatch(
+        @NotNull @PathVariable("championshipId") championshipId: Int,
+        @RequestBody dto: MatchCreationDto,
+        authentication: Authentication
+    ): ResponseEntity<EventDto> {
         val championshipDto = championshipService.getChampionship(championshipId)
         if (accessController.isTeamAdmin(authentication, championshipDto.teamId!!)) {
             val match = championshipService.createMatch(dto, championshipId)

@@ -16,7 +16,7 @@ open class Message {
     }
 
     var body = ""
-    var authorUsername = ""   // Username of the author
+    var authorUsername = "" // Username of the author
     var authorFirstName = ""
     var authorLastName = ""
     var recipients: List<Int> = emptyList() // If empty, everyone is targeted. The recipients contain list of team member ids

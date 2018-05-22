@@ -1,5 +1,9 @@
 package com.zcorp.opensportmanagement.service
 
+import assertk.assertions.contains
+import assertk.assertions.hasSize
+import assertk.assertions.isEqualTo
+import assertk.assertions.isNull
 import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.times
@@ -9,13 +13,13 @@ import com.zcorp.opensportmanagement.model.Team
 import com.zcorp.opensportmanagement.model.User
 import com.zcorp.opensportmanagement.repositories.TeamRepository
 import com.zcorp.opensportmanagement.repositories.UserRepository
-import io.kotlintest.shouldBe
-import io.kotlintest.shouldThrow
-import io.kotlintest.specs.StringSpec
+import org.junit.Test
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import java.util.Optional
+import assertk.assert
+import assertk.assertions.isInstanceOf
 
-class UserServiceTest : StringSpec() {
+class UserServiceTest {
     private val teamId = 5
     private val username = "username"
     private val firstName = "firstname"
@@ -29,47 +33,48 @@ class UserServiceTest : StringSpec() {
     private val userRepoMock: UserRepository = mock()
     private val userService: UserService = UserService(teamRepoMock, userRepoMock, BCryptPasswordEncoder())
 
-    override fun isInstancePerTest() = true
+    @Test
+    fun `find user not existing should return null`() {
+        whenever(userRepoMock.findByUsername(any())).thenReturn(null)
+        val user = userService.findByUsername("Foo")
+        assert(user).isNull()
+    }
 
-    init {
-        "find user not existing should return null" {
-            whenever(userRepoMock.findByUsername(any())).thenReturn(null)
-            val user = userService.findByUsername("Foo")
-            user shouldBe null
-        }
+    @Test
+    fun `find existing user should return the user`() {
+        whenever(userRepoMock.findByUsername(mockUser.username)).thenReturn(mockUser)
+        val user = userService.findByUsername(username)
+        assert(user?.username).isEqualTo(username)
+        assert(user?.firstName).isEqualTo(firstName)
+        assert(user?.lastName).isEqualTo(lastName)
+        assert(user?.email).isEqualTo(email)
+        assert(user?.phoneNumber).isEqualTo(phoneNumber)
+    }
 
-        "find existing user should return the user" {
-            whenever(userRepoMock.findByUsername(mockUser.username)).thenReturn(mockUser)
-            val user = userService.findByUsername(username)
-            user?.username shouldBe username
-            user?.firstName shouldBe firstName
-            user?.lastName shouldBe lastName
-            user?.email shouldBe email
-            user?.phoneNumber shouldBe phoneNumber
-        }
+    @Test
+    fun `user that does not exist trying to join a team should not be possible`() {
+        whenever(userRepoMock.findByUsername(any())).thenReturn(null)
+        assert {
+            userService.joinTeam("Foo", 1)
+        }.thrownError { isInstanceOf(NotFoundException::class) }
+    }
 
-        "user that does not exist trying to join a team should not be possible" {
-            whenever(userRepoMock.findByUsername(any())).thenReturn(null)
-            shouldThrow<NotFoundException> {
-                userService.joinTeam("Foo", 1)
-            }
-        }
+    @Test
+    fun `user trying to join a team that does not exist should not be possible`() {
+        whenever(userRepoMock.findByUsername(mockUser.username)).thenReturn(mockUser)
+        whenever(teamRepoMock.findById(any())).thenReturn(Optional.empty())
+        assert {
+            userService.joinTeam(username, 1)
+        }.thrownError { isInstanceOf(NotFoundException::class) }
+    }
 
-        "user trying to join a team that does not exist should not be possible" {
-            whenever(userRepoMock.findByUsername(mockUser.username)).thenReturn(mockUser)
-            whenever(teamRepoMock.findById(any())).thenReturn(Optional.empty())
-            shouldThrow<NotFoundException> {
-                userService.joinTeam(username, 1)
-            }
-        }
-
-        "user trying to join a team should be possible" {
-            whenever(userRepoMock.findByUsername(mockUser.username)).thenReturn(mockUser)
-            whenever(teamRepoMock.findById(any())).thenReturn(Optional.of(mockTeam))
-            mockUser.getMemberOf().size shouldBe 0
-            userService.joinTeam(username, teamId)
-            mockUser.getMemberOf().size shouldBe 1
-            verify(userRepoMock, times(1)).save(mockUser)
-        }
+    @Test
+    fun `user trying to join a team should be possible`() {
+        whenever(userRepoMock.findByUsername(mockUser.username)).thenReturn(mockUser)
+        whenever(teamRepoMock.findById(any())).thenReturn(Optional.of(mockTeam))
+        assert(mockUser.getMemberOf()).hasSize(0)
+        userService.joinTeam(username, teamId)
+        assert(mockUser.getMemberOf()).hasSize(1)
+        verify(userRepoMock, times(1)).save(mockUser)
     }
 }

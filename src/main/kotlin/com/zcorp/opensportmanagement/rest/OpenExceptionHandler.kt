@@ -1,5 +1,6 @@
 package com.zcorp.opensportmanagement.rest
 
+import com.zcorp.opensportmanagement.service.BadParameterException
 import com.zcorp.opensportmanagement.service.MissingParameterException
 import com.zcorp.opensportmanagement.service.NotFoundException
 import com.zcorp.opensportmanagement.service.PastEventException
@@ -41,4 +42,8 @@ open class OpenExceptionHandler : ResponseEntityExceptionHandler() {
     @ExceptionHandler(PastEventException::class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     fun handleError(e: PastEventException) = e.message
+
+    @ExceptionHandler(BadParameterException::class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    fun handleError(e: BadParameterException) = e.message
 }

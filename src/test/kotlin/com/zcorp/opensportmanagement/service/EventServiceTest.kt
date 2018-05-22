@@ -1,5 +1,13 @@
 package com.zcorp.opensportmanagement.service
 
+import assertk.assert
+import assertk.assertions.containsExactly
+import assertk.assertions.hasSize
+import assertk.assertions.isEmpty
+import assertk.assertions.isEqualTo
+import assertk.assertions.isInstanceOf
+import assertk.assertions.isNull
+import assertk.assertions.message
 import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.argumentCaptor
 import com.nhaarman.mockito_kotlin.mock
@@ -16,16 +24,14 @@ import com.zcorp.opensportmanagement.repositories.EventRepository
 import com.zcorp.opensportmanagement.repositories.PlaceRepository
 import com.zcorp.opensportmanagement.repositories.TeamMemberRepository
 import com.zcorp.opensportmanagement.repositories.TeamRepository
-import io.kotlintest.shouldBe
-import io.kotlintest.shouldThrow
-import io.kotlintest.specs.StringSpec
+import org.junit.Test
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.Optional
 
-class EventServiceTest : StringSpec() {
+class EventServiceTest {
     private val teamId = 5
     private val placeId = 1
     private val mockTeam = Team("SuperNam", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "", teamId)
@@ -54,164 +60,182 @@ class EventServiceTest : StringSpec() {
     private val teamMemberRepoMock: TeamMemberRepository = mock()
     private val eventService = EventService(eventRepoMock, teamMemberRepoMock, placeRepoMock, teamRepoMock)
 
-    override fun isInstancePerTest() = true
-
-    init {
-        "create punctual event should work" {
-            whenever(teamRepoMock.findById(any())).thenReturn(Optional.of(mockTeam))
-            whenever(placeRepoMock.findById(any())).thenReturn(Optional.of(mockPlace))
-            val fromDateTime = LocalDateTime.of(2018, 1, 1, 0, 0)
-            val toDateTime = LocalDateTime.of(2018, 1, 1, 10, 0)
-            val dto = EventCreationDto("event", fromDateTime.toLocalDate(), toDateTime.toLocalDate(),
-                    fromDateTime.toLocalTime(), toDateTime.toLocalTime(), mockPlace.id)
+    @Test
+    fun `create event with an empty name should be forbidden`() {
+        val fromDateTime = LocalDateTime.of(2018, 1, 1, 0, 0)
+        val toDateTime = LocalDateTime.of(2018, 1, 1, 10, 0)
+        val dto = EventCreationDto("", fromDateTime.toLocalDate(), toDateTime.toLocalDate(),
+                fromDateTime.toLocalTime(), toDateTime.toLocalTime(), mockPlace.id)
+        assert {
             eventService.createEvent(teamId, dto)
-            argumentCaptor<Event>().apply {
-                verify(eventRepoMock, times(1)).save(capture())
-                allValues.size shouldBe 1
-                firstValue.name shouldBe "event"
-                firstValue.fromDateTime shouldBe fromDateTime
-                firstValue.toDateTime shouldBe toDateTime
-                firstValue.place shouldBe mockPlace
-                firstValue.team shouldBe mockTeam
-            }
+        }.thrownError {
+            isInstanceOf(BadParameterException::class)
+            message().isEqualTo("Name of the event must not be empty")
         }
+    }
 
-        "create recurrent event should produce one event" {
-            whenever(teamRepoMock.findById(any())).thenReturn(Optional.of(mockTeam))
-            whenever(placeRepoMock.findById(any())).thenReturn(Optional.of(mockPlace))
-            val fromDate = LocalDate.of(2018, 1, 1)
-            val toDate = LocalDate.of(2018, 1, 8)
-            val fromTime = LocalTime.of(10, 0)
-            val toTime = LocalTime.of(11, 0)
-            val dto = EventCreationDto("event", fromDate, toDate, fromTime, toTime, mockPlace.id,
-                    true, mutableSetOf(DayOfWeek.WEDNESDAY))
-            eventService.createEvent(teamId, dto)
-            argumentCaptor<List<Event>>().apply {
-                verify(eventRepoMock, times(1)).saveAll(capture())
-                allValues.size shouldBe 1
-                firstValue.size shouldBe 1
-                val event = firstValue[0]
-                val expectedDate = LocalDate.of(2018, 1, 3)
-                event.name shouldBe "event"
-                event.fromDateTime shouldBe LocalDateTime.of(expectedDate, fromTime)
-                event.toDateTime shouldBe LocalDateTime.of(expectedDate, toTime)
-                event.place shouldBe mockPlace
-                event.team shouldBe mockTeam
-            }
+    @Test
+    fun `create punctual event should work`() {
+        whenever(teamRepoMock.findById(any())).thenReturn(Optional.of(mockTeam))
+        whenever(placeRepoMock.findById(any())).thenReturn(Optional.of(mockPlace))
+        val fromDateTime = LocalDateTime.of(2018, 1, 1, 0, 0)
+        val toDateTime = LocalDateTime.of(2018, 1, 1, 10, 0)
+        val dto = EventCreationDto("event", fromDateTime.toLocalDate(), toDateTime.toLocalDate(),
+                fromDateTime.toLocalTime(), toDateTime.toLocalTime(), mockPlace.id)
+        eventService.createEvent(teamId, dto)
+        argumentCaptor<Event>().apply {
+            verify(eventRepoMock, times(1)).save(capture())
+            assert(allValues).hasSize(1)
+            assert(firstValue.name).isEqualTo("event")
+            assert(firstValue.fromDateTime).isEqualTo(fromDateTime)
+            assert(firstValue.toDateTime).isEqualTo(toDateTime)
+            assert(firstValue.place).isEqualTo(mockPlace)
+            assert(firstValue.team).isEqualTo(mockTeam)
         }
+    }
 
-        "create recurrent event should produce several events" {
-            whenever(teamRepoMock.findById(any())).thenReturn(Optional.of(mockTeam))
-            whenever(placeRepoMock.findById(any())).thenReturn(Optional.of(mockPlace))
-            val fromDate = LocalDate.of(2018, 1, 5) // It's a friday
-            val toDate = LocalDate.of(2018, 3, 31)
-            val fromTime = LocalTime.of(10, 0)
-            val toTime = LocalTime.of(11, 0)
-            val dto = EventCreationDto("event", fromDate, toDate, fromTime, toTime, mockPlace.id,
-                    true, mutableSetOf(DayOfWeek.WEDNESDAY, DayOfWeek.TUESDAY))
-            eventService.createEvent(teamId, dto)
-            argumentCaptor<List<Event>>().apply {
-                verify(eventRepoMock, times(1)).saveAll(capture())
-                allValues.size shouldBe 1
-                firstValue.size shouldBe 24
-                val event = firstValue[0]
-                val expectedDate = LocalDate.of(2018, 1, 9)
-                event.name shouldBe "event"
-                event.fromDateTime shouldBe LocalDateTime.of(expectedDate, fromTime)
-                event.toDateTime shouldBe LocalDateTime.of(expectedDate, toTime)
-                event.place shouldBe mockPlace
-                event.team shouldBe mockTeam
-            }
+    @Test
+    fun `create recurrent event should produce one event`() {
+        whenever(teamRepoMock.findById(any())).thenReturn(Optional.of(mockTeam))
+        whenever(placeRepoMock.findById(any())).thenReturn(Optional.of(mockPlace))
+        val fromDate = LocalDate.of(2018, 1, 1)
+        val toDate = LocalDate.of(2018, 1, 8)
+        val fromTime = LocalTime.of(10, 0)
+        val toTime = LocalTime.of(11, 0)
+        val dto = EventCreationDto("event", fromDate, toDate, fromTime, toTime, mockPlace.id,
+                true, mutableSetOf(DayOfWeek.WEDNESDAY))
+        eventService.createEvent(teamId, dto)
+        argumentCaptor<List<Event>>().apply {
+            verify(eventRepoMock, times(1)).saveAll(capture())
+            assert(allValues).hasSize(1)
+            assert(firstValue).hasSize(1)
+            val event = firstValue[0]
+            val expectedDate = LocalDate.of(2018, 1, 3)
+            assert(event.name).isEqualTo("event")
+            assert(event.fromDateTime).isEqualTo(LocalDateTime.of(expectedDate, fromTime))
+            assert(event.toDateTime).isEqualTo(LocalDateTime.of(expectedDate, toTime))
+            assert(event.place).isEqualTo(mockPlace)
+            assert(event.team).isEqualTo(mockTeam)
         }
+    }
 
-        "user that does not exist trying to participate to an event should not be possible" {
-            shouldThrow<NotFoundException> {
-                whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
-                whenever(teamMemberRepoMock.findByUsername(any(), any())).thenReturn(null)
-                eventService.participate("Foo", eventId, true)
-            }
+    @Test
+    fun `create recurrent event should produce several events`() {
+        whenever(teamRepoMock.findById(any())).thenReturn(Optional.of(mockTeam))
+        whenever(placeRepoMock.findById(any())).thenReturn(Optional.of(mockPlace))
+        val fromDate = LocalDate.of(2018, 1, 5) // It's a friday
+        val toDate = LocalDate.of(2018, 3, 31)
+        val fromTime = LocalTime.of(10, 0)
+        val toTime = LocalTime.of(11, 0)
+        val dto = EventCreationDto("event", fromDate, toDate, fromTime, toTime, mockPlace.id,
+                true, mutableSetOf(DayOfWeek.WEDNESDAY, DayOfWeek.TUESDAY))
+        eventService.createEvent(teamId, dto)
+        argumentCaptor<List<Event>>().apply {
+            verify(eventRepoMock, times(1)).saveAll(capture())
+            assert(allValues).hasSize(1)
+            assert(firstValue).hasSize(24)
+            val event = firstValue[0]
+            val expectedDate = LocalDate.of(2018, 1, 9)
+            assert(event.name).isEqualTo("event")
+            assert(event.fromDateTime).isEqualTo(LocalDateTime.of(expectedDate, fromTime))
+            assert(event.toDateTime).isEqualTo(LocalDateTime.of(expectedDate, toTime))
+            assert(event.place).isEqualTo(mockPlace)
+            assert(event.team).isEqualTo(mockTeam)
         }
+    }
 
-        "user trying to participate to an event that does not exist should not be possible" {
-            whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
-            whenever(eventRepoMock.findById(any())).thenReturn(Optional.empty())
-            shouldThrow<NotFoundException> {
-                eventService.participate(username, eventId, true)
-            }
-        }
+    @Test
+    fun `user that does not exist trying to participate to an event should not be possible`() {
+        whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
+        whenever(teamMemberRepoMock.findByUsername(any(), any())).thenReturn(null)
+        assert {
+            eventService.participate("Foo", eventId, true)
+        }.thrownError { isInstanceOf(NotFoundException::class) }
+    }
 
-        "user trying to participate to a past event should not be possible" {
-            val pastEvent = Event.Builder().name("TheOne")
-                    .fromDate(LocalDateTime.of(2018, 1, 1, 10, 0, 0))
-                    .toDate(LocalDateTime.of(2018, 1, 1, 11, 0, 0))
-                    .place(mockPlace)
-                    .team(mockTeam)
-                    .build()
-            whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
-            whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(pastEvent))
-            shouldThrow<PastEventException> {
-                eventService.participate(username, eventId, true)
-            }
-        }
+    @Test
+    fun `user trying to participate to an event that does not exist should not be possible`() {
+        whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
+        whenever(eventRepoMock.findById(any())).thenReturn(Optional.empty())
+        assert {
+            eventService.participate(username, eventId, true)
+        }.thrownError { isInstanceOf(NotFoundException::class) }
+    }
 
-        "user trying to participate to a future event should add him in the present members" {
-            mockEvent.id = eventId
-            mockTeamMember.user = mockUser
-            whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
-            whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
-            whenever(eventRepoMock.save(mockEvent)).thenReturn(mockEvent)
-            whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
-            val eventDto = eventService.participate(username, eventId, true)
-            mockEvent.getPresentMembers().size shouldBe 1
-            mockEvent.getAbsentMembers().size shouldBe 0
-            mockEvent.getWaitingMembers().size shouldBe 0
-            verify(eventRepoMock, times(1)).save(mockEvent)
-            eventDto.name shouldBe mockEvent.name
-            eventDto._id shouldBe mockEvent.id
-            eventDto.absentMembers shouldBe emptyList<TeamMember>()
-            eventDto.waitingMembers shouldBe emptyList<TeamMember>()
-            eventDto.presentMembers shouldBe listOf(mockTeamMember.toDto())
-            eventDto.fromDateTime shouldBe mockEvent.fromDateTime
-            eventDto.toDateTime shouldBe mockEvent.toDateTime
-            eventDto.placeId shouldBe mockEvent.place.id
-            eventDto.isDone shouldBe null
-            eventDto.localTeamName shouldBe null
-            eventDto.localTeamScore shouldBe null
-            eventDto.localTeamImgUrl shouldBe null
-            eventDto.visitorTeamImgUrl shouldBe null
-            eventDto.visitorTeamName shouldBe null
-            eventDto.visitorTeamScore shouldBe null
-        }
+    @Test
+    fun `user trying to participate to a past event should not be possible`() {
+        val pastEvent = Event.Builder().name("TheOne")
+                .fromDate(LocalDateTime.of(2018, 1, 1, 10, 0, 0))
+                .toDate(LocalDateTime.of(2018, 1, 1, 11, 0, 0))
+                .place(mockPlace)
+                .team(mockTeam)
+                .build()
+        whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
+        whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(pastEvent))
+        assert {
+            eventService.participate(username, eventId, true)
+        }.thrownError { isInstanceOf(PastEventException::class) }
+    }
 
-        "user trying to participate to a future event already full should add him in the waiting members" {
-            mockEvent.id = eventId
-            mockEvent.maxMembers = 0
-            mockTeamMember.user = mockUser
-            whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
-            whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
-            whenever(eventRepoMock.save(mockEvent)).thenReturn(mockEvent)
-            whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
-            mockEvent.getPresentMembers().size shouldBe 0
-            val eventDto = eventService.participate(username, eventId, true)
-            mockEvent.getPresentMembers().size shouldBe 0
-            mockEvent.getAbsentMembers().size shouldBe 0
-            mockEvent.getWaitingMembers().size shouldBe 1
-            verify(eventRepoMock, times(1)).save(mockEvent)
-            eventDto.name shouldBe mockEvent.name
-            eventDto._id shouldBe mockEvent.id
-            eventDto.absentMembers shouldBe emptyList<TeamMember>()
-            eventDto.presentMembers shouldBe emptyList<TeamMember>()
-            eventDto.waitingMembers shouldBe listOf(mockTeamMember.toDto())
-            eventDto.fromDateTime shouldBe mockEvent.fromDateTime
-            eventDto.toDateTime shouldBe mockEvent.toDateTime
-            eventDto.placeId shouldBe mockEvent.place.id
-            eventDto.isDone shouldBe null
-            eventDto.localTeamName shouldBe null
-            eventDto.localTeamScore shouldBe null
-            eventDto.localTeamImgUrl shouldBe null
-            eventDto.visitorTeamImgUrl shouldBe null
-            eventDto.visitorTeamName shouldBe null
-            eventDto.visitorTeamScore shouldBe null
-        }
+    @Test
+    fun `user trying to participate to a future event should add him in the present members`() {
+        mockEvent.id = eventId
+        mockTeamMember.user = mockUser
+        whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
+        whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
+        whenever(eventRepoMock.save(mockEvent)).thenReturn(mockEvent)
+        whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
+        val eventDto = eventService.participate(username, eventId, true)
+        assert(mockEvent.getPresentMembers()).hasSize(1)
+        assert(mockEvent.getAbsentMembers()).hasSize(0)
+        assert(mockEvent.getWaitingMembers()).hasSize(0)
+        verify(eventRepoMock, times(1)).save(mockEvent)
+        assert(eventDto.name).isEqualTo(mockEvent.name)
+        assert(eventDto._id).isEqualTo(mockEvent.id)
+        assert(eventDto.absentMembers).isEmpty()
+        assert(eventDto.waitingMembers).isEmpty()
+        assert(eventDto.presentMembers).containsExactly(mockTeamMember.toDto())
+        assert(eventDto.fromDateTime).isEqualTo(mockEvent.fromDateTime)
+        assert(eventDto.toDateTime).isEqualTo(mockEvent.toDateTime)
+        assert(eventDto.placeId).isEqualTo(mockEvent.place.id)
+        assert(eventDto.isDone).isNull()
+        assert(eventDto.localTeamName).isNull()
+        assert(eventDto.localTeamScore).isNull()
+        assert(eventDto.localTeamImgUrl).isNull()
+        assert(eventDto.visitorTeamImgUrl).isNull()
+        assert(eventDto.visitorTeamName).isNull()
+        assert(eventDto.visitorTeamScore).isNull()
+    }
+
+    @Test
+    fun `user trying to participate to a future event already full should add him in the waiting members`() {
+        mockEvent.id = eventId
+        mockEvent.maxMembers = 0
+        mockTeamMember.user = mockUser
+        whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
+        whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
+        whenever(eventRepoMock.save(mockEvent)).thenReturn(mockEvent)
+        whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
+        assert(mockEvent.getPresentMembers()).hasSize(0)
+        val eventDto = eventService.participate(username, eventId, true)
+        assert(mockEvent.getPresentMembers()).hasSize(0)
+        assert(mockEvent.getAbsentMembers()).hasSize(0)
+        assert(mockEvent.getWaitingMembers()).hasSize(1)
+        verify(eventRepoMock, times(1)).save(mockEvent)
+        assert(eventDto.name).isEqualTo(mockEvent.name)
+        assert(eventDto._id).isEqualTo(mockEvent.id)
+        assert(eventDto.absentMembers).isEmpty()
+        assert(eventDto.presentMembers).isEmpty()
+        assert(eventDto.waitingMembers).containsExactly(mockTeamMember.toDto())
+        assert(eventDto.fromDateTime).isEqualTo(mockEvent.fromDateTime)
+        assert(eventDto.toDateTime).isEqualTo(mockEvent.toDateTime)
+        assert(eventDto.placeId).isEqualTo(mockEvent.place.id)
+        assert(eventDto.isDone).isNull()
+        assert(eventDto.localTeamName).isNull()
+        assert(eventDto.localTeamScore).isNull()
+        assert(eventDto.localTeamImgUrl).isNull()
+        assert(eventDto.visitorTeamImgUrl).isNull()
+        assert(eventDto.visitorTeamName).isNull()
+        assert(eventDto.visitorTeamScore).isNull()
     }
 }

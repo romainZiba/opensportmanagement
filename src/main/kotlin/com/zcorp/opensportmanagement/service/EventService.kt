@@ -36,10 +36,16 @@ open class EventService @Autowired constructor(
     }
 
     @Transactional
+    @Throws(BadParameterException::class)
     open fun createEvent(teamId: Int, dto: EventCreationDto) {
+        val eventName = dto.name
+        if (eventName.isEmpty()) {
+            throw BadParameterException("Name of the event must not be empty")
+        }
+
         val team = teamRepository.findById(teamId)
                 .orElseThrow { NotFoundException("Team $teamId does not exist") }
-        val eventBuilder = Event.Builder().name(dto.name).team(team)
+        val eventBuilder = Event.Builder().name(eventName).team(team)
         val placeId = dto.placeId
         val place = placeRepository.findById(placeId)
                 .orElseThrow { NotFoundException("Place $placeId does not exist") }

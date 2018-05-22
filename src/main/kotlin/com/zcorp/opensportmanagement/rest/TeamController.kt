@@ -90,7 +90,7 @@ open class TeamController @Autowired constructor(
         @RequestBody eventDto: EventCreationDto,
         authentication: Authentication
     ): ResponseEntity<EventDto> {
-        if (accessController.isTeamAdmin(authentication, teamId)) {
+        if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
             eventService.createEvent(teamId, eventDto)
             return ResponseEntity(null, HttpStatus.CREATED)
         }
@@ -145,11 +145,14 @@ open class TeamController @Autowired constructor(
         throw UserForbiddenException()
     }
 
-    @GetMapping("/{teamId}/stadiums")
-    open fun getStadiums(@PathVariable("teamId") teamId: Int, authentication: Authentication): ResponseEntity<List<PlaceDto>> {
+    @GetMapping("/{teamId}/places")
+    open fun getPlaces(
+        @PathVariable("teamId") teamId: Int,
+        authentication: Authentication
+    ): ResponseEntity<List<PlaceDto>> {
         if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
-            val stadiums = teamService.getStadiums(teamId)
-            return ResponseEntity.ok(stadiums)
+            val places = teamService.getPlaces(teamId)
+            return ResponseEntity.ok(places)
         }
         throw UserForbiddenException()
     }

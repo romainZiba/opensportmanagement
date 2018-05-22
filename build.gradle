@@ -59,7 +59,7 @@ dependencies {
     implementation "com.fasterxml.jackson.core:jackson-databind"
     runtime "com.fasterxml.jackson.datatype:jackson-datatype-jdk8"
     implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.0"
-    runtime "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
+    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.9.5'
 
     // Databases
     implementation("com.h2database:h2")
@@ -72,7 +72,7 @@ dependencies {
     testImplementation group: 'junit', name: 'junit', version: '4.11'
     testImplementation group: 'junit', name: 'junit', version: '4.12'
     testImplementation "com.nhaarman:mockito-kotlin:1.5.0"
-    testImplementation 'io.kotlintest:kotlintest-runner-junit5:3.1.0'
+    testImplementation 'com.willowtreeapps.assertk:assertk:0.10'
 }
 
 compileKotlin {
@@ -98,4 +98,11 @@ task ktlintFormat(type: JavaExec, group: "formatting") {
     classpath = configurations.ktlint
     main = "com.github.shyiko.ktlint.Main"
     args "-F", "src/**/*.kt"
+}
+
+test {
+    reports {
+        junitXml.enabled = false
+        html.enabled = true
+    }
 }

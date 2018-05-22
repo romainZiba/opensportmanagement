@@ -65,8 +65,8 @@ open class TeamService @Autowired constructor(
     }
 
     @Transactional
-    open fun getStadiums(teamId: Int): List<PlaceDto> {
-        return teamRepository.getStadiums(teamId).map { it.toDto() }
+    open fun getPlaces(teamId: Int): List<PlaceDto> {
+        return teamRepository.getPlaces(teamId).map { it.toDto() }
     }
 
     @Transactional

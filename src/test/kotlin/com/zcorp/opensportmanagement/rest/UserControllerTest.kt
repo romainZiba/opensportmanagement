@@ -7,10 +7,10 @@ import com.zcorp.opensportmanagement.service.UserService
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.security.test.context.support.WithMockUser
-import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -18,8 +18,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 @RunWith(SpringRunner::class)
-@WebMvcTest(UserController::class)
-@ContextConfiguration
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@AutoConfigureMockMvc
 class UserControllerTest {
 
     @Autowired
@@ -32,8 +32,8 @@ class UserControllerTest {
     private val userDto = UserDto("toto", "sacred", username, "", "")
 
     @Test
-    fun `GET on 'users-me' when unauthenticated should return a response with status 'UNAUTHORIZED'`() {
-        this.mockMvc.perform(get("/users/me")).andExpect(status().isUnauthorized)
+    fun `GET on 'users-me' when unauthenticated should return a response with status 'FORBIDDEN'`() {
+        this.mockMvc.perform(get("/users/me")).andExpect(status().isForbidden)
     }
 
     @Test

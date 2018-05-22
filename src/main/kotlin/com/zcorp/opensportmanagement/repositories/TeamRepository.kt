@@ -24,7 +24,7 @@ interface TeamDAO {
     fun getTeamMember(teamId: Int, memberId: Int): TeamMember?
 
     @Query("SELECT s FROM Place s WHERE s.team.id = :teamId")
-    fun getStadiums(teamId: Int): List<Place>
+    fun getPlaces(teamId: Int): List<Place>
 
     @Query("SELECT s FROM Season s WHERE s.team.id = :teamId")
     fun getSeasons(teamId: Int): List<Season>

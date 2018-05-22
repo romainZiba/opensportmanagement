@@ -35,3 +35,8 @@ For now:
 ## REST api
 
 Documentation coming soon
+
+## Known issues
+
+Usage of @SpringBootTest and @AutoConfigureMockMvc instead of @WebMvcTest because the @EnableWebSecurity is currently
+not included: refer to https://github.com/spring-projects/spring-boot/issues/6514

@@ -21,14 +21,17 @@ open class MessageChangesListener {
 
     @Async
     open fun pushChangesToWebSocket() {
-        val cursor: Cursor<Message> = table.changes()
-                .getField("new_val")
-                .run(connectionFactory.createConnection(), Message::class.java)
+        val connection = connectionFactory.createConnection()
+        if (connection != null) {
+            val cursor: Cursor<Message> = table.changes()
+                    .getField("new_val")
+                    .run(connection, Message::class.java)
 
-        while (cursor.hasNext()) {
-            val message = cursor.next()
-            log.info("New body: {}", message.body)
-            webSocket.convertAndSend("/topic/" + message.conversationId, message.toDto())
+            while (cursor.hasNext()) {
+                val message = cursor.next()
+                log.info("New body: {}", message.body)
+                webSocket.convertAndSend("/topic/" + message.conversationId, message.toDto())
+            }
         }
     }
 }

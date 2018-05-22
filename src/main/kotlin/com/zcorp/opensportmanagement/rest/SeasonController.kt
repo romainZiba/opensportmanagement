@@ -56,8 +56,8 @@ open class SeasonController @Autowired constructor(
     ): ResponseEntity<ChampionshipDto> {
         val seasonDto = seasonService.getSeason(seasonId)
         if (accessController.isTeamAdmin(authentication, seasonDto.teamId!!)) {
-            val championshipDto = seasonService.createChampionship(championshipDto, seasonId)
-            return ResponseEntity(championshipDto, HttpStatus.CREATED)
+            val savedChampionship = seasonService.createChampionship(championshipDto, seasonId)
+            return ResponseEntity(savedChampionship, HttpStatus.CREATED)
         }
         throw UserForbiddenException()
     }

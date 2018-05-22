@@ -12,17 +12,15 @@ open class RethinkDBConfiguration {
     @Autowired
     private lateinit var env: Environment
 
+    private var dbHost = "127.0.0.1"
+
     @PostConstruct
     fun init() {
-        DBHOST = this.env.getProperty("rethinkdb.dbhost")
+        dbHost = this.env.getProperty("rethinkdb.dbhost") ?: "127.0.0.1"
     }
 
     @Bean
     open fun connectionFactory(): RethinkDBConnectionFactory {
-        return RethinkDBConnectionFactory(DBHOST)
-    }
-
-    companion object {
-        var DBHOST = "127.0.0.1"
+        return RethinkDBConnectionFactory(dbHost)
     }
 }

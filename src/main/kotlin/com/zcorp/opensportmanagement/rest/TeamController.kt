@@ -48,8 +48,8 @@ open class TeamController @Autowired constructor(
         @RequestBody teamDto: TeamDto,
         authentication: Authentication
     ): ResponseEntity<TeamDto> {
-        val teamDto = teamService.createTeam(teamDto, authentication.name)
-        return ResponseEntity(teamDto, HttpStatus.CREATED)
+        val savedTeam = teamService.createTeam(teamDto, authentication.name)
+        return ResponseEntity(savedTeam, HttpStatus.CREATED)
     }
 
     @GetMapping("/{teamId}")
@@ -92,7 +92,7 @@ open class TeamController @Autowired constructor(
     ): ResponseEntity<EventDto> {
         if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
             eventService.createEvent(teamId, eventDto)
-            return ResponseEntity(null, HttpStatus.CREATED)
+            return ResponseEntity(HttpStatus.CREATED)
         }
         throw UserForbiddenException()
     }

@@ -23,8 +23,8 @@ open class UserController @Autowired constructor(private val userService: UserSe
     @PostMapping("/sign-up")
     open fun createUser(@Valid @RequestBody user: User): ResponseEntity<UserDto> {
         if (userService.findByUsername(user.username) == null) {
-            val user = userService.createUser(user)
-            return ResponseEntity(user, HttpStatus.CREATED)
+            val savedUser = userService.createUser(user)
+            return ResponseEntity(savedUser, HttpStatus.CREATED)
         }
         throw EntityAlreadyExistsException("User " + user.username + " already exists")
     }

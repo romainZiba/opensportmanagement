@@ -52,6 +52,9 @@ open class EventService @Autowired constructor(
         eventBuilder.place(place)
         if (dto.isRecurrent) {
             val daysOfWeek = dto.recurrenceDays
+            if (daysOfWeek.isEmpty()) {
+                throw BadParameterException("At least one day has to be selected")
+            }
             var currentDate = dto.fromDate
             val events = mutableListOf<Event>()
             while (!currentDate.isAfter(dto.toDate)) {

@@ -1,12 +1,30 @@
 package com.zcorp.opensportmanagement
 
 import com.zcorp.opensportmanagement.config.OsmProperties
+// import com.zcorp.opensportmanagement.dto.ChampionshipDto
+// import com.zcorp.opensportmanagement.dto.OpponentDto
+// import com.zcorp.opensportmanagement.dto.PlaceDto
+// import com.zcorp.opensportmanagement.dto.SeasonDto
+// import com.zcorp.opensportmanagement.dto.TeamDto
+//    import com.zcorp.opensportmanagement.model.Season
+// import com.zcorp.opensportmanagement.model.Team
+// import com.zcorp.opensportmanagement.model.User
+// import com.zcorp.opensportmanagement.service.EventService
+// import com.zcorp.opensportmanagement.service.MatchService
+// import com.zcorp.opensportmanagement.service.PlaceService
+// import com.zcorp.opensportmanagement.service.SeasonService
+// import com.zcorp.opensportmanagement.service.TeamService
+// import com.zcorp.opensportmanagement.service.UserService
+// import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.scheduling.annotation.EnableAsync
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+// import java.time.LocalDate
+// import java.time.Month
+// import javax.transaction.Transactional
 
 @SpringBootApplication
 @EnableAsync
@@ -51,13 +69,13 @@ open class Application {
 //        userService.joinTeam(userTeam2.username, team2Dto._id!!)
 //
 //        var placeDto = PlaceDto("LE stade", "2 allée", "Toulouse")
-//        placeDto = placeService.createPlace(placeDto, team1Dto._id!!)
+//        placeService.createPlace(placeDto, team1Dto._id!!)
 //
 //        var opponentDto = OpponentDto("TCMS2",
 //                "0159756563",
 //                "testmail@gmail.com",
 //                "https://tsnimages.tsn.ca/ImageProvider/TeamLogo?seoId=houston-rockets")
-//        opponentDto = teamService.createOpponent(opponentDto, team1Dto._id!!)
+//        teamService.createOpponent(opponentDto, team1Dto._id!!)
 //
 //        var seasonDto = SeasonDto("2017-2018",
 //                LocalDate.of(2017, Month.SEPTEMBER, 1),
@@ -66,33 +84,7 @@ open class Application {
 //        seasonDto = teamService.createSeason(seasonDto, team1Dto._id!!)
 //
 //        var championshipDto = ChampionshipDto("Championnat 2017-2018")
-//        championshipDto = seasonService.createChampionship(championshipDto, seasonDto._id!!)
-//
-//        (0..4L).forEach({
-//            val fromDateTime = LocalDateTime.of(LocalDate.now().plusDays(it), LocalTime.of(20, 0))
-//            val matchCreationDto = MatchCreationDto("Match de championnat",
-//                    fromDateTime, fromDateTime.plusHours(2L), placeDto._id!!,
-//                    Match.MatchType.CHAMPIONSHIP, championshipDto._id, opponentDto._id, true)
-//
-//            matchService.createMatch(team1Dto._id!!, matchCreationDto)
-//        })
-//        var lastDto: EventDto? = null
-//        (1..2L).forEach({
-//            val fromDateTime = LocalDateTime.of(LocalDate.now().minusDays(it), LocalTime.of(20, 0))
-//
-//            val matchCreationDto = MatchCreationDto("Match de championnat",
-//                    fromDateTime, fromDateTime.plusHours(2L), placeDto._id!!,
-//                    Match.MatchType.CHAMPIONSHIP, championshipDto._id, opponentDto._id, true)
-//            lastDto = matchService.createMatch(team1Dto._id!!, matchCreationDto)
-//        })
-//
-//        val fromDate = LocalDate.of(2018, 1, 5) // It's a friday
-//        val toDate = LocalDate.of(2018, 3, 31)
-//        val fromTime = LocalTime.of(10, 0)
-//        val toTime = LocalTime.of(11, 0)
-//        val dto = EventCreationDto("event", fromDate, toDate, fromTime, toTime, placeDto._id!!, true,
-//                mutableSetOf(DayOfWeek.WEDNESDAY, DayOfWeek.TUESDAY))
-//        eventService.createEvent(team1Dto._id!!, dto)
+//        seasonService.createChampionship(championshipDto, seasonDto._id!!)
 //    }
 }
 

@@ -27,10 +27,6 @@ open class OpenExceptionHandler : ResponseEntityExceptionHandler() {
     @ResponseStatus(HttpStatus.FORBIDDEN)
     fun handleError(e: UserForbiddenException) = e.message
 
-    @ExceptionHandler(UserAlreadyMemberException::class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    fun handleError(e: UserAlreadyMemberException) = e.message
-
     @ExceptionHandler(MissingParameterException::class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     fun handleError(e: MissingParameterException) = e.message

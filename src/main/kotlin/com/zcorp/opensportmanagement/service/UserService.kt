@@ -24,13 +24,13 @@ open class UserService @Autowired constructor(
     }
 
     @Transactional
-    open fun joinTeam(userId: String, teamId: Int) {
+    open fun joinTeam(userId: String, teamId: Int): UserDto {
         val user = userRepository.findByUsername(userId) ?: throw NotFoundException("User $userId does not exist")
         val team = teamRepository.findById(teamId)
                 .orElseThrow { NotFoundException("Team $teamId does not exist") }
         val member = TeamMember(mutableSetOf(TeamMember.Role.PLAYER), team)
         user.addTeamMember(member)
-        userRepository.save(user)
+        return userRepository.save(user).toDto()
     }
 
     @Transactional

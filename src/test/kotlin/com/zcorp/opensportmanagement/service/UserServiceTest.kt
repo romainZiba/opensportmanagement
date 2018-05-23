@@ -72,6 +72,7 @@ class UserServiceTest {
     fun `user trying to join a team should be possible`() {
         whenever(userRepoMock.findByUsername(mockUser.username)).thenReturn(mockUser)
         whenever(teamRepoMock.findById(any())).thenReturn(Optional.of(mockTeam))
+        whenever(userRepoMock.save(mockUser)).thenReturn(mockUser)
         assert(mockUser.getMemberOf()).hasSize(0)
         userService.joinTeam(username, teamId)
         assert(mockUser.getMemberOf()).hasSize(1)

@@ -20,7 +20,7 @@ import javax.validation.Valid
 @RequestMapping("/users")
 open class UserController @Autowired constructor(private val userService: UserService) {
 
-    @PostMapping("/sign-up")
+    @PostMapping
     open fun createUser(@Valid @RequestBody user: User): ResponseEntity<UserDto> {
         if (userService.findByUsername(user.username) == null) {
             val savedUser = userService.createUser(user)

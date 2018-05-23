@@ -13,7 +13,7 @@ import javax.persistence.Converter
 class LocalDateAttributeConverter : AttributeConverter<LocalDate, Date> {
 
     override fun convertToDatabaseColumn(locDate: LocalDate?): Date? {
-        return if (locDate == null) null else Date.valueOf(locDate)
+        return locDate?.let { Date.valueOf(locDate) }
     }
 
     override fun convertToEntityAttribute(sqlDate: Date?): LocalDate? {

@@ -14,7 +14,7 @@ jobs:
       # documented at https://circleci.com/docs/2.0/circleci-images/
       # - image: circleci/postgres:9.4
 
-    working_directory: ~/repo
+    working_directory: ~/opensportmanagement
 
     environment:
       # Customize the JVM maximum heap limit
@@ -24,6 +24,14 @@ jobs:
     steps:
       - checkout
 
+      # Modify some configuration
+      - run:
+          command: |
+            sed -i "s/key-store: \/home\/romainz\/opensportmanagement\/cert\/keystore.p12/key-store: $KEY_STORE_PATH/g" src/main/resources/application.yml
+            sed -i "s/key-alias: opensportmanagement/key-alias: tomcat/g" src/main/resources/application.yml
+            sed -i "s/key-store-password: password/key-store-password: $KEY_STORE_PASS/g" src/main/resources/application.yml
+            sed -i "s/https:\/\/127.0.0.1:4200/https:\/\/$ALLOWED_HOST:$ALLOWED_PORT/g" src/main/resources/application.yml
+
       # Download and cache dependencies
       - restore_cache:
           keys:
@@ -31,12 +39,58 @@ jobs:
           # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
 
-      - run: gradle dependencies
-
+      - run:
+            command: |
+              ./gradlew dependencies
       - save_cache:
           paths:
             - ~/.gradle
           key: v1-dependencies-{{ checksum "build.gradle" }}
         
       # run tests!
-      - run: gradle test
+      - run:
+            command: |
+              ./gradlew test
+
+      # Build the JAR
+      - run:
+            command: |
+              ./gradlew bootJar
+
+      - store_artifacts:
+          path: build/libs/opensportmanagement-1.0-SNAPSHOT.jar
+
+      - save_cache:
+          key: v1-dist-{{ .Environment.CIRCLE_BRANCH }}-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+              - build
+
+  deploy:
+      machine: true
+      working_directory: ~/opensportmanagement
+      steps:
+        - restore_cache:
+            key: v1-dist-{{ .Environment.CIRCLE_BRANCH }}-{{ .Environment.CIRCLE_SHA1 }}
+        - run:
+            name: Stop previous execution
+            command: |
+              ssh $SSH_USER@$SSH_HOST "screen -X -S spring quit"
+        - run:
+            name: Copy jar over SSH
+            command: |
+              scp -r build/libs/opensportmanagement-1.0-SNAPSHOT.jar $SSH_USER@$SSH_HOST:~/opensportmanagement/opensportmanagement.jar
+        - run:
+            name: Execution
+            command: |
+              ssh $SSH_USER@$SSH_HOST "screen -dmS spring java -jar ~/opensportmanagement/opensportmanagement.jar"
+workflows:
+  version: 2
+  build-and-deploy:
+    jobs:
+      - build
+      - deploy:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master

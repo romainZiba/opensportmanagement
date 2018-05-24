@@ -15,9 +15,8 @@ Then, put your configuration in the application.yml file.
 ### To build the Jar
 `./gradlew bootJar`
 
-### PostgreSql Docker
-If you want to use postgresql instead of in-memory database, uncomment the related part in the application.yml. 
-Then, you can use a docker like this:
+### PostgreSQL and docker
+This project uses postgresql by default. You can use a Postgres docker like this:
 
 ```
 docker run --name opensportmanagement-psql -p 5432:5432 -e POSTGRES_DB=open -e POSTGRES_PASSWORD=open -d postgres

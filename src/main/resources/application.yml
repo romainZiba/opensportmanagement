@@ -4,19 +4,16 @@ spring:
       indent_output: true
       write_dates_as_timestamps: false
       write_durations_as_timestamps: false
-  datasource.url: jdbc:h2:file:~/test
-  datasource.driver-class-name: org.h2.Driver
-
-#  datasource:
-#    url: jdbc:postgresql://localhost:5438/open
-#    username: postgres
-#    password: open
-#    driver-class-name: org.postgresql.Driver
-#  jpa:
-#    generate-ddl: true
-#    hibernate:
-#      ddl-auto: create
-#    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  datasource:
+    url: jdbc:postgresql://localhost:5432/yourDB
+    username: postgres
+    password: password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    generate-ddl: true
+    hibernate:
+      ddl-auto: create
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
 #logging:
 #  level:
 #    org.springframework.messaging: trace
@@ -34,3 +31,16 @@ opensportmanagement:
   allowedOrigins:
     - https://127.0.0.1:4200
     - https://localhost:4200
+---
+spring:
+  profiles: test
+  datasource:
+    url: jdbc:h2:file:~/test
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    generate-ddl: false
+    hibernate:
+      ddl-auto: none
+    database-platform: org.hibernate.dialect.H2Dialect

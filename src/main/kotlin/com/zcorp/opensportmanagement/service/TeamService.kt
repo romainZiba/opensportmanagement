@@ -38,7 +38,7 @@ open class TeamService @Autowired constructor(
 
     @Transactional
     open fun getTeams(teamIds: List<Int>): List<TeamDto> {
-        return teamRepository.findByIds(teamIds).map { it.toDto() }
+        return teamRepository.findByIdIn(teamIds).map { it.toDto() }
     }
 
     @Transactional

@@ -14,8 +14,7 @@ import org.springframework.data.jpa.repository.Query
 interface TeamRepository : JpaRepository<Team, Int>, TeamDAO
 
 interface TeamDAO {
-    @Query("SELECT t FROM Team t WHERE t.id IN :ids")
-    fun findByIds(ids: List<Int>): List<Team>
+    fun findByIdIn(ids: List<Int>): List<Team>
 
     @Query("SELECT m FROM TeamMember m WHERE m.team.id = :teamId")
     fun getTeamMembers(teamId: Int): List<TeamMember>

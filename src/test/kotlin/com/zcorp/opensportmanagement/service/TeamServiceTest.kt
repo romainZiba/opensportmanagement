@@ -34,7 +34,7 @@ class TeamServiceTest {
 
     @Test
     fun `get teams should return the teams`() {
-        whenever(teamRepoMock.findByIds(teamIds)).thenReturn(mockTeams)
+        whenever(teamRepoMock.findByIdIn(teamIds)).thenReturn(mockTeams)
         val teams = teamService.getTeams(teamIds)
         assert(teams).containsExactly(
                 mockTeams[0].toDto(),

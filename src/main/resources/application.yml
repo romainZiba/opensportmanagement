@@ -5,15 +5,19 @@ spring:
       write_dates_as_timestamps: false
       write_durations_as_timestamps: false
   datasource:
-    url: jdbc:postgresql://localhost:5432/yourDB
+    url: jdbc:postgresql://localhost:15435/open
     username: postgres
-    password: password
+    password: open
     driver-class-name: org.postgresql.Driver
   jpa:
     generate-ddl: true
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+#logging:
+#  level:
+#    org.hibernate.SQL: DEBUG
+#    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 #logging:
 #  level:
 #    org.springframework.messaging: trace

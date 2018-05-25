@@ -1,0 +1,12 @@
+= Teams endpoint REST api
+
+== Create a place
+
+.request
+include::{snippets}/create_place/http-request.adoc[]
+
+.response
+include::{snippets}/create_place/http-response.adoc[]
+
+.fields
+include::{snippets}/create_place/response-fields.adoc[]

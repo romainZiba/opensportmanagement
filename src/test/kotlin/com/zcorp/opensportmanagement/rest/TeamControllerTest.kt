@@ -14,20 +14,23 @@ import com.zcorp.opensportmanagement.service.TeamService
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
+import org.springframework.http.MediaType.APPLICATION_JSON
+import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation
+import org.springframework.restdocs.payload.PayloadDocumentation
 import org.springframework.security.test.context.support.WithMockUser
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.springframework.http.MediaType.APPLICATION_JSON
-import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -35,6 +38,7 @@ import java.time.LocalTime
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@AutoConfigureRestDocs
 class TeamControllerTest {
 
     @Autowired
@@ -50,7 +54,7 @@ class TeamControllerTest {
     private val teamId = 1
     private val mockTeam = Team("SuperNam", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "", teamId)
 
-    private val mockPlacesDto = listOf(PlaceDto("", "", "", teamId, 1))
+    private val mockPlacesDto = listOf(PlaceDto("name", "address", "city", teamId, 1))
 
     @Test
     fun `Get teams when unauthenticated should return FORBIDDEN`() {
@@ -126,5 +130,27 @@ class TeamControllerTest {
                         .characterEncoding("UTF-8")
                         .content(jacksonObjectMapper().findAndRegisterModules().writeValueAsString(eventCreationDto)))
                 .andExpect(status().isBadRequest)
+    }
+
+    @Test
+    @WithMockUser("toto")
+    fun `Create place should return a response with status 'CREATED'`() {
+        val dto = mockPlacesDto[0]
+        val placeDto = PlaceDto(dto.name, dto.address, dto.city)
+        whenever(accessController.isTeamAdmin(any(), any())).thenReturn(true)
+        whenever(teamService.createPlace(any(), any())).thenReturn(dto)
+        this.mockMvc.perform(
+                post("/teams/1/places")
+                        .contentType(APPLICATION_JSON)
+                        .characterEncoding("UTF-8")
+                        .content(jacksonObjectMapper().findAndRegisterModules().writeValueAsString(placeDto)))
+                .andExpect(status().isCreated)
+                .andExpect(MockMvcResultMatchers.content().json(jacksonObjectMapper().writeValueAsString(dto)))
+                .andDo(MockMvcRestDocumentation.document("create_place", PayloadDocumentation.responseFields(
+                        PayloadDocumentation.fieldWithPath("name").description("The name of the place"),
+                        PayloadDocumentation.fieldWithPath("address").description("The address of the place"),
+                        PayloadDocumentation.fieldWithPath("city").description("The city of the place"),
+                        PayloadDocumentation.fieldWithPath("_id").description("The identifier of the place")
+                )))
     }
 }

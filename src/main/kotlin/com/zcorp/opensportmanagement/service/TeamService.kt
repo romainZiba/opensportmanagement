@@ -8,10 +8,12 @@ import com.zcorp.opensportmanagement.dto.TeamDto
 import com.zcorp.opensportmanagement.dto.TeamMemberDto
 import com.zcorp.opensportmanagement.dto.TeamMemberUpdateDto
 import com.zcorp.opensportmanagement.model.Opponent
+import com.zcorp.opensportmanagement.model.Place
 import com.zcorp.opensportmanagement.model.Season
 import com.zcorp.opensportmanagement.model.Team
 import com.zcorp.opensportmanagement.model.TeamMember
 import com.zcorp.opensportmanagement.repositories.OpponentRepository
+import com.zcorp.opensportmanagement.repositories.PlaceRepository
 import com.zcorp.opensportmanagement.repositories.SeasonRepository
 import com.zcorp.opensportmanagement.repositories.TeamMemberRepository
 import com.zcorp.opensportmanagement.repositories.TeamRepository
@@ -24,11 +26,12 @@ import javax.transaction.Transactional
 
 @Service
 open class TeamService @Autowired constructor(
-    private val teamRepository: TeamRepository,
-    private val teamMemberRepository: TeamMemberRepository,
-    private val userRepository: UserRepository,
-    private val seasonRepository: SeasonRepository,
-    private val opponentRepository: OpponentRepository
+        private val teamRepository: TeamRepository,
+        private val teamMemberRepository: TeamMemberRepository,
+        private val userRepository: UserRepository,
+        private val seasonRepository: SeasonRepository,
+        private val placeRepository: PlaceRepository,
+        private val opponentRepository: OpponentRepository
 ) {
 
     @Transactional
@@ -91,6 +94,23 @@ open class TeamService @Autowired constructor(
     @Transactional
     open fun getOpponents(teamId: Int): List<OpponentDto> {
         return teamRepository.getOpponents(teamId).map { it.toDto() }
+    }
+
+    @Transactional
+    open fun createPlace(placeDto: PlaceDto, teamId: Int): PlaceDto {
+        val team = teamRepository.findById(teamId)
+                .orElseThrow { NotFoundException("Team $teamId does not exist") }
+        if (placeDto.name.isEmpty()) {
+            throw BadParameterException("Name should not be empty")
+        }
+        if (placeDto.address.isEmpty()) {
+            throw BadParameterException("Address should not be empty")
+        }
+        if (placeDto.city.isEmpty()) {
+            throw BadParameterException("City should not be empty")
+        }
+        val place = Place(placeDto.name, placeDto.address, placeDto.city, team)
+        return placeRepository.save(place).toDto()
     }
 
     @Transactional

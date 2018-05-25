@@ -10,8 +10,7 @@ import javax.transaction.Transactional
 
 @Service
 open class PlaceService @Autowired constructor(
-    private val placeRepository: PlaceRepository,
-    private val teamRepository: TeamRepository
+    private val placeRepository: PlaceRepository
 ) {
 
     @Transactional
@@ -19,13 +18,5 @@ open class PlaceService @Autowired constructor(
         return placeRepository.findById(placeId)
                 .map { it.toDto() }
                 .orElseThrow { NotFoundException("Place $placeId does not exist") }
-    }
-
-    @Transactional
-    open fun createPlace(placeDto: PlaceDto, teamId: Int): PlaceDto {
-        val team = teamRepository.findById(teamId)
-                .orElseThrow { NotFoundException("Team $teamId does not exist") }
-        val stadium = Place(placeDto.name, placeDto.address, placeDto.city, team)
-        return placeRepository.save(stadium).toDto()
     }
 }

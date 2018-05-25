@@ -6,18 +6,22 @@ import assertk.assertions.containsExactly
 import assertk.assertions.hasSize
 import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
+import assertk.assertions.isInstanceOf
 import assertk.assertions.isNotEmpty
 import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.whenever
+import com.zcorp.opensportmanagement.dto.PlaceDto
 import com.zcorp.opensportmanagement.model.Place
 import com.zcorp.opensportmanagement.model.Team
 import com.zcorp.opensportmanagement.repositories.OpponentRepository
+import com.zcorp.opensportmanagement.repositories.PlaceRepository
 import com.zcorp.opensportmanagement.repositories.SeasonRepository
 import com.zcorp.opensportmanagement.repositories.TeamMemberRepository
 import com.zcorp.opensportmanagement.repositories.TeamRepository
 import com.zcorp.opensportmanagement.repositories.UserRepository
 import org.junit.Test
+import java.util.Optional
 
 class TeamServiceTest {
     private val teamRepoMock: TeamRepository = mock()
@@ -25,7 +29,9 @@ class TeamServiceTest {
     private val seasonRepoMock: SeasonRepository = mock()
     private val opponentRepoMock: OpponentRepository = mock()
     private val teamMemberRepoMock: TeamMemberRepository = mock()
-    private val teamService: TeamService = TeamService(teamRepoMock, teamMemberRepoMock, userRepoMock, seasonRepoMock, opponentRepoMock)
+    private val placeRepoMock: PlaceRepository = mock()
+    private val teamService: TeamService = TeamService(teamRepoMock, teamMemberRepoMock, userRepoMock, seasonRepoMock,
+            placeRepoMock, opponentRepoMock)
     private val teamIds = listOf(5, 8, 13, 25)
     private val mockTeams = teamIds.map {
         Team("SuperName $it", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "", it)
@@ -60,5 +66,50 @@ class TeamServiceTest {
             assert(places).hasSize(1)
             assert(places[0]).isEqualTo(mockPlaces[0].toDto())
         }
+    }
+
+    @Test
+    fun `create place should create it`() {
+        whenever(teamRepoMock.findById(teamIds[0])).thenReturn(Optional.of(mockTeams[0]))
+        whenever(placeRepoMock.save<Place>(any())).thenReturn(mockPlaces[0])
+        val placeDto = PlaceDto("place", "address", "city")
+        val savedPlace = teamService.createPlace(placeDto, teamIds[0])
+        assert(savedPlace).isEqualTo(mockPlaces[0].toDto())
+    }
+
+    @Test
+    fun `create place with a not existing team should fail`() {
+        whenever(teamRepoMock.findById(teamIds[0])).thenReturn(Optional.empty())
+        val placeDto = PlaceDto("place", "address", "city")
+        assert {
+            teamService.createPlace(placeDto, teamIds[0])
+        }.thrownError { isInstanceOf(NotFoundException::class) }
+    }
+
+    @Test
+    fun `create place with an empty name should fail`() {
+        whenever(teamRepoMock.findById(teamIds[0])).thenReturn(Optional.of(mockTeams[0]))
+        val placeDto = PlaceDto("", "address", "city")
+        assert {
+            teamService.createPlace(placeDto, teamIds[0])
+        }.thrownError { isInstanceOf(BadParameterException::class) }
+    }
+
+    @Test
+    fun `create place with an empty address should fail`() {
+        whenever(teamRepoMock.findById(teamIds[0])).thenReturn(Optional.of(mockTeams[0]))
+        val placeDto = PlaceDto("name", "", "city")
+        assert {
+            teamService.createPlace(placeDto, teamIds[0])
+        }.thrownError { isInstanceOf(BadParameterException::class) }
+    }
+
+    @Test
+    fun `create place with an empty city should fail`() {
+        whenever(teamRepoMock.findById(teamIds[0])).thenReturn(Optional.of(mockTeams[0]))
+        val placeDto = PlaceDto("name", "address", "")
+        assert {
+            teamService.createPlace(placeDto, teamIds[0])
+        }.thrownError { isInstanceOf(BadParameterException::class) }
     }
 }

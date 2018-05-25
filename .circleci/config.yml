@@ -30,9 +30,9 @@ jobs:
             sed -i "s/key-store: \/home\/romainz\/opensportmanagement\/cert\/keystore.p12/key-store: $KEY_STORE_PATH/g" src/main/resources/application.yml
             sed -i "s/key-alias: opensportmanagement/key-alias: tomcat/g" src/main/resources/application.yml
             sed -i "s/key-store-password: password/key-store-password: $KEY_STORE_PASS/g" src/main/resources/application.yml
-            sed -i "s/https:\/\/127.0.0.1:4200/https:\/\/$ALLOWED_HOST:$ALLOWED_PORT/g" src/main/resources/application.yml
-            sed -i "s/url: jdbc:postgresql:\/\/localhost:5432\/yourDB/url: jdbc:postgresql:\/\/localhost:$DOCKER_POSTGRES_PORT\/$DOCKER_POSTGRES_DB/g" src/main/resources/application.yml
-            sed -i "s/password: password/password: $DOCKER_POSTGRES_PASSWORD/g" src/main/resources/application.yml
+            sed -i "s/https:\/\/127.0.0.1:4200/https:\/\/$ALLOWED_HOST/g" src/main/resources/application.yml
+            sed -i "s/url: jdbc:postgresql:\/\/localhost:15435\/open/url: jdbc:postgresql:\/\/localhost:$DOCKER_POSTGRES_PORT\/$DOCKER_POSTGRES_DB/g" src/main/resources/application.yml
+            sed -i "s/password: open/password: $DOCKER_POSTGRES_PASSWORD/g" src/main/resources/application.yml
 
       # Download and cache dependencies
       - restore_cache:
@@ -73,10 +73,6 @@ jobs:
       steps:
         - restore_cache:
             key: v1-dist-{{ .Environment.CIRCLE_BRANCH }}-{{ .Environment.CIRCLE_SHA1 }}
-        - run:
-            name: Stop previous execution
-            command: |
-              ssh $SSH_USER@$SSH_HOST "screen -X -S spring quit"
         - run:
             name: Copy jar over SSH
             command: |

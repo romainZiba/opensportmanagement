@@ -97,6 +97,19 @@ open class TeamController @Autowired constructor(
         throw UserForbiddenException()
     }
 
+    @PostMapping("/{teamId}/places")
+    open fun createPlace(
+            @NotNull @PathVariable("teamId") teamId: Int,
+            @RequestBody placeDto: PlaceDto,
+            authentication: Authentication
+    ): ResponseEntity<PlaceDto> {
+        if (accessController.isTeamAdmin(authentication, teamId)) {
+            val place = teamService.createPlace(placeDto, teamId)
+            return ResponseEntity(place, HttpStatus.CREATED)
+        }
+        throw UserForbiddenException()
+    }
+
     @PostMapping("/{teamId}/opponents")
     open fun createOpponent(
         @NotNull @PathVariable("teamId") teamId: Int,

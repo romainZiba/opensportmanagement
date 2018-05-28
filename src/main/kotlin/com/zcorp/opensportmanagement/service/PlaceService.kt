@@ -17,4 +17,9 @@ open class PlaceService @Autowired constructor(
                 .map { it.toDto() }
                 .orElseThrow { NotFoundException("Place $placeId does not exist") }
     }
+
+    @Transactional
+    open fun delete(placeId: Int) {
+        placeRepository.deleteById(placeId)
+    }
 }

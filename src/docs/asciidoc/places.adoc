@@ -1,0 +1,12 @@
+= Places endpoint REST api
+
+== Get a place
+
+.request
+include::{snippets}/get_place/http-request.adoc[]
+
+.response
+include::{snippets}/get_place/http-response.adoc[]
+
+.fields
+include::{snippets}/get_place/response-fields.adoc[]

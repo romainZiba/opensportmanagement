@@ -34,11 +34,8 @@ open class WebSecurity(
         http.cors().and().authorizeRequests()
                 .antMatchers("/").permitAll()
                 .antMatchers(HttpMethod.POST, SIGN_UP_URL).permitAll()
-                // TODO: remove the following permit all
-                .antMatchers("/img/**").permitAll()
-                .antMatchers("/css/**").permitAll()
-                .antMatchers("/js/**").permitAll()
-                .antMatchers("/webjars/**").permitAll()
+                .antMatchers(HttpMethod.GET, "/docs").permitAll()
+                // TODO: for authenticated users only
                 .antMatchers("/messagesWS/**").permitAll()
                 .and().authorizeRequests().anyRequest()
                 .authenticated()

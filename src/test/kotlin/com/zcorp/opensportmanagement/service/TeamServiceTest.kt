@@ -13,6 +13,7 @@ import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.whenever
 import com.zcorp.opensportmanagement.dto.PlaceDto
 import com.zcorp.opensportmanagement.model.Place
+import com.zcorp.opensportmanagement.model.Place.PlaceType
 import com.zcorp.opensportmanagement.model.Team
 import com.zcorp.opensportmanagement.repositories.OpponentRepository
 import com.zcorp.opensportmanagement.repositories.PlaceRepository
@@ -36,7 +37,7 @@ class TeamServiceTest {
     private val mockTeams = teamIds.map {
         Team("SuperName $it", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "", it)
     }
-    private val mockPlaces = listOf(Place("Place", "", "", mockTeams[0], 1))
+    private val mockPlaces = listOf(Place("Place", "", "", PlaceType.STADIUM, mockTeams[0], 1))
 
     @Test
     fun `get teams should return the teams`() {
@@ -72,7 +73,7 @@ class TeamServiceTest {
     fun `create place should create it`() {
         whenever(teamRepoMock.findById(teamIds[0])).thenReturn(Optional.of(mockTeams[0]))
         whenever(placeRepoMock.save<Place>(any())).thenReturn(mockPlaces[0])
-        val placeDto = PlaceDto("place", "address", "city")
+        val placeDto = PlaceDto("place", "address", "city", PlaceType.STADIUM)
         val savedPlace = teamService.createPlace(placeDto, teamIds[0])
         assert(savedPlace).isEqualTo(mockPlaces[0].toDto())
     }
@@ -80,7 +81,7 @@ class TeamServiceTest {
     @Test
     fun `create place with a not existing team should fail`() {
         whenever(teamRepoMock.findById(teamIds[0])).thenReturn(Optional.empty())
-        val placeDto = PlaceDto("place", "address", "city")
+        val placeDto = PlaceDto("place", "address", "city", PlaceType.STADIUM)
         assert {
             teamService.createPlace(placeDto, teamIds[0])
         }.thrownError { isInstanceOf(NotFoundException::class) }
@@ -89,7 +90,7 @@ class TeamServiceTest {
     @Test
     fun `create place with an empty name should fail`() {
         whenever(teamRepoMock.findById(teamIds[0])).thenReturn(Optional.of(mockTeams[0]))
-        val placeDto = PlaceDto("", "address", "city")
+        val placeDto = PlaceDto("", "address", "city", PlaceType.STADIUM)
         assert {
             teamService.createPlace(placeDto, teamIds[0])
         }.thrownError { isInstanceOf(BadParameterException::class) }
@@ -98,7 +99,7 @@ class TeamServiceTest {
     @Test
     fun `create place with an empty address should fail`() {
         whenever(teamRepoMock.findById(teamIds[0])).thenReturn(Optional.of(mockTeams[0]))
-        val placeDto = PlaceDto("name", "", "city")
+        val placeDto = PlaceDto("name", "", "city", PlaceType.STADIUM)
         assert {
             teamService.createPlace(placeDto, teamIds[0])
         }.thrownError { isInstanceOf(BadParameterException::class) }
@@ -107,7 +108,7 @@ class TeamServiceTest {
     @Test
     fun `create place with an empty city should fail`() {
         whenever(teamRepoMock.findById(teamIds[0])).thenReturn(Optional.of(mockTeams[0]))
-        val placeDto = PlaceDto("name", "address", "")
+        val placeDto = PlaceDto("name", "address", "", PlaceType.STADIUM)
         assert {
             teamService.createPlace(placeDto, teamIds[0])
         }.thrownError { isInstanceOf(BadParameterException::class) }

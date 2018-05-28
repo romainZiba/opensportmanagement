@@ -18,6 +18,7 @@ import com.zcorp.opensportmanagement.model.Championship
 import com.zcorp.opensportmanagement.model.Match
 import com.zcorp.opensportmanagement.model.Opponent
 import com.zcorp.opensportmanagement.model.Place
+import com.zcorp.opensportmanagement.model.Place.PlaceType
 import com.zcorp.opensportmanagement.model.Season
 import com.zcorp.opensportmanagement.model.Team
 import com.zcorp.opensportmanagement.repositories.ChampionshipRepository
@@ -45,7 +46,7 @@ class ChampionshipServiceTest {
     private val mockTeam = Team("SuperNam", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "", teamId)
     private val mockSeason = Season("Season", LocalDate.of(2018, 1, 1), LocalDate.of(2018, 9, 29), Season.Status.CURRENT, mockTeam, seasonId)
     private val mockChampionship = Championship("Champ", mockSeason, championshipId)
-    private val mockStadium = Place("The place", "", "Toulouse", mockTeam, placeId)
+    private val mockStadium = Place("The place", "", "Toulouse", PlaceType.STADIUM, mockTeam, placeId)
     private val mockOpponent = Opponent("TerribleOpponent", "", "", "", mockTeam, opponentId)
 
     @Test

@@ -26,12 +26,12 @@ import javax.transaction.Transactional
 
 @Service
 open class TeamService @Autowired constructor(
-        private val teamRepository: TeamRepository,
-        private val teamMemberRepository: TeamMemberRepository,
-        private val userRepository: UserRepository,
-        private val seasonRepository: SeasonRepository,
-        private val placeRepository: PlaceRepository,
-        private val opponentRepository: OpponentRepository
+    private val teamRepository: TeamRepository,
+    private val teamMemberRepository: TeamMemberRepository,
+    private val userRepository: UserRepository,
+    private val seasonRepository: SeasonRepository,
+    private val placeRepository: PlaceRepository,
+    private val opponentRepository: OpponentRepository
 ) {
 
     @Transactional
@@ -109,7 +109,7 @@ open class TeamService @Autowired constructor(
         if (placeDto.city.isEmpty()) {
             throw BadParameterException("City should not be empty")
         }
-        val place = Place(placeDto.name, placeDto.address, placeDto.city, team)
+        val place = Place(placeDto.name, placeDto.address, placeDto.city, placeDto.type, team)
         return placeRepository.save(place).toDto()
     }
 

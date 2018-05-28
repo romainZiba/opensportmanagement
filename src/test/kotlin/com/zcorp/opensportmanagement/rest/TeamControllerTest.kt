@@ -6,6 +6,7 @@ import com.nhaarman.mockito_kotlin.whenever
 import com.zcorp.opensportmanagement.dto.EventCreationDto
 import com.zcorp.opensportmanagement.dto.PlaceDto
 import com.zcorp.opensportmanagement.dto.TeamDto
+import com.zcorp.opensportmanagement.model.Place.PlaceType
 import com.zcorp.opensportmanagement.model.Team
 import com.zcorp.opensportmanagement.security.AccessController
 import com.zcorp.opensportmanagement.service.BadParameterException
@@ -54,7 +55,7 @@ class TeamControllerTest {
     private val teamId = 1
     private val mockTeam = Team("SuperNam", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "", teamId)
 
-    private val mockPlacesDto = listOf(PlaceDto("name", "address", "city", teamId, 1))
+    private val mockPlacesDto = listOf(PlaceDto("name", "address", "city", PlaceType.STADIUM, teamId, 1))
 
     @Test
     fun `Get teams when unauthenticated should return FORBIDDEN`() {
@@ -136,7 +137,7 @@ class TeamControllerTest {
     @WithMockUser("toto")
     fun `Create place should return a response with status 'CREATED'`() {
         val dto = mockPlacesDto[0]
-        val placeDto = PlaceDto(dto.name, dto.address, dto.city)
+        val placeDto = PlaceDto(dto.name, dto.address, dto.city, PlaceType.STADIUM)
         whenever(accessController.isTeamAdmin(any(), any())).thenReturn(true)
         whenever(teamService.createPlace(any(), any())).thenReturn(dto)
         this.mockMvc.perform(
@@ -150,6 +151,7 @@ class TeamControllerTest {
                         PayloadDocumentation.fieldWithPath("name").description("The name of the place"),
                         PayloadDocumentation.fieldWithPath("address").description("The address of the place"),
                         PayloadDocumentation.fieldWithPath("city").description("The city of the place"),
+                        PayloadDocumentation.fieldWithPath("type").description("The type of the place"),
                         PayloadDocumentation.fieldWithPath("_id").description("The identifier of the place")
                 )))
     }

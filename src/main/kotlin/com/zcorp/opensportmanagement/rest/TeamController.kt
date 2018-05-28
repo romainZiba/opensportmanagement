@@ -99,9 +99,9 @@ open class TeamController @Autowired constructor(
 
     @PostMapping("/{teamId}/places")
     open fun createPlace(
-            @NotNull @PathVariable("teamId") teamId: Int,
-            @RequestBody placeDto: PlaceDto,
-            authentication: Authentication
+        @NotNull @PathVariable("teamId") teamId: Int,
+        @RequestBody placeDto: PlaceDto,
+        authentication: Authentication
     ): ResponseEntity<PlaceDto> {
         if (accessController.isTeamAdmin(authentication, teamId)) {
             val place = teamService.createPlace(placeDto, teamId)

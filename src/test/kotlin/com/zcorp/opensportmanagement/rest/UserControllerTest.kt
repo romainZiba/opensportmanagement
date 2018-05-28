@@ -2,7 +2,6 @@ package com.zcorp.opensportmanagement.rest
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.nhaarman.mockito_kotlin.whenever
-import com.zcorp.opensportmanagement.dto.UserDto
 import com.zcorp.opensportmanagement.model.User
 import com.zcorp.opensportmanagement.service.UserService
 import org.junit.Test

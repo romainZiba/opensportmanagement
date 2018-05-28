@@ -17,6 +17,7 @@ import com.nhaarman.mockito_kotlin.whenever
 import com.zcorp.opensportmanagement.dto.EventCreationDto
 import com.zcorp.opensportmanagement.model.Event
 import com.zcorp.opensportmanagement.model.Place
+import com.zcorp.opensportmanagement.model.Place.PlaceType
 import com.zcorp.opensportmanagement.model.Team
 import com.zcorp.opensportmanagement.model.TeamMember
 import com.zcorp.opensportmanagement.model.User
@@ -35,7 +36,7 @@ class EventServiceTest {
     private val teamId = 5
     private val placeId = 1
     private val mockTeam = Team("SuperNam", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "", teamId)
-    private val mockPlace = Place("The place", "", "Toulouse", mockTeam, placeId)
+    private val mockPlace = Place("The place", "", "Toulouse", PlaceType.STADIUM, mockTeam, placeId)
     private val mockEvent = Event.Builder().name("TheOne")
             .fromDate(LocalDateTime.now().plusMinutes(2L))
             .toDate(LocalDateTime.now().plusMinutes(5L))

@@ -9,8 +9,11 @@ import com.zcorp.opensportmanagement.dto.TeamDto
 import com.zcorp.opensportmanagement.dto.TeamMemberDto
 import com.zcorp.opensportmanagement.dto.TeamMemberUpdateDto
 import com.zcorp.opensportmanagement.security.AccessController
+import com.zcorp.opensportmanagement.security.JWTUtils
+import com.zcorp.opensportmanagement.security.OpenGrantedAuthority
 import com.zcorp.opensportmanagement.service.EventService
 import com.zcorp.opensportmanagement.service.TeamService
+import com.zcorp.opensportmanagement.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Pageable
 import org.springframework.data.rest.webmvc.RepositoryRestController
@@ -19,7 +22,9 @@ import org.springframework.hateoas.PagedResources
 import org.springframework.hateoas.Resource
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
+import org.springframework.security.core.GrantedAuthority
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -27,6 +32,8 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import java.util.LinkedList
+import javax.servlet.http.HttpServletResponse
 import javax.validation.constraints.NotNull
 
 @RepositoryRestController
@@ -34,7 +41,8 @@ import javax.validation.constraints.NotNull
 open class TeamController @Autowired constructor(
     private val teamService: TeamService,
     private val eventService: EventService,
-    private val accessController: AccessController
+    private val accessController: AccessController,
+    private val userService: UserService
 ) {
 
     @GetMapping
@@ -46,9 +54,17 @@ open class TeamController @Autowired constructor(
     @PostMapping
     open fun createTeam(
         @RequestBody teamDto: TeamDto,
-        authentication: Authentication
+        authentication: Authentication,
+        response: HttpServletResponse
     ): ResponseEntity<TeamDto> {
-        val savedTeam = teamService.createTeam(teamDto, authentication.name)
+        val username = authentication.name
+        val savedTeam = teamService.createTeam(teamDto, username)
+        val authorities = userService.getTeamsAndRoles(username)
+                ?.mapTo(LinkedList<GrantedAuthority>()) { OpenGrantedAuthority(it.team.id, it.roles) }
+        val copyAuthentication = UsernamePasswordAuthenticationToken(
+                authentication.principal, authentication.credentials, authorities)
+        val newCookie = JWTUtils.getAccessCookie(copyAuthentication)
+        response.addCookie(newCookie)
         return ResponseEntity(savedTeam, HttpStatus.CREATED)
     }
 

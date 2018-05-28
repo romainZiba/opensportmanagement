@@ -48,4 +48,9 @@ open class UserService @Autowired constructor(
         user.email = dto.email
         return userRepository.save(user).toDto()
     }
+
+    @Transactional
+    open fun getTeamsAndRoles(username: String): Set<TeamMember>? {
+        return userRepository.findByUsername(username)?.getMemberOf()
+    }
 }

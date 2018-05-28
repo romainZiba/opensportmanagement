@@ -8,10 +8,12 @@ import com.zcorp.opensportmanagement.dto.PlaceDto
 import com.zcorp.opensportmanagement.dto.TeamDto
 import com.zcorp.opensportmanagement.model.Place.PlaceType
 import com.zcorp.opensportmanagement.model.Team
+import com.zcorp.opensportmanagement.model.TeamMember
 import com.zcorp.opensportmanagement.security.AccessController
 import com.zcorp.opensportmanagement.service.BadParameterException
 import com.zcorp.opensportmanagement.service.EventService
 import com.zcorp.opensportmanagement.service.TeamService
+import com.zcorp.opensportmanagement.service.UserService
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -46,9 +48,11 @@ class TeamControllerTest {
     private lateinit var mockMvc: MockMvc
 
     @MockBean
-    private lateinit var teamService: TeamService
+    private lateinit var teamServiceMock: TeamService
     @MockBean
-    private lateinit var eventService: EventService
+    private lateinit var userServiceMock: UserService
+    @MockBean
+    private lateinit var eventServiceMock: EventService
     @MockBean
     private lateinit var accessController: AccessController
 
@@ -66,7 +70,7 @@ class TeamControllerTest {
     @WithMockUser("toto")
     fun `Get teams when authenticated should return OK`() {
         whenever(accessController.getUserTeamIds(any())).thenReturn(listOf(teamId))
-        whenever(teamService.getTeams(listOf(teamId))).thenReturn(listOf(mockTeam).map { it.toDto() })
+        whenever(teamServiceMock.getTeams(listOf(teamId))).thenReturn(listOf(mockTeam).map { it.toDto() })
         this.mockMvc.perform(get("/teams")).andExpect(status().isOk)
     }
 
@@ -85,7 +89,9 @@ class TeamControllerTest {
     fun `Create team when authenticated should return CREATED`() {
         val teamDto = TeamDto("The team", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "")
         val savedTeam = TeamDto("The team", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "", 2)
-        whenever(teamService.createTeam(any(), any())).thenReturn(savedTeam)
+        whenever(teamServiceMock.createTeam(any(), any())).thenReturn(savedTeam)
+        val teamMembers = setOf(TeamMember(mutableSetOf(TeamMember.Role.ADMIN), mockTeam, "AAA", 1))
+        whenever(userServiceMock.getTeamsAndRoles(any())).thenReturn(teamMembers)
         this.mockMvc.perform(post("/teams")
                 .contentType(MediaType.APPLICATION_JSON)
                 .characterEncoding("UTF-8")
@@ -103,7 +109,7 @@ class TeamControllerTest {
     @WithMockUser("toto")
     fun `GET places when authenticated should return a response with status 'OK'`() {
         whenever(accessController.isUserAllowedToAccessTeam(any(), any())).thenReturn(true)
-        whenever(teamService.getPlaces(any())).thenReturn(mockPlacesDto)
+        whenever(teamServiceMock.getPlaces(any())).thenReturn(mockPlacesDto)
         this.mockMvc.perform(
                 get("/teams/1/places"))
                 .andExpect(status().isOk)
@@ -122,7 +128,7 @@ class TeamControllerTest {
     @WithMockUser("toto")
     fun `Create event with an empty name should return a response with status 'BAD REQUEST'`() {
         whenever(accessController.isUserAllowedToAccessTeam(any(), any())).thenReturn(true)
-        whenever(eventService.createEvent(any(), any())).thenThrow(BadParameterException(""))
+        whenever(eventServiceMock.createEvent(any(), any())).thenThrow(BadParameterException(""))
         val eventCreationDto = EventCreationDto("", LocalDate.of(2050, 1, 1), LocalDate.of(2050, 2, 1),
                 LocalTime.of(16, 0), LocalTime.of(18, 0), 1)
         this.mockMvc.perform(
@@ -139,7 +145,7 @@ class TeamControllerTest {
         val dto = mockPlacesDto[0]
         val placeDto = PlaceDto(dto.name, dto.address, dto.city, PlaceType.STADIUM)
         whenever(accessController.isTeamAdmin(any(), any())).thenReturn(true)
-        whenever(teamService.createPlace(any(), any())).thenReturn(dto)
+        whenever(teamServiceMock.createPlace(any(), any())).thenReturn(dto)
         this.mockMvc.perform(
                 post("/teams/1/places")
                         .contentType(APPLICATION_JSON)

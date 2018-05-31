@@ -17,7 +17,7 @@ data class TeamMember(
     @ElementCollection val roles: MutableSet<Role>,
     @ManyToOne @JoinColumn(name = "TEAM_ID") val team: Team,
     var licenseNumber: String = "",
-    @Id @GeneratedValue val id: Int = -1
+    @Id @GeneratedValue val id: Int? = null
 ) {
 
     @ManyToOne
@@ -30,6 +30,6 @@ data class TeamMember(
 
     fun toDto(): TeamMemberDto {
         return TeamMemberDto(user.username, user.firstName, user.lastName, roles, licenseNumber, user.email,
-                user.phoneNumber, team.id, id)
+                user.phoneNumber, team.id!!, id!!)
     }
 }

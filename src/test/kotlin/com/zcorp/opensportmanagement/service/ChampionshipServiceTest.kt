@@ -21,10 +21,10 @@ import com.zcorp.opensportmanagement.model.Place
 import com.zcorp.opensportmanagement.model.Place.PlaceType
 import com.zcorp.opensportmanagement.model.Season
 import com.zcorp.opensportmanagement.model.Team
-import com.zcorp.opensportmanagement.repositories.ChampionshipRepository
-import com.zcorp.opensportmanagement.repositories.MatchRepository
-import com.zcorp.opensportmanagement.repositories.OpponentRepository
-import com.zcorp.opensportmanagement.repositories.PlaceRepository
+import com.zcorp.opensportmanagement.repository.ChampionshipRepository
+import com.zcorp.opensportmanagement.repository.MatchRepository
+import com.zcorp.opensportmanagement.repository.OpponentRepository
+import com.zcorp.opensportmanagement.repository.PlaceRepository
 import org.junit.Test
 import org.mockito.AdditionalMatchers.not
 import java.time.LocalDate

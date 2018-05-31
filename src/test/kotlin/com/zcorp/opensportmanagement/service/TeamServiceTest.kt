@@ -15,12 +15,12 @@ import com.zcorp.opensportmanagement.dto.PlaceDto
 import com.zcorp.opensportmanagement.model.Place
 import com.zcorp.opensportmanagement.model.Place.PlaceType
 import com.zcorp.opensportmanagement.model.Team
-import com.zcorp.opensportmanagement.repositories.OpponentRepository
-import com.zcorp.opensportmanagement.repositories.PlaceRepository
-import com.zcorp.opensportmanagement.repositories.SeasonRepository
-import com.zcorp.opensportmanagement.repositories.TeamMemberRepository
-import com.zcorp.opensportmanagement.repositories.TeamRepository
-import com.zcorp.opensportmanagement.repositories.UserRepository
+import com.zcorp.opensportmanagement.repository.OpponentRepository
+import com.zcorp.opensportmanagement.repository.PlaceRepository
+import com.zcorp.opensportmanagement.repository.SeasonRepository
+import com.zcorp.opensportmanagement.repository.TeamMemberRepository
+import com.zcorp.opensportmanagement.repository.TeamRepository
+import com.zcorp.opensportmanagement.repository.UserRepository
 import org.junit.Test
 import java.util.Optional
 

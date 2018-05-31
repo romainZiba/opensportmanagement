@@ -14,9 +14,8 @@ data class Team(
     val genderKind: Gender,
     val ageGroup: AgeGroup,
     var imgUrl: String = "",
-    @Id @GeneratedValue val id: Int = -1
+    @Id @GeneratedValue val id: Int? = null
 ) {
-
     fun toDto(): TeamDto {
         return TeamDto(name, sport, genderKind, ageGroup, imgUrl, id)
     }

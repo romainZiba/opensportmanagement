@@ -3,10 +3,11 @@ package com.zcorp.opensportmanagement.service
 import com.zcorp.opensportmanagement.dto.EventCreationDto
 import com.zcorp.opensportmanagement.dto.EventDto
 import com.zcorp.opensportmanagement.model.Event
-import com.zcorp.opensportmanagement.repositories.EventRepository
-import com.zcorp.opensportmanagement.repositories.PlaceRepository
-import com.zcorp.opensportmanagement.repositories.TeamMemberRepository
-import com.zcorp.opensportmanagement.repositories.TeamRepository
+import com.zcorp.opensportmanagement.repository.EventRepository
+import com.zcorp.opensportmanagement.repository.PlaceRepository
+import com.zcorp.opensportmanagement.repository.TeamMemberRepository
+import com.zcorp.opensportmanagement.repository.TeamRepository
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -18,8 +19,12 @@ open class EventService @Autowired constructor(
     private val eventRepository: EventRepository,
     private val teamMemberRepository: TeamMemberRepository,
     private val placeRepository: PlaceRepository,
-    private val teamRepository: TeamRepository
+    private val teamRepository: TeamRepository,
+    private val emailService: EmailService
 ) {
+    companion object {
+        private val log = LoggerFactory.getLogger(EventService::class.java)
+    }
 
     @Transactional
     open fun getEvent(eventId: Int): EventDto {
@@ -28,6 +33,19 @@ open class EventService @Autowired constructor(
         } catch (e: NoResultException) {
             throw NotFoundException("Event $eventId does not exist")
         }
+    }
+
+    @Transactional
+    open fun notifyEvents(comparedDate: LocalDateTime): Int {
+        val events = eventRepository.getEventsByNotifiedFalseAndFromDateTimeBefore(comparedDate)
+        log.info("There are ${events.size} events not notified that are going to happen in less than 5 days")
+        for (event in events) {
+            val noResponseMembers = eventRepository.getMembersThatHaveNotResponded(event.id)
+            val teamMembersToNotify = noResponseMembers.map { it.user.email }.toList()
+            emailService.sendMessage(teamMembersToNotify, "L'évènement ${event.name} approche!", "Inscris toi donc")
+            event.notified = true
+        }
+        return events.size
     }
 
     @Transactional
@@ -77,7 +95,7 @@ open class EventService @Autowired constructor(
     @Transactional
     open fun participate(username: String, eventId: Int, present: Boolean): EventDto {
         val event = eventRepository.findById(eventId).orElseThrow { NotFoundException("Event $eventId does not exist") }
-        val teamMember = teamMemberRepository.findByUsername(username, event.team.id) ?: throw NotFoundException("Team member $username does not exist")
+        val teamMember = teamMemberRepository.findByUsername(username, event.team.id!!) ?: throw NotFoundException("Team member $username does not exist")
         if (event.fromDateTime.isBefore(LocalDateTime.now())) {
             throw PastEventException(eventId)
         }

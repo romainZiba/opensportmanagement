@@ -1,4 +1,4 @@
-package com.zcorp.opensportmanagement.repositories
+package com.zcorp.opensportmanagement.repository
 
 import com.zcorp.opensportmanagement.model.Opponent
 import org.springframework.data.jpa.repository.JpaRepository

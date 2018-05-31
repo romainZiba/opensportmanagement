@@ -3,10 +3,10 @@ package com.zcorp.opensportmanagement.service
 import com.zcorp.opensportmanagement.dto.ChampionshipDto
 import com.zcorp.opensportmanagement.dto.MatchCreationDto
 import com.zcorp.opensportmanagement.model.Match
-import com.zcorp.opensportmanagement.repositories.ChampionshipRepository
-import com.zcorp.opensportmanagement.repositories.MatchRepository
-import com.zcorp.opensportmanagement.repositories.OpponentRepository
-import com.zcorp.opensportmanagement.repositories.PlaceRepository
+import com.zcorp.opensportmanagement.repository.ChampionshipRepository
+import com.zcorp.opensportmanagement.repository.MatchRepository
+import com.zcorp.opensportmanagement.repository.OpponentRepository
+import com.zcorp.opensportmanagement.repository.PlaceRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime

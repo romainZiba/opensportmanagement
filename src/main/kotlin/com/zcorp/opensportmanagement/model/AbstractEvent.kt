@@ -24,9 +24,9 @@ abstract class AbstractEvent protected constructor() {
     @ManyToOne @JoinColumn(name = "team_id") lateinit var team: Team
     lateinit var fromDateTime: LocalDateTime
     var toDateTime: LocalDateTime? = null
-    @ManyToMany private val presentMembers: MutableSet<TeamMember> = mutableSetOf()
-    @ManyToMany private val absentMembers: MutableSet<TeamMember> = mutableSetOf()
-    @ManyToMany private val waitingMembers: MutableSet<TeamMember> = mutableSetOf()
+    @ManyToMany val presentMembers: MutableSet<TeamMember> = mutableSetOf()
+    @ManyToMany val absentMembers: MutableSet<TeamMember> = mutableSetOf()
+    @ManyToMany val waitingMembers: MutableSet<TeamMember> = mutableSetOf()
     @GeneratedValue @Id var id: Int = -1
 
     @ManyToOne
@@ -36,17 +36,8 @@ abstract class AbstractEvent protected constructor() {
     @Column(name = "eventtype")
     var eventType: EventType ? = null
 
-    fun getAbsentMembers(): Set<TeamMember> {
-        return absentMembers
-    }
-
-    fun getPresentMembers(): Set<TeamMember> {
-        return presentMembers
-    }
-
-    fun getWaitingMembers(): Set<TeamMember> {
-        return waitingMembers
-    }
+    @Column(name = "notified")
+    var notified: Boolean = false
 
     abstract fun toDto(): EventDto
 

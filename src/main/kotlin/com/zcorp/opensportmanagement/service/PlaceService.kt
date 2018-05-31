@@ -1,7 +1,7 @@
 package com.zcorp.opensportmanagement.service
 
 import com.zcorp.opensportmanagement.dto.PlaceDto
-import com.zcorp.opensportmanagement.repositories.PlaceRepository
+import com.zcorp.opensportmanagement.repository.PlaceRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional

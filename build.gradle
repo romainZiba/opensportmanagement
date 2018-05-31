@@ -48,6 +48,8 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-data-jpa:$spring_boot_version"
     implementation "org.springframework.boot:spring-boot-starter-security:$spring_boot_version"
     implementation "org.springframework.boot:spring-boot-starter-data-rest:$spring_boot_version"
+    implementation "org.springframework.boot:spring-boot-starter-batch:$spring_boot_version"
+    implementation "org.springframework.boot:spring-boot-starter-mail:$spring_boot_version"
     implementation "org.springframework.boot:spring-boot-devtools"
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
 
@@ -63,7 +65,6 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.9.5'
 
     // Databases
-    implementation("com.h2database:h2")
     runtime('org.postgresql:postgresql:42.1.4')
     implementation group: 'com.rethinkdb', name: 'rethinkdb-driver', version: '2.3.3'
 
@@ -79,6 +80,7 @@ dependencies {
     testImplementation 'com.willowtreeapps.assertk:assertk:0.10'
     asciidoctor "org.springframework.restdocs:spring-restdocs-asciidoctor:$spring_boot_version"
     testImplementation "org.springframework.restdocs:spring-restdocs-mockmvc:$spring_boot_version"
+    testImplementation('com.h2database:h2')
 }
 
 compileKotlin {

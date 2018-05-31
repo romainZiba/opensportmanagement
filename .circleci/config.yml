@@ -33,6 +33,9 @@ jobs:
             sed -i "s/https:\/\/127.0.0.1:4200/https:\/\/$ALLOWED_HOST/g" src/main/resources/application.yml
             sed -i "s/url: jdbc:postgresql:\/\/localhost:15435\/open/url: jdbc:postgresql:\/\/localhost:$DOCKER_POSTGRES_PORT\/$DOCKER_POSTGRES_DB/g" src/main/resources/application.yml
             sed -i "s/password: open/password: $DOCKER_POSTGRES_PASSWORD/g" src/main/resources/application.yml
+            sed -i "s/username: <your_mail@gmail.com>/username: $MAIL_USERNAME/g" src/main/resources/application.yml
+            sed -i "s/password: <your_mail_password>/password: $MAIL_PASSWORD/g" src/main/resources/application.yml
+            sed -i "s/enabled: false/enabled: $ENABLED/g" src/main/resources/application.yml
 
       # Download and cache dependencies
       - restore_cache:

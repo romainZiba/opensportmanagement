@@ -1,6 +1,6 @@
 package com.zcorp.opensportmanagement.security
 
-import com.zcorp.opensportmanagement.repositories.UserRepository
+import com.zcorp.opensportmanagement.repository.UserRepository
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.User
@@ -20,6 +20,6 @@ open class UserDetailsServiceImpl(private val userRepository: UserRepository) : 
         val user = userRepository.findByUsername(username) ?: throw UsernameNotFoundException(username)
         return User(user.username,
                 user.password,
-                user.getMemberOf().mapTo(LinkedList<GrantedAuthority>()) { OpenGrantedAuthority(it.team.id, it.roles) })
+                user.getMemberOf().mapTo(LinkedList<GrantedAuthority>()) { OpenGrantedAuthority(it.team.id!!, it.roles) })
     }
 }

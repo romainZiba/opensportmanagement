@@ -4,11 +4,11 @@ import com.zcorp.opensportmanagement.dto.EventDto
 import com.zcorp.opensportmanagement.dto.MatchCreationDto
 import com.zcorp.opensportmanagement.dto.ResultDto
 import com.zcorp.opensportmanagement.model.Match
-import com.zcorp.opensportmanagement.repositories.ChampionshipRepository
-import com.zcorp.opensportmanagement.repositories.MatchRepository
-import com.zcorp.opensportmanagement.repositories.OpponentRepository
-import com.zcorp.opensportmanagement.repositories.PlaceRepository
-import com.zcorp.opensportmanagement.repositories.TeamRepository
+import com.zcorp.opensportmanagement.repository.ChampionshipRepository
+import com.zcorp.opensportmanagement.repository.MatchRepository
+import com.zcorp.opensportmanagement.repository.OpponentRepository
+import com.zcorp.opensportmanagement.repository.PlaceRepository
+import com.zcorp.opensportmanagement.repository.TeamRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional

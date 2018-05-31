@@ -20,6 +20,6 @@ data class Championship(
     @Id @GeneratedValue val id: Int = -1
 ) {
     fun toDto(): ChampionshipDto {
-        return ChampionshipDto(name, season.team.id, id)
+        return ChampionshipDto(name, season.team.id!!, id)
     }
 }

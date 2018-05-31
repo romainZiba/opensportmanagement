@@ -21,7 +21,7 @@ data class Place(
     private val city: String,
     @Enumerated(EnumType.STRING) private val type: PlaceType,
     @ManyToOne @JoinColumn(name = "team_id") val team: Team,
-    @Id @GeneratedValue val id: Int = -1
+    @Id @GeneratedValue val id: Int? = null
 ) {
 
     enum class PlaceType {

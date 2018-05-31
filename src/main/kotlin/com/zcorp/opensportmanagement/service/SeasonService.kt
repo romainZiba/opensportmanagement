@@ -3,8 +3,8 @@ package com.zcorp.opensportmanagement.service
 import com.zcorp.opensportmanagement.dto.ChampionshipDto
 import com.zcorp.opensportmanagement.dto.SeasonDto
 import com.zcorp.opensportmanagement.model.Championship
-import com.zcorp.opensportmanagement.repositories.ChampionshipRepository
-import com.zcorp.opensportmanagement.repositories.SeasonRepository
+import com.zcorp.opensportmanagement.repository.ChampionshipRepository
+import com.zcorp.opensportmanagement.repository.SeasonRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional

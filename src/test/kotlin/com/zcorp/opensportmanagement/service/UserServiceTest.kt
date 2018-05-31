@@ -1,6 +1,5 @@
 package com.zcorp.opensportmanagement.service
 
-import assertk.assertions.contains
 import assertk.assertions.hasSize
 import assertk.assertions.isEqualTo
 import assertk.assertions.isNull
@@ -11,8 +10,8 @@ import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.whenever
 import com.zcorp.opensportmanagement.model.Team
 import com.zcorp.opensportmanagement.model.User
-import com.zcorp.opensportmanagement.repositories.TeamRepository
-import com.zcorp.opensportmanagement.repositories.UserRepository
+import com.zcorp.opensportmanagement.repository.TeamRepository
+import com.zcorp.opensportmanagement.repository.UserRepository
 import org.junit.Test
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import java.util.Optional

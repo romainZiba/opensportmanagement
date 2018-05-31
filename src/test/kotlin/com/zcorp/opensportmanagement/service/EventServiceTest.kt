@@ -21,10 +21,10 @@ import com.zcorp.opensportmanagement.model.Place.PlaceType
 import com.zcorp.opensportmanagement.model.Team
 import com.zcorp.opensportmanagement.model.TeamMember
 import com.zcorp.opensportmanagement.model.User
-import com.zcorp.opensportmanagement.repositories.EventRepository
-import com.zcorp.opensportmanagement.repositories.PlaceRepository
-import com.zcorp.opensportmanagement.repositories.TeamMemberRepository
-import com.zcorp.opensportmanagement.repositories.TeamRepository
+import com.zcorp.opensportmanagement.repository.EventRepository
+import com.zcorp.opensportmanagement.repository.PlaceRepository
+import com.zcorp.opensportmanagement.repository.TeamMemberRepository
+import com.zcorp.opensportmanagement.repository.TeamRepository
 import org.junit.Test
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -59,14 +59,15 @@ class EventServiceTest {
     private val placeRepoMock: PlaceRepository = mock()
     private val teamRepoMock: TeamRepository = mock()
     private val teamMemberRepoMock: TeamMemberRepository = mock()
-    private val eventService = EventService(eventRepoMock, teamMemberRepoMock, placeRepoMock, teamRepoMock)
+    private val emailServiceMock: EmailService = mock()
+    private val eventService = EventService(eventRepoMock, teamMemberRepoMock, placeRepoMock, teamRepoMock, emailServiceMock)
 
     @Test
     fun `create event with an empty name should be forbidden`() {
         val fromDateTime = LocalDateTime.of(2018, 1, 1, 0, 0)
         val toDateTime = LocalDateTime.of(2018, 1, 1, 10, 0)
         val dto = EventCreationDto("", fromDateTime.toLocalDate(), toDateTime.toLocalDate(),
-                fromDateTime.toLocalTime(), toDateTime.toLocalTime(), mockPlace.id)
+                fromDateTime.toLocalTime(), toDateTime.toLocalTime(), mockPlace.id!!)
         assert {
             eventService.createEvent(teamId, dto)
         }.thrownError {
@@ -82,7 +83,7 @@ class EventServiceTest {
         val fromDateTime = LocalDateTime.of(2018, 1, 1, 0, 0)
         val toDateTime = LocalDateTime.of(2018, 1, 1, 10, 0)
         val dto = EventCreationDto("event", fromDateTime.toLocalDate(), toDateTime.toLocalDate(),
-                fromDateTime.toLocalTime(), toDateTime.toLocalTime(), mockPlace.id)
+                fromDateTime.toLocalTime(), toDateTime.toLocalTime(), mockPlace.id!!)
         eventService.createEvent(teamId, dto)
         argumentCaptor<Event>().apply {
             verify(eventRepoMock, times(1)).save(capture())
@@ -103,7 +104,7 @@ class EventServiceTest {
         val toDate = LocalDate.of(2018, 1, 8)
         val fromTime = LocalTime.of(10, 0)
         val toTime = LocalTime.of(11, 0)
-        val dto = EventCreationDto("event", fromDate, toDate, fromTime, toTime, mockPlace.id,
+        val dto = EventCreationDto("event", fromDate, toDate, fromTime, toTime, mockPlace.id!!,
                 true, mutableSetOf(DayOfWeek.WEDNESDAY))
         eventService.createEvent(teamId, dto)
         argumentCaptor<List<Event>>().apply {
@@ -128,7 +129,7 @@ class EventServiceTest {
         val toDate = LocalDate.of(2018, 3, 31)
         val fromTime = LocalTime.of(10, 0)
         val toTime = LocalTime.of(11, 0)
-        val dto = EventCreationDto("event", fromDate, toDate, fromTime, toTime, mockPlace.id,
+        val dto = EventCreationDto("event", fromDate, toDate, fromTime, toTime, mockPlace.id!!,
                 true, mutableSetOf(DayOfWeek.WEDNESDAY, DayOfWeek.TUESDAY))
         eventService.createEvent(teamId, dto)
         argumentCaptor<List<Event>>().apply {
@@ -187,9 +188,9 @@ class EventServiceTest {
         whenever(eventRepoMock.save(mockEvent)).thenReturn(mockEvent)
         whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
         val eventDto = eventService.participate(username, eventId, true)
-        assert(mockEvent.getPresentMembers()).hasSize(1)
-        assert(mockEvent.getAbsentMembers()).hasSize(0)
-        assert(mockEvent.getWaitingMembers()).hasSize(0)
+        assert(mockEvent.presentMembers).hasSize(1)
+        assert(mockEvent.absentMembers).hasSize(0)
+        assert(mockEvent.waitingMembers).hasSize(0)
         verify(eventRepoMock, times(1)).save(mockEvent)
         assert(eventDto.name).isEqualTo(mockEvent.name)
         assert(eventDto._id).isEqualTo(mockEvent.id)
@@ -217,11 +218,11 @@ class EventServiceTest {
         whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
         whenever(eventRepoMock.save(mockEvent)).thenReturn(mockEvent)
         whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
-        assert(mockEvent.getPresentMembers()).hasSize(0)
+        assert(mockEvent.presentMembers).hasSize(0)
         val eventDto = eventService.participate(username, eventId, true)
-        assert(mockEvent.getPresentMembers()).hasSize(0)
-        assert(mockEvent.getAbsentMembers()).hasSize(0)
-        assert(mockEvent.getWaitingMembers()).hasSize(1)
+        assert(mockEvent.presentMembers).hasSize(0)
+        assert(mockEvent.absentMembers).hasSize(0)
+        assert(mockEvent.waitingMembers).hasSize(1)
         verify(eventRepoMock, times(1)).save(mockEvent)
         assert(eventDto.name).isEqualTo(mockEvent.name)
         assert(eventDto._id).isEqualTo(mockEvent.id)

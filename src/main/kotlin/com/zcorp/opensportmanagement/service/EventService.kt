@@ -62,7 +62,6 @@ open class EventService @Autowired constructor(
                 .orElseThrow { NotFoundException("Team $teamId does not exist") }
         val eventBuilder = Event.Builder().name(eventName)
                 .team(team)
-                .type(AbstractEvent.EventType.OTHER)
         val placeId = dto.placeId
         val place = placeRepository.findById(placeId)
                 .orElseThrow { NotFoundException("Place $placeId does not exist") }

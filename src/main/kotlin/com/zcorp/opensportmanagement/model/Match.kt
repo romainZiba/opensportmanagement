@@ -26,7 +26,6 @@ class Match private constructor(builder: Builder) : AbstractEvent() {
 
     init {
         this.name = builder.name
-        this.eventType = builder.eventType
         this.team = builder.team
         this.fromDateTime = builder.fromDateTime
         this.toDateTime = builder.toDateTime
@@ -71,7 +70,6 @@ class Match private constructor(builder: Builder) : AbstractEvent() {
 
     class Builder {
         lateinit var name: String
-        val eventType = EventType.MATCH
         lateinit var team: Team
         lateinit var fromDateTime: LocalDateTime
         var toDateTime: LocalDateTime? = null

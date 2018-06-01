@@ -33,9 +33,6 @@ abstract class AbstractEvent protected constructor() {
     lateinit var place: Place
     var maxMembers = MAX_MEMBERS
 
-    @Column(name = "eventtype")
-    var eventType: EventType ? = null
-
     @Column(name = "notified")
     var notified: Boolean = false
 
@@ -79,13 +76,11 @@ abstract class AbstractEvent protected constructor() {
 
     enum class EventType(val type: String) {
         MATCH(match),
-        TRAINING(training),
         OTHER(other)
     }
 
     companion object {
         const val match = "MATCH"
-        const val training = "TRAINING"
         const val other = "OTHER"
         const val MAX_MEMBERS: Int = 100
     }

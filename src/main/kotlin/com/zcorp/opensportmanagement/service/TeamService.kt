@@ -5,6 +5,7 @@ import com.zcorp.opensportmanagement.dto.OpponentDto
 import com.zcorp.opensportmanagement.dto.PlaceDto
 import com.zcorp.opensportmanagement.dto.SeasonDto
 import com.zcorp.opensportmanagement.dto.TeamDto
+import com.zcorp.opensportmanagement.dto.TeamMemberCreationDto
 import com.zcorp.opensportmanagement.dto.TeamMemberDto
 import com.zcorp.opensportmanagement.dto.TeamMemberUpdateDto
 import com.zcorp.opensportmanagement.model.Opponent
@@ -12,6 +13,7 @@ import com.zcorp.opensportmanagement.model.Place
 import com.zcorp.opensportmanagement.model.Season
 import com.zcorp.opensportmanagement.model.Team
 import com.zcorp.opensportmanagement.model.TeamMember
+import com.zcorp.opensportmanagement.model.User
 import com.zcorp.opensportmanagement.repository.OpponentRepository
 import com.zcorp.opensportmanagement.repository.PlaceRepository
 import com.zcorp.opensportmanagement.repository.SeasonRepository
@@ -21,6 +23,7 @@ import com.zcorp.opensportmanagement.repository.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional
 
@@ -33,6 +36,7 @@ open class TeamService @Autowired constructor(
     private val placeRepository: PlaceRepository,
     private val opponentRepository: OpponentRepository
 ) {
+    private val bCryptPasswordEncoder = BCryptPasswordEncoder()
 
     @Transactional
     open fun getTeamMembers(teamId: Int): List<TeamMemberDto> {
@@ -137,5 +141,20 @@ open class TeamService @Autowired constructor(
         val teamMember = teamRepository.getTeamMemberByUserName(teamId, name) ?: throw NotFoundException("Team member $name does not exist")
         teamMember.licenseNumber = dto.licenseNumber
         return teamMemberRepository.save(teamMember).toDto()
+    }
+
+    @Transactional
+    open fun createTeamMember(teamMemberDto: TeamMemberCreationDto, teamId: Int): TeamMemberDto {
+        val team = teamRepository.findById(teamId).orElseThrow { NotFoundException("Team $teamId does not exist") }
+        val firstName = teamMemberDto.firstName
+        val lastName = teamMemberDto.lastName
+        val username = firstName + lastName
+        val userToSave = User(username, firstName, lastName, bCryptPasswordEncoder.encode("password"),
+                teamMemberDto.email, teamMemberDto.phoneNumber)
+        val user = userRepository.findByEmail(teamMemberDto.email) ?: userRepository.save(userToSave)
+        val teamMember = TeamMember(teamMemberDto.roles.toMutableSet(), team)
+        user.addTeamMember(teamMember)
+        val savedUser = userRepository.save(user)
+        return savedUser.getMemberOf().first { it.team.id == teamId }.toDto()
     }
 }

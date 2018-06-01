@@ -6,6 +6,7 @@ import com.zcorp.opensportmanagement.dto.OpponentDto
 import com.zcorp.opensportmanagement.dto.PlaceDto
 import com.zcorp.opensportmanagement.dto.SeasonDto
 import com.zcorp.opensportmanagement.dto.TeamDto
+import com.zcorp.opensportmanagement.dto.TeamMemberCreationDto
 import com.zcorp.opensportmanagement.dto.TeamMemberDto
 import com.zcorp.opensportmanagement.dto.TeamMemberUpdateDto
 import com.zcorp.opensportmanagement.security.AccessController
@@ -225,6 +226,19 @@ open class TeamController @Autowired constructor(
         if (accessController.isUserAllowedToAccessTeam(authentication, teamId)) {
             val teamMember = teamService.getTeamMember(teamId, memberId) ?: throw UserForbiddenException()
             return ResponseEntity.ok(teamMember)
+        }
+        throw UserForbiddenException()
+    }
+
+    @PostMapping("/{teamId}/members")
+    open fun createTeamMember(
+            @PathVariable("teamId") teamId: Int,
+            @RequestBody dto: TeamMemberCreationDto,
+            authentication: Authentication
+    ): ResponseEntity<TeamMemberDto> {
+        if (accessController.isTeamAdmin(authentication, teamId)) {
+            val savedTeamMember = teamService.createTeamMember(dto, teamId)
+            return ResponseEntity.ok(savedTeamMember)
         }
         throw UserForbiddenException()
     }

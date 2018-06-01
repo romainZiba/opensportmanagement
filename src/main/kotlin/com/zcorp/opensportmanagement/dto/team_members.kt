@@ -15,4 +15,12 @@ data class TeamMemberDto(
     val _id: Int
 )
 
+data class TeamMemberCreationDto(
+        val firstName: String,
+        val lastName: String,
+        val roles: Set<TeamMember.Role>,
+        val email: String,
+        val phoneNumber: String?
+)
+
 data class TeamMemberUpdateDto(val licenseNumber: String)

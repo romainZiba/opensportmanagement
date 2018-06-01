@@ -3,6 +3,7 @@ package com.zcorp.opensportmanagement.model
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.zcorp.opensportmanagement.dto.UserDto
 import javax.persistence.CascadeType
+import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Id
 import javax.persistence.OneToMany
@@ -13,12 +14,12 @@ import javax.validation.constraints.NotNull
 @Table(name = "app_user")
 @JsonIgnoreProperties("memberOf")
 data class User(
-    @Id @NotNull val username: String,
-    var firstName: String,
-    var lastName: String,
-    var password: String,
-    var email: String,
-    var phoneNumber: String?
+        @Id @NotNull val username: String,
+        var firstName: String,
+        var lastName: String,
+        var password: String,
+        @Column(unique = true) var email: String,
+        var phoneNumber: String?
 ) {
 
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL])

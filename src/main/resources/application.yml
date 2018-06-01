@@ -43,6 +43,8 @@ server:
     key-store-password: password
     key-alias: opensportmanagement
 opensportmanagement:
+  events:
+    daysBefore: 7
   notifications:
     daysBefore: 7
     enabled: false

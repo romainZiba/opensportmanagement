@@ -10,3 +10,8 @@ data class NotificationsProperties(
     var enabled: Boolean = false,
     var daysBefore: Long = 7
 )
+
+@ConfigurationProperties("opensportmanagement.events")
+data class EventsProperties(
+    var daysBefore: Long = 7
+)

@@ -1,5 +1,6 @@
 package com.zcorp.opensportmanagement.service
 
+import com.zcorp.opensportmanagement.config.EventsProperties
 import com.zcorp.opensportmanagement.dto.EventCreationDto
 import com.zcorp.opensportmanagement.dto.EventDto
 import com.zcorp.opensportmanagement.model.AbstractEvent
@@ -20,7 +21,8 @@ open class EventService @Autowired constructor(
     private val teamMemberRepository: TeamMemberRepository,
     private val placeRepository: PlaceRepository,
     private val teamRepository: TeamRepository,
-    private val emailService: EmailService
+    private val emailService: EmailService,
+    private val properties: EventsProperties
 ) {
     @Transactional
     open fun getEvent(eventId: Int): EventDto {
@@ -90,11 +92,14 @@ open class EventService @Autowired constructor(
     }
 
     @Transactional
-    open fun participate(username: String, eventId: Int, present: Boolean): EventDto {
+    open fun participate(username: String, eventId: Int, present: Boolean, now: LocalDateTime): EventDto {
         val event = eventRepository.findById(eventId).orElseThrow { NotFoundException("Event $eventId does not exist") }
         val teamMember = teamMemberRepository.findByUsername(username, event.team.id!!) ?: throw NotFoundException("Team member $username does not exist")
-        if (event.fromDateTime.isBefore(LocalDateTime.now())) {
-            throw PastEventException(eventId)
+        if (event.fromDateTime.isBefore(now)) {
+            throw SubscriptionNotPermittedException("Event $eventId has already occurred")
+        }
+        if (event.fromDateTime.isAfter(now.plusDays(properties.daysBefore))) {
+            throw SubscriptionNotPermittedException("Event $eventId is not open for subscriptions yet")
         }
         event.participate(teamMember, present)
         return eventRepository.save(event).toDto()

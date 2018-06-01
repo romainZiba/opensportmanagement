@@ -3,7 +3,7 @@ package com.zcorp.opensportmanagement.rest
 import com.zcorp.opensportmanagement.service.BadParameterException
 import com.zcorp.opensportmanagement.service.MissingParameterException
 import com.zcorp.opensportmanagement.service.NotFoundException
-import com.zcorp.opensportmanagement.service.PastEventException
+import com.zcorp.opensportmanagement.service.SubscriptionNotPermittedException
 import com.zcorp.opensportmanagement.service.UnexpectedParameterException
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ControllerAdvice
@@ -35,9 +35,9 @@ open class OpenExceptionHandler : ResponseEntityExceptionHandler() {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     fun handleError(e: UnexpectedParameterException) = e.message
 
-    @ExceptionHandler(PastEventException::class)
+    @ExceptionHandler(SubscriptionNotPermittedException::class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    fun handleError(e: PastEventException) = e.message
+    fun handleError(e: SubscriptionNotPermittedException) = e.message
 
     @ExceptionHandler(BadParameterException::class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)

@@ -25,18 +25,27 @@ docker run --name opensportmanagement-psql -p 5432:5432 -e POSTGRES_DB=open -e P
 ## REST api
 The REST api is built thanks to Spring REST Docs and is contained in the jar.
 
-## Notifications
+## Configuration of the application
 
-Notifications are sent by mail to the team members that have not responded yet. You can find the configuration in the 
-application.yml file. Especially configure:
+For now, all configuration is done via the application.yml. Future features will enable to make some configuration for
+each team.
+
+### Events subscriptions
+
+Your team members can subscribe to events only before a number of days, configured by:
+- opensportmanagement.events.daysBefore
+
+### Notifications
+
+Notifications are sent by mail to the team members that have not responded yet. The configuration includes:
 - spring.mail to configure the sender
 - opensportmanagement.notifications.enabled to enable/disable notifications
 - opensportmanagement.notifications.daysBefore to express how many days before an event you want the members to receive
  the notification
 
 ## RethinkDB
-This project uses RethinkDB to provide real-time communication. It is possible not to use it but the messaging features
-won't work.
+This project uses RethinkDB to provide real-time communication. It is possible not to use it but the real-time messaging
+ features won't work.
 
 Visit https://www.rethinkdb.com/docs/install/ for more information on how to install it.
 

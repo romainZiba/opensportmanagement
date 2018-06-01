@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import java.time.LocalDateTime
 import javax.validation.constraints.NotNull
 
 @RepositoryRestController
@@ -58,7 +59,7 @@ open class ChampionshipController @Autowired constructor(
     ): ResponseEntity<EventDto> {
         val championshipDto = championshipService.getChampionship(championshipId)
         if (accessController.isTeamAdmin(authentication, championshipDto.teamId!!)) {
-            val match = championshipService.createMatch(dto, championshipId)
+            val match = championshipService.createMatch(dto, championshipId, LocalDateTime.now())
             return ResponseEntity(match.toDto(), HttpStatus.CREATED)
         }
         throw UserForbiddenException()

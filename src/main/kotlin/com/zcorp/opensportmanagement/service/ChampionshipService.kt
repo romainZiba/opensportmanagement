@@ -35,7 +35,7 @@ open class ChampionshipService @Autowired constructor(
     }
 
     @Transactional
-    open fun createMatch(dto: MatchCreationDto, championshipId: Int): Match {
+    open fun createMatch(dto: MatchCreationDto, championshipId: Int, now: LocalDateTime): Match {
         val championship = championshipRepository.findById(championshipId)
                 .orElseThrow { NotFoundException("Championship $championshipId does not exist") }
         val opponentId = dto.opponentId ?: throw MissingParameterException("opponentId")
@@ -44,8 +44,8 @@ open class ChampionshipService @Autowired constructor(
                 .orElseThrow { NotFoundException("Stadium $stadiumId does not exist") }
         val opponent = opponentRepository.findById(opponentId)
                 .orElseThrow { NotFoundException("Opponent $opponentId does not exist") }
-        if (dto.fromDate.isBefore(LocalDateTime.now())) {
-            throw PastEventException()
+        if (dto.fromDate.isBefore(now)) {
+            throw NotPossibleException("From date can not be in the past")
         }
         val match = Match.Builder().name(dto.name).fromDate(dto.fromDate).toDate(dto.toDate).place(stadium)
                 .opponent(opponent).team(championship.season.team).championship(championship).type(dto.matchType)

@@ -79,7 +79,7 @@ class ChampionshipServiceTest {
                 matchType = Match.MatchType.CHAMPIONSHIP, placeId = placeId)
         whenever(championshipRepoMock.findById(championshipId)).thenReturn(Optional.empty())
         assert {
-            championshipService.createMatch(matchDto, championshipId)
+            championshipService.createMatch(matchDto, championshipId, LocalDateTime.of(2017, 1, 1, 10, 0))
         }.thrownError { isInstanceOf(NotFoundException::class) }
     }
 
@@ -90,7 +90,7 @@ class ChampionshipServiceTest {
         whenever(championshipRepoMock.findById(championshipId)).thenReturn(Optional.of(mockChampionship))
         whenever(placeRepoMock.findById(placeId)).thenReturn(Optional.empty())
         assert {
-            championshipService.createMatch(matchDto, championshipId)
+            championshipService.createMatch(matchDto, championshipId, LocalDateTime.of(2017, 1, 1, 10, 0))
         }.thrownError { isInstanceOf(NotFoundException::class) }
     }
 
@@ -102,7 +102,7 @@ class ChampionshipServiceTest {
         whenever(placeRepoMock.findById(placeId)).thenReturn(Optional.of(mockStadium))
         whenever(opponentRepoMock.findById(opponentId)).thenReturn(Optional.empty())
         assert {
-            championshipService.createMatch(matchDto, championshipId)
+            championshipService.createMatch(matchDto, championshipId, LocalDateTime.of(2017, 1, 1, 10, 0))
         }.thrownError { isInstanceOf(NotFoundException::class) }
     }
 
@@ -114,8 +114,8 @@ class ChampionshipServiceTest {
         whenever(placeRepoMock.findById(placeId)).thenReturn(Optional.of(mockStadium))
         whenever(opponentRepoMock.findById(opponentId)).thenReturn(Optional.of(mockOpponent))
         assert {
-            championshipService.createMatch(dto, championshipId)
-        }.thrownError { isInstanceOf(PastEventException::class) }
+            championshipService.createMatch(dto, championshipId, LocalDateTime.of(2018, 1, 1, 19, 51))
+        }.thrownError { isInstanceOf(NotPossibleException::class) }
     }
 
     @Test
@@ -126,7 +126,7 @@ class ChampionshipServiceTest {
         whenever(placeRepoMock.findById(placeId)).thenReturn(Optional.of(mockStadium))
         whenever(opponentRepoMock.findById(opponentId)).thenReturn(Optional.of(mockOpponent))
         whenever(matchRepoMock.save<Match>(any())).thenAnswer { it.arguments[0] }
-        val match = championshipService.createMatch(dto, championshipId)
+        val match = championshipService.createMatch(dto, championshipId, LocalDateTime.of(2017, 1, 1, 10, 0))
         assert(match.championship).isEqualTo(mockChampionship)
         assert(match.isDone).isFalse()
         assert(match.isTeamLocal).isTrue()

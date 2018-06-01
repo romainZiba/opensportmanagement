@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import java.time.LocalDateTime
 import javax.validation.constraints.NotNull
 
 @RepositoryRestController
@@ -60,7 +61,7 @@ open class EventController @Autowired constructor(
     ): ResponseEntity<EventDto> {
         var eventDto = eventService.getEvent(eventId)
         if (accessController.isUserAllowedToAccessTeam(authentication, eventDto.teamId!!)) {
-            eventDto = eventService.participate(authentication.name, eventId, present)
+            eventDto = eventService.participate(authentication.name, eventId, present, LocalDateTime.now())
             return ResponseEntity.ok(eventDto)
         }
         throw NotFoundException("Match not found")

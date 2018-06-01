@@ -11,9 +11,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 
-interface TeamRepository : JpaRepository<Team, Int>, TeamDAO
-
-interface TeamDAO {
+interface TeamRepository : JpaRepository<Team, Int> {
     fun findByIdIn(ids: List<Int>): List<Team>
 
     @Query("SELECT m FROM TeamMember m WHERE m.team.id = :teamId")

@@ -64,6 +64,7 @@ open class TeamService @Autowired constructor(
 
     @Transactional
     open fun deleteTeam(teamId: Int) {
+        // TODO: should delete everything related to the team: members, championships...
         teamRepository.deleteById(teamId)
     }
 

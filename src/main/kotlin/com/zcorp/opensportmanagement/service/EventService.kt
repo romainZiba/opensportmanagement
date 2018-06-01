@@ -2,12 +2,12 @@ package com.zcorp.opensportmanagement.service
 
 import com.zcorp.opensportmanagement.dto.EventCreationDto
 import com.zcorp.opensportmanagement.dto.EventDto
+import com.zcorp.opensportmanagement.model.AbstractEvent
 import com.zcorp.opensportmanagement.model.Event
 import com.zcorp.opensportmanagement.repository.EventRepository
 import com.zcorp.opensportmanagement.repository.PlaceRepository
 import com.zcorp.opensportmanagement.repository.TeamMemberRepository
 import com.zcorp.opensportmanagement.repository.TeamRepository
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -22,10 +22,6 @@ open class EventService @Autowired constructor(
     private val teamRepository: TeamRepository,
     private val emailService: EmailService
 ) {
-    companion object {
-        private val log = LoggerFactory.getLogger(EventService::class.java)
-    }
-
     @Transactional
     open fun getEvent(eventId: Int): EventDto {
         try {
@@ -38,7 +34,6 @@ open class EventService @Autowired constructor(
     @Transactional
     open fun notifyEvents(comparedDate: LocalDateTime): Int {
         val events = eventRepository.getEventsByNotifiedFalseAndFromDateTimeBefore(comparedDate)
-        log.info("There are ${events.size} events not notified that are going to happen in less than 5 days")
         for (event in events) {
             val noResponseMembers = eventRepository.getMembersThatHaveNotResponded(event.id)
             val teamMembersToNotify = noResponseMembers.map { it.user.email }.toList()
@@ -63,7 +58,9 @@ open class EventService @Autowired constructor(
 
         val team = teamRepository.findById(teamId)
                 .orElseThrow { NotFoundException("Team $teamId does not exist") }
-        val eventBuilder = Event.Builder().name(eventName).team(team)
+        val eventBuilder = Event.Builder().name(eventName)
+                .team(team)
+                .type(AbstractEvent.EventType.OTHER)
         val placeId = dto.placeId
         val place = placeRepository.findById(placeId)
                 .orElseThrow { NotFoundException("Place $placeId does not exist") }

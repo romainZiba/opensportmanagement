@@ -33,6 +33,9 @@ open class UserService @Autowired constructor(
         return userRepository.save(user).toDto()
     }
 
+    // TODO: leave team
+    // TODO: delete account
+
     @Transactional
     open fun createUser(user: User): UserDto {
         user.password = bCryptPasswordEncoder.encode(user.password)

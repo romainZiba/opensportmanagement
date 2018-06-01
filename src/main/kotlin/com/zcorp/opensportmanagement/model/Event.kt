@@ -35,7 +35,7 @@ class Event private constructor(builder: Builder) : AbstractEvent() {
         lateinit var fromDateTime: LocalDateTime
         var toDateTime: LocalDateTime? = null
         lateinit var place: Place
-        var maxMembers: Int = MAX_PLAYERS
+        var maxMembers: Int = MAX_MEMBERS
 
         fun name(n: String): Builder {
             this.name = n

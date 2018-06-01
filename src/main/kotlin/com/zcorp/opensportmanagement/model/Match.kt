@@ -76,7 +76,7 @@ class Match private constructor(builder: Builder) : AbstractEvent() {
         lateinit var fromDateTime: LocalDateTime
         var toDateTime: LocalDateTime? = null
         lateinit var place: Place
-        var maxMembers: Int = MAX_PLAYERS
+        var maxMembers: Int = MAX_MEMBERS
         lateinit var opponent: Opponent
         lateinit var championship: Championship
         lateinit var type: MatchType

@@ -31,7 +31,7 @@ abstract class AbstractEvent protected constructor() {
 
     @ManyToOne
     lateinit var place: Place
-    var maxMembers = MAX_PLAYERS
+    var maxMembers = MAX_MEMBERS
 
     @Column(name = "eventtype")
     var eventType: EventType ? = null
@@ -87,7 +87,6 @@ abstract class AbstractEvent protected constructor() {
         const val match = "MATCH"
         const val training = "TRAINING"
         const val other = "OTHER"
-        // TODO: handle configuration of this parameter
-        const val MAX_PLAYERS: Int = 10
+        const val MAX_MEMBERS: Int = 100
     }
 }

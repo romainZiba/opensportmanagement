@@ -17,7 +17,10 @@ open class UserDetailsServiceImpl(private val userRepository: UserRepository) : 
     @Transactional(readOnly = true)
     @Throws(UsernameNotFoundException::class)
     override fun loadUserByUsername(username: String): UserDetails {
-        val user = userRepository.findByUsername(username) ?: throw UsernameNotFoundException(username)
+        var user = userRepository.findByUsername(username)
+        if (user == null) {
+            user = userRepository.findByEmail(username) ?: throw UsernameNotFoundException(username)
+        }
         return User(user.username,
                 user.password,
                 user.getMemberOf().mapTo(LinkedList<GrantedAuthority>()) { OpenGrantedAuthority(it.team.id!!, it.roles) })

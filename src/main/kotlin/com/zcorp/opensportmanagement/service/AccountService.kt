@@ -1,9 +1,10 @@
 package com.zcorp.opensportmanagement.service
 
+import com.zcorp.opensportmanagement.dto.AccountConfirmationDto
 import com.zcorp.opensportmanagement.dto.AccountDto
 import com.zcorp.opensportmanagement.dto.AccountUpdateDto
-import com.zcorp.opensportmanagement.model.TeamMember
 import com.zcorp.opensportmanagement.model.Account
+import com.zcorp.opensportmanagement.model.TeamMember
 import com.zcorp.opensportmanagement.repository.TeamRepository
 import com.zcorp.opensportmanagement.repository.AccountRepository
 import org.springframework.beans.factory.annotation.Autowired
@@ -21,6 +22,20 @@ open class AccountService @Autowired constructor(
     @Transactional
     open fun findByUsername(username: String): AccountDto? {
         return accountRepository.findByUsername(username)?.toDto()
+    }
+
+    @Transactional
+    open fun findByEmail(email: String): AccountDto? {
+        return accountRepository.findByEmail(email)?.toDto()
+    }
+
+    @Transactional
+    open fun confirmAccount(confirmationDto: AccountConfirmationDto): AccountDto? {
+        val account = accountRepository.findByConfirmationId(confirmationDto.confirmationId)
+                ?: throw NotFoundException("User not found")
+        account.temporary = false
+        account.password = bCryptPasswordEncoder.encode(confirmationDto.password)
+        return accountRepository.save(account).toDto()
     }
 
     @Transactional

@@ -1,5 +1,6 @@
 package com.zcorp.opensportmanagement.rest
 
+import com.zcorp.opensportmanagement.config.OsmProperties
 import com.zcorp.opensportmanagement.dto.EventCreationDto
 import com.zcorp.opensportmanagement.dto.EventDto
 import com.zcorp.opensportmanagement.dto.OpponentDto
@@ -15,6 +16,7 @@ import com.zcorp.opensportmanagement.security.OpenGrantedAuthority
 import com.zcorp.opensportmanagement.service.EventService
 import com.zcorp.opensportmanagement.service.TeamService
 import com.zcorp.opensportmanagement.service.AccountService
+import com.zcorp.opensportmanagement.service.EmailService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Pageable
 import org.springframework.data.rest.webmvc.RepositoryRestController
@@ -43,7 +45,9 @@ open class TeamController @Autowired constructor(
     private val teamService: TeamService,
     private val eventService: EventService,
     private val accessController: AccessController,
-    private val accountService: AccountService
+    private val accountService: AccountService,
+    private val emailService: EmailService,
+    private val properties: OsmProperties
 ) {
 
     @GetMapping
@@ -237,8 +241,14 @@ open class TeamController @Autowired constructor(
         authentication: Authentication
     ): ResponseEntity<TeamMemberDto> {
         if (accessController.isTeamAdmin(authentication, teamId)) {
+            val team = teamService.getTeam(teamId)
             val savedTeamMember = teamService.createTeamMember(dto, teamId)
-            // TODO: send an email to the new member. Also, make the new account temporary so that every mail is not sent to temporary accounts
+            emailService.sendMessage(listOf(savedTeamMember.email),
+                    "Rejoignez l'équipe ${team.name}",
+                    "Vous êtes invités à rejoindre l'équipe ${team.name}. \n\n " +
+                            "Veuillez confirmer votre inscription en suivant ce lien: " +
+                            "${properties.allowedOrigins[0]}/confirmation?id=${savedTeamMember.confirmationId}\n " +
+                            "Vous serez alors invité à modifier votre mot de passe.")
             return ResponseEntity.ok(savedTeamMember)
         }
         throw UserForbiddenException()

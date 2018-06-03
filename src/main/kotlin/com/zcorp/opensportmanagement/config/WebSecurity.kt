@@ -2,7 +2,6 @@ package com.zcorp.opensportmanagement.config
 
 import com.zcorp.opensportmanagement.security.JWTAuthenticationFilter
 import com.zcorp.opensportmanagement.security.JWTAuthorizationFilter
-import com.zcorp.opensportmanagement.security.SIGN_UP_URL
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -33,7 +32,8 @@ open class WebSecurity(
     override fun configure(http: HttpSecurity) {
         http.cors().and().authorizeRequests()
                 .antMatchers("/").permitAll()
-                .antMatchers(HttpMethod.POST, SIGN_UP_URL).permitAll()
+                .antMatchers(HttpMethod.POST, "/accounts").permitAll()
+                .antMatchers(HttpMethod.PUT, "/accounts/confirmation").permitAll()
                 .antMatchers(HttpMethod.GET, "/docs").permitAll()
                 // TODO: for authenticated users only
                 .antMatchers("/messagesWS/**").permitAll()

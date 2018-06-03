@@ -12,6 +12,7 @@ data class TeamMemberDto(
     val email: String,
     val phoneNumber: String?,
     @JsonIgnore val teamId: Int,
+    @JsonIgnore val confirmationId: String,
     val _id: Int
 )
 

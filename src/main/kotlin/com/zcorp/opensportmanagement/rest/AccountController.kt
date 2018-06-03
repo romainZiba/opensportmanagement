@@ -1,5 +1,6 @@
 package com.zcorp.opensportmanagement.rest
 
+import com.zcorp.opensportmanagement.dto.AccountConfirmationDto
 import com.zcorp.opensportmanagement.dto.AccountDto
 import com.zcorp.opensportmanagement.dto.AccountUpdateDto
 import com.zcorp.opensportmanagement.model.Account
@@ -17,12 +18,13 @@ import org.springframework.web.bind.annotation.RequestMapping
 import javax.validation.Valid
 
 @RepositoryRestController
-@RequestMapping("/users")
+@RequestMapping("/accounts")
 open class AccountController @Autowired constructor(private val accountService: AccountService) {
 
+    // TODO: this endpoint should be available for a global admin only
     @PostMapping
-    open fun createUser(@Valid @RequestBody account: Account): ResponseEntity<AccountDto> {
-        if (accountService.findByUsername(account.username) == null) {
+    open fun createAccount(@Valid @RequestBody account: Account): ResponseEntity<AccountDto> {
+        if (accountService.findByEmail(account.email) == null) {
             val savedUser = accountService.createUser(account)
             return ResponseEntity(savedUser, HttpStatus.CREATED)
         }
@@ -32,6 +34,12 @@ open class AccountController @Autowired constructor(private val accountService: 
     @GetMapping("/me")
     open fun whoAmi(authentication: Authentication): ResponseEntity<AccountDto> {
         return ResponseEntity.ok(accountService.findByUsername(authentication.name) ?: throw UserForbiddenException())
+    }
+
+    @PutMapping("/confirmation")
+    open fun confirmAccount(@RequestBody(required = true) confirmationDto: AccountConfirmationDto): ResponseEntity<AccountDto> {
+        val account = accountService.confirmAccount(confirmationDto)
+        return ResponseEntity.ok(account)
     }
 
     @PutMapping("/me")

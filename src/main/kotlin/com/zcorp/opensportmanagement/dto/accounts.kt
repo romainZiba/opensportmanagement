@@ -14,3 +14,8 @@ data class AccountUpdateDto(
     val email: String,
     val phoneNumber: String?
 )
+
+data class AccountConfirmationDto(
+    val confirmationId: String,
+    val password: String
+)

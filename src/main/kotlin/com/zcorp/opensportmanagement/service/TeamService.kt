@@ -25,6 +25,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
+import java.util.UUID
 import javax.transaction.Transactional
 
 @Service
@@ -148,7 +149,7 @@ open class TeamService @Autowired constructor(
         val team = teamRepository.findById(teamId).orElseThrow { NotFoundException("Team $teamId does not exist") }
         val firstName = teamMemberDto.firstName
         val lastName = teamMemberDto.lastName
-        val userToSave = Account(firstName, lastName, bCryptPasswordEncoder.encode("password"),
+        val userToSave = Account(firstName, lastName, bCryptPasswordEncoder.encode(UUID.randomUUID().toString()),
                 teamMemberDto.email, teamMemberDto.phoneNumber)
         val user = accountRepository.findByEmail(teamMemberDto.email) ?: accountRepository.save(userToSave)
         val teamMember = TeamMember(teamMemberDto.roles.toMutableSet(), team)

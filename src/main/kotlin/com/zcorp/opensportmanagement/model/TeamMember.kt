@@ -30,6 +30,6 @@ data class TeamMember(
 
     fun toDto(): TeamMemberDto {
         return TeamMemberDto(account.username, account.firstName, account.lastName, roles, licenseNumber, account.email,
-                account.phoneNumber, team.id!!, id!!)
+                account.phoneNumber, team.id!!, account.confirmationId, id!!)
     }
 }

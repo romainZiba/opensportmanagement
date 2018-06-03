@@ -9,21 +9,25 @@ import javax.persistence.Entity
 import javax.persistence.Id
 import javax.persistence.OneToMany
 import javax.persistence.Table
-import javax.validation.constraints.NotNull
 
 @Entity
 @Table(name = "account")
 @JsonIgnoreProperties("memberOf")
 data class Account(
-        var firstName: String,
-        var lastName: String,
-        var password: String,
-        @Column(unique = true) var email: String,
-        var phoneNumber: String?
+    @Column(name = "first_name") var firstName: String,
+    @Column(name = "last_name") var lastName: String,
+    @Column(name = "password") var password: String,
+    @Column(name = "email", unique = true) var email: String,
+    @Column(name = "phone_number") var phoneNumber: String?,
+    @Column(name = "temporary") var temporary: Boolean = true
 ) {
 
     @Id
+    @Column(name = "username")
     val username: String = UUID.randomUUID().toString()
+
+    @Column(name = "confirmation_id", unique = true)
+    val confirmationId: String = UUID.randomUUID().toString()
 
     @OneToMany(mappedBy = "account", cascade = [CascadeType.ALL])
     private val memberOf: MutableSet<TeamMember> = mutableSetOf()

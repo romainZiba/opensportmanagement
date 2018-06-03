@@ -26,7 +26,7 @@ open class MatchController @Autowired constructor(
     @GetMapping("/{matchId}")
     open fun getMatch(@PathVariable matchId: Int, authentication: Authentication): ResponseEntity<EventDto> {
         val matchDto = matchService.getMatch(matchId)
-        if (accessController.isUserAllowedToAccessTeam(authentication, matchDto.teamId!!)) {
+        if (accessController.isAccountAllowedToAccessTeam(authentication, matchDto.teamId!!)) {
             return ResponseEntity.ok(matchDto)
         }
         throw UserForbiddenException()
@@ -39,7 +39,7 @@ open class MatchController @Autowired constructor(
         authentication: Authentication
     ): ResponseEntity<EventDto> {
         var matchDto = matchService.getMatch(matchId)
-        if (accessController.isUserAllowedToAccessTeam(authentication, matchDto.teamId!!)) {
+        if (accessController.isAccountAllowedToAccessTeam(authentication, matchDto.teamId!!)) {
             matchDto = matchService.changeScore(matchId, resultDto)
             return ResponseEntity.ok(matchDto)
         }

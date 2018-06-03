@@ -11,7 +11,7 @@ class AccessController {
         return authentication.authorities.map { (it as OpenGrantedAuthority).teamId }
     }
 
-    fun isUserAllowedToAccessTeam(authentication: Authentication, teamId: Int): Boolean {
+    fun isAccountAllowedToAccessTeam(authentication: Authentication, teamId: Int): Boolean {
         return getUserTeamIds(authentication).contains(teamId)
     }
 

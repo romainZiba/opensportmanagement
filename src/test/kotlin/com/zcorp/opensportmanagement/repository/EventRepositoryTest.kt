@@ -8,7 +8,7 @@ import com.zcorp.opensportmanagement.model.Event
 import com.zcorp.opensportmanagement.model.Place
 import com.zcorp.opensportmanagement.model.Team
 import com.zcorp.opensportmanagement.model.TeamMember
-import com.zcorp.opensportmanagement.model.User
+import com.zcorp.opensportmanagement.model.Account
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -35,15 +35,15 @@ open class EventRepositoryTest {
         val team = Team("", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "")
         val savedTeam = entityManager.persist(team)
 
-        val user1 = User("user1", "first", "last", "pass", "email", "")
-        val user2 = User("user2", "second", "last", "pass", "email", "")
+        val user1 = Account("user1", "first", "last", "pass", "email1", "")
+        val user2 = Account("user2", "second", "last", "pass", "email2", "")
         val savedUser1 = entityManager.persist(user1)
         val savedUser2 = entityManager.persist(user2)
 
         val teamMember1 = TeamMember(mutableSetOf(), savedTeam, "")
         val teamMember2 = TeamMember(mutableSetOf(), savedTeam, "")
-        teamMember1.user = savedUser1
-        teamMember2.user = savedUser2
+        teamMember1.account = savedUser1
+        teamMember2.account = savedUser2
         val savedTeamMember1 = entityManager.persist(teamMember1)
         val savedTeamMember2 = entityManager.persist(teamMember2)
 
@@ -71,15 +71,15 @@ open class EventRepositoryTest {
         val team = Team("", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "")
         val savedTeam = entityManager.persist(team)
 
-        val user1 = User("user1", "first", "last", "pass", "email", "")
-        val user2 = User("user2", "second", "last", "pass", "email", "")
+        val user1 = Account("user1", "first", "last", "pass", "email1", "")
+        val user2 = Account("user2", "second", "last", "pass", "email2", "")
         val savedUser1 = entityManager.persist(user1)
         val savedUser2 = entityManager.persist(user2)
 
         val teamMember1 = TeamMember(mutableSetOf(), savedTeam, "")
         val teamMember2 = TeamMember(mutableSetOf(), savedTeam, "")
-        teamMember1.user = savedUser1
-        teamMember2.user = savedUser2
+        teamMember1.account = savedUser1
+        teamMember2.account = savedUser2
         val savedTeamMember1 = entityManager.persist(teamMember1)
         val savedTeamMember2 = entityManager.persist(teamMember2)
 

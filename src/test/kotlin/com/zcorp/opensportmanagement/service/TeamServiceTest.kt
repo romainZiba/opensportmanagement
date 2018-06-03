@@ -20,18 +20,18 @@ import com.zcorp.opensportmanagement.repository.PlaceRepository
 import com.zcorp.opensportmanagement.repository.SeasonRepository
 import com.zcorp.opensportmanagement.repository.TeamMemberRepository
 import com.zcorp.opensportmanagement.repository.TeamRepository
-import com.zcorp.opensportmanagement.repository.UserRepository
+import com.zcorp.opensportmanagement.repository.AccountRepository
 import org.junit.Test
 import java.util.Optional
 
 class TeamServiceTest {
     private val teamRepoMock: TeamRepository = mock()
-    private val userRepoMock: UserRepository = mock()
+    private val accountRepoMock: AccountRepository = mock()
     private val seasonRepoMock: SeasonRepository = mock()
     private val opponentRepoMock: OpponentRepository = mock()
     private val teamMemberRepoMock: TeamMemberRepository = mock()
     private val placeRepoMock: PlaceRepository = mock()
-    private val teamService: TeamService = TeamService(teamRepoMock, teamMemberRepoMock, userRepoMock, seasonRepoMock,
+    private val teamService: TeamService = TeamService(teamRepoMock, teamMemberRepoMock, accountRepoMock, seasonRepoMock,
             placeRepoMock, opponentRepoMock)
     private val teamIds = listOf(5, 8, 13, 25)
     private val mockTeams = teamIds.map {

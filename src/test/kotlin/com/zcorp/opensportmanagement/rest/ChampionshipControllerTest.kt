@@ -64,7 +64,7 @@ class ChampionshipControllerTest {
     @WithMockUser("toto")
     fun `Get championship when authenticated should return response code 'OK'`() {
         whenever(championshipServiceMock.getChampionship(any())).thenReturn(mockChampionship.toDto())
-        whenever(accessControllerMock.isUserAllowedToAccessTeam(any(), any())).thenReturn(true)
+        whenever(accessControllerMock.isAccountAllowedToAccessTeam(any(), any())).thenReturn(true)
         this.mockMvc.perform(get("/championships/$championshipId"))
                 .andExpect(status().isOk)
                 .andExpect(MockMvcResultMatchers.content()

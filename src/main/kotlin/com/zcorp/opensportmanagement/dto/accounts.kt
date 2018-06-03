@@ -1,6 +1,6 @@
 package com.zcorp.opensportmanagement.dto
 
-data class UserDto(
+data class AccountDto(
     val firstName: String,
     val lastName: String,
     val username: String,
@@ -8,7 +8,7 @@ data class UserDto(
     val phoneNumber: String?
 )
 
-data class UserUpdateDto(
+data class AccountUpdateDto(
     val firstName: String,
     val lastName: String,
     val email: String,

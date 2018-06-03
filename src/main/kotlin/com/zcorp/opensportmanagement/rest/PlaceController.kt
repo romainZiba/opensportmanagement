@@ -25,7 +25,7 @@ open class PlaceController @Autowired constructor(
         authentication: Authentication
     ): ResponseEntity<PlaceDto> {
         val stadiumDto = placeService.getPlace(placeId)
-        if (accessController.isUserAllowedToAccessTeam(authentication, stadiumDto.teamId!!)) {
+        if (accessController.isAccountAllowedToAccessTeam(authentication, stadiumDto.teamId!!)) {
             return ResponseEntity.ok(stadiumDto)
         }
         throw UserForbiddenException()

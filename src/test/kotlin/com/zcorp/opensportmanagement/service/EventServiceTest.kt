@@ -21,7 +21,7 @@ import com.zcorp.opensportmanagement.model.Place
 import com.zcorp.opensportmanagement.model.Place.PlaceType
 import com.zcorp.opensportmanagement.model.Team
 import com.zcorp.opensportmanagement.model.TeamMember
-import com.zcorp.opensportmanagement.model.User
+import com.zcorp.opensportmanagement.model.Account
 import com.zcorp.opensportmanagement.repository.EventRepository
 import com.zcorp.opensportmanagement.repository.PlaceRepository
 import com.zcorp.opensportmanagement.repository.TeamMemberRepository
@@ -53,7 +53,7 @@ class EventServiceTest {
     private val phoneNumber = "55965"
     private val eventId = 7
 
-    private val mockUser = User(username, firstName, lastName, password, email, phoneNumber)
+    private val mockUser = Account(username, firstName, lastName, password, email, phoneNumber)
     private val mockTeamMember = TeamMember(mutableSetOf(TeamMember.Role.ADMIN), mockTeam, "", teamMemberId)
 
     private val eventRepoMock: EventRepository = mock()
@@ -178,7 +178,7 @@ class EventServiceTest {
     @Test
     fun `user trying to participate to a future event more than x days before should not be possible`() {
         mockEvent.id = eventId
-        mockTeamMember.user = mockUser
+        mockTeamMember.account = mockUser
         whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
         whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
         whenever(eventRepoMock.save(mockEvent)).thenReturn(mockEvent)
@@ -191,7 +191,7 @@ class EventServiceTest {
     @Test
     fun `user trying to participate to a future event should add him in the present members`() {
         mockEvent.id = eventId
-        mockTeamMember.user = mockUser
+        mockTeamMember.account = mockUser
         whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
         whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
         whenever(eventRepoMock.save(mockEvent)).thenReturn(mockEvent)
@@ -222,7 +222,7 @@ class EventServiceTest {
     fun `user trying to participate to a future event already full should add him in the waiting members`() {
         mockEvent.id = eventId
         mockEvent.maxMembers = 0
-        mockTeamMember.user = mockUser
+        mockTeamMember.account = mockUser
         whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
         whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
         whenever(eventRepoMock.save(mockEvent)).thenReturn(mockEvent)

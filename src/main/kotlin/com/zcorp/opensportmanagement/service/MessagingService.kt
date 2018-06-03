@@ -26,7 +26,7 @@ import javax.naming.ServiceUnavailableException
  */
 @Service
 class MessagingService @Autowired constructor(
-    private val userService: UserService,
+    private val accountService: AccountService,
     private val connectionFactory: RethinkDBConnectionFactory,
     private val messageChangesListener: MessageChangesListener
 ) : InitializingBean {
@@ -95,7 +95,7 @@ class MessagingService @Autowired constructor(
     }
 
     fun createMessage(messageDto: MessageDto, authorName: String, eventId: Int? = null): MessageDto {
-        val author = userService.findByUsername(authorName) ?: throw NotFoundException("User $authorName does not exist")
+        val author = accountService.findByUsername(authorName) ?: throw NotFoundException("Account $authorName does not exist")
         val connection = connectionFactory.createConnection()
         if (connection != null) {
             val message = Message()

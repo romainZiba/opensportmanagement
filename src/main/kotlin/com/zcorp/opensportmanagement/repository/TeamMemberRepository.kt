@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param
 interface TeamMemberRepository : JpaRepository<TeamMember, Int> {
     @Query("SELECT teamMember " +
             " FROM TeamMember teamMember " +
-            " WHERE teamMember.user.username = :username " +
+            " WHERE teamMember.account.username = :username " +
             " AND teamMember.team.id = :teamId")
     fun findByUsername(
         @Param("username") username: String,

@@ -3,7 +3,6 @@ package com.zcorp.opensportmanagement.service
 import com.zcorp.opensportmanagement.config.EventsProperties
 import com.zcorp.opensportmanagement.dto.EventCreationDto
 import com.zcorp.opensportmanagement.dto.EventDto
-import com.zcorp.opensportmanagement.model.AbstractEvent
 import com.zcorp.opensportmanagement.model.Event
 import com.zcorp.opensportmanagement.repository.EventRepository
 import com.zcorp.opensportmanagement.repository.PlaceRepository
@@ -38,7 +37,7 @@ open class EventService @Autowired constructor(
         val events = eventRepository.getEventsByNotifiedFalseAndFromDateTimeBefore(comparedDate)
         for (event in events) {
             val noResponseMembers = eventRepository.getMembersThatHaveNotResponded(event.id)
-            val teamMembersToNotify = noResponseMembers.map { it.user.email }.toList()
+            val teamMembersToNotify = noResponseMembers.map { it.account.email }.toList()
             emailService.sendMessage(teamMembersToNotify, "L'évènement ${event.name} approche!", "Inscris toi donc")
             event.notified = true
         }

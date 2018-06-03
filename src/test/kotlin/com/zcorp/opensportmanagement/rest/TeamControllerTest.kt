@@ -13,7 +13,7 @@ import com.zcorp.opensportmanagement.security.AccessController
 import com.zcorp.opensportmanagement.service.BadParameterException
 import com.zcorp.opensportmanagement.service.EventService
 import com.zcorp.opensportmanagement.service.TeamService
-import com.zcorp.opensportmanagement.service.UserService
+import com.zcorp.opensportmanagement.service.AccountService
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -50,7 +50,7 @@ class TeamControllerTest {
     @MockBean
     private lateinit var teamServiceMock: TeamService
     @MockBean
-    private lateinit var userServiceMock: UserService
+    private lateinit var accountServiceMock: AccountService
     @MockBean
     private lateinit var eventServiceMock: EventService
     @MockBean
@@ -91,7 +91,7 @@ class TeamControllerTest {
         val savedTeam = TeamDto("The team", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "", 2)
         whenever(teamServiceMock.createTeam(any(), any())).thenReturn(savedTeam)
         val teamMembers = setOf(TeamMember(mutableSetOf(TeamMember.Role.ADMIN), mockTeam, "AAA", 1))
-        whenever(userServiceMock.getTeamsAndRoles(any())).thenReturn(teamMembers)
+        whenever(accountServiceMock.getTeamsAndRoles(any())).thenReturn(teamMembers)
         this.mockMvc.perform(post("/teams")
                 .contentType(MediaType.APPLICATION_JSON)
                 .characterEncoding("UTF-8")
@@ -108,7 +108,7 @@ class TeamControllerTest {
     @Test
     @WithMockUser("toto")
     fun `GET places when authenticated should return a response with status 'OK'`() {
-        whenever(accessController.isUserAllowedToAccessTeam(any(), any())).thenReturn(true)
+        whenever(accessController.isAccountAllowedToAccessTeam(any(), any())).thenReturn(true)
         whenever(teamServiceMock.getPlaces(any())).thenReturn(mockPlacesDto)
         this.mockMvc.perform(
                 get("/teams/1/places"))
@@ -119,7 +119,7 @@ class TeamControllerTest {
     @Test
     @WithMockUser("toto")
     fun `Get opponents when authenticated should return a response with status 'OK'`() {
-        whenever(accessController.isUserAllowedToAccessTeam(any(), any())).thenReturn(true)
+        whenever(accessController.isAccountAllowedToAccessTeam(any(), any())).thenReturn(true)
         this.mockMvc.perform(get("/teams/1/opponents"))
                 .andExpect(status().isOk)
     }
@@ -127,7 +127,7 @@ class TeamControllerTest {
     @Test
     @WithMockUser("toto")
     fun `Create event with an empty name should return a response with status 'BAD REQUEST'`() {
-        whenever(accessController.isUserAllowedToAccessTeam(any(), any())).thenReturn(true)
+        whenever(accessController.isAccountAllowedToAccessTeam(any(), any())).thenReturn(true)
         whenever(eventServiceMock.createEvent(any(), any())).thenThrow(BadParameterException(""))
         val eventCreationDto = EventCreationDto("", LocalDate.of(2050, 1, 1), LocalDate.of(2050, 2, 1),
                 LocalTime.of(16, 0), LocalTime.of(18, 0), 1)

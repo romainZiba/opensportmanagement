@@ -9,16 +9,16 @@ import com.nhaarman.mockito_kotlin.times
 import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.whenever
 import com.zcorp.opensportmanagement.model.Team
-import com.zcorp.opensportmanagement.model.User
+import com.zcorp.opensportmanagement.model.Account
 import com.zcorp.opensportmanagement.repository.TeamRepository
-import com.zcorp.opensportmanagement.repository.UserRepository
+import com.zcorp.opensportmanagement.repository.AccountRepository
 import org.junit.Test
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import java.util.Optional
 import assertk.assert
 import assertk.assertions.isInstanceOf
 
-class UserServiceTest {
+class AccountServiceTest {
     private val teamId = 5
     private val username = "username"
     private val firstName = "firstname"
@@ -26,23 +26,23 @@ class UserServiceTest {
     private val password = "whatever"
     private val email = "this@camail.com"
     private val phoneNumber = "55965"
-    private val mockUser = User(username, firstName, lastName, password, email, phoneNumber)
+    private val mockUser = Account(username, firstName, lastName, password, email, phoneNumber)
     private val mockTeam = Team("SuperNam", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "", teamId)
     private val teamRepoMock: TeamRepository = mock()
-    private val userRepoMock: UserRepository = mock()
-    private val userService: UserService = UserService(teamRepoMock, userRepoMock, BCryptPasswordEncoder())
+    private val accountRepoMock: AccountRepository = mock()
+    private val accountService: AccountService = AccountService(teamRepoMock, accountRepoMock, BCryptPasswordEncoder())
 
     @Test
     fun `find user not existing should return null`() {
-        whenever(userRepoMock.findByUsername(any())).thenReturn(null)
-        val user = userService.findByUsername("Foo")
+        whenever(accountRepoMock.findByUsername(any())).thenReturn(null)
+        val user = accountService.findByUsername("Foo")
         assert(user).isNull()
     }
 
     @Test
     fun `find existing user should return the user`() {
-        whenever(userRepoMock.findByUsername(mockUser.username)).thenReturn(mockUser)
-        val user = userService.findByUsername(username)
+        whenever(accountRepoMock.findByUsername(mockUser.username)).thenReturn(mockUser)
+        val user = accountService.findByUsername(username)
         assert(user?.username).isEqualTo(username)
         assert(user?.firstName).isEqualTo(firstName)
         assert(user?.lastName).isEqualTo(lastName)
@@ -52,29 +52,29 @@ class UserServiceTest {
 
     @Test
     fun `user that does not exist trying to join a team should not be possible`() {
-        whenever(userRepoMock.findByUsername(any())).thenReturn(null)
+        whenever(accountRepoMock.findByUsername(any())).thenReturn(null)
         assert {
-            userService.joinTeam("Foo", 1)
+            accountService.joinTeam("Foo", 1)
         }.thrownError { isInstanceOf(NotFoundException::class) }
     }
 
     @Test
     fun `user trying to join a team that does not exist should not be possible`() {
-        whenever(userRepoMock.findByUsername(mockUser.username)).thenReturn(mockUser)
+        whenever(accountRepoMock.findByUsername(mockUser.username)).thenReturn(mockUser)
         whenever(teamRepoMock.findById(any())).thenReturn(Optional.empty())
         assert {
-            userService.joinTeam(username, 1)
+            accountService.joinTeam(username, 1)
         }.thrownError { isInstanceOf(NotFoundException::class) }
     }
 
     @Test
     fun `user trying to join a team should be possible`() {
-        whenever(userRepoMock.findByUsername(mockUser.username)).thenReturn(mockUser)
+        whenever(accountRepoMock.findByUsername(mockUser.username)).thenReturn(mockUser)
         whenever(teamRepoMock.findById(any())).thenReturn(Optional.of(mockTeam))
-        whenever(userRepoMock.save(mockUser)).thenReturn(mockUser)
+        whenever(accountRepoMock.save(mockUser)).thenReturn(mockUser)
         assert(mockUser.getMemberOf()).hasSize(0)
-        userService.joinTeam(username, teamId)
+        accountService.joinTeam(username, teamId)
         assert(mockUser.getMemberOf()).hasSize(1)
-        verify(userRepoMock, times(1)).save(mockUser)
+        verify(accountRepoMock, times(1)).save(mockUser)
     }
 }

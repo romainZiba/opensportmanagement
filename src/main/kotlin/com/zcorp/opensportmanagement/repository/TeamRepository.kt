@@ -32,6 +32,6 @@ interface TeamRepository : JpaRepository<Team, Int> {
     @Query("SELECT o FROM Opponent o WHERE o.team.id = :teamId")
     fun getOpponents(teamId: Int): List<Opponent>
 
-    @Query("SELECT m FROM TeamMember m WHERE m.user.username = :name AND m.team.id = :teamId")
+    @Query("SELECT m FROM TeamMember m WHERE m.account.username = :name AND m.team.id = :teamId")
     fun getTeamMemberByUserName(teamId: Int, name: String): TeamMember?
 }

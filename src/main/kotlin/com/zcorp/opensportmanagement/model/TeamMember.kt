@@ -12,7 +12,7 @@ import javax.persistence.UniqueConstraint
 
 @Entity
 @Table(name = "team_member",
-        uniqueConstraints = [(UniqueConstraint(columnNames = arrayOf("USER_USERNAME", "TEAM_ID")))])
+        uniqueConstraints = [(UniqueConstraint(columnNames = arrayOf("ACCOUNT_USERNAME", "TEAM_ID")))])
 data class TeamMember(
     @ElementCollection val roles: MutableSet<Role>,
     @ManyToOne @JoinColumn(name = "TEAM_ID") val team: Team,
@@ -21,15 +21,15 @@ data class TeamMember(
 ) {
 
     @ManyToOne
-    @JoinColumn(name = "USER_USERNAME", nullable = false)
-    lateinit var user: User
+    @JoinColumn(name = "ACCOUNT_USERNAME", nullable = false)
+    lateinit var account: Account
 
     enum class Role {
         PLAYER, COACH, ADMIN
     }
 
     fun toDto(): TeamMemberDto {
-        return TeamMemberDto(user.username, user.firstName, user.lastName, roles, licenseNumber, user.email,
-                user.phoneNumber, team.id!!, id!!)
+        return TeamMemberDto(account.username, account.firstName, account.lastName, roles, licenseNumber, account.email,
+                account.phoneNumber, team.id!!, id!!)
     }
 }

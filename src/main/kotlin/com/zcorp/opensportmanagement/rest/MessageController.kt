@@ -23,7 +23,7 @@ class MessageController @Autowired constructor(private val messagingService: Mes
 
     @GetMapping("/{conversationId}/messages")
     fun getMessages(@PathVariable("conversationId") conversationId: String): List<MessageDto> {
-        // TODO: check if user is allowed to access to this conversationId
+        // TODO: check if account is allowed to access to this conversationId
         return messagingService.getMessages(conversationId)
     }
 
@@ -32,7 +32,7 @@ class MessageController @Autowired constructor(private val messagingService: Mes
         @RequestBody messageDto: MessageDto,
         authentication: Authentication
     ): MessageDto {
-        // TODO: check if user is allowed to send message to these users
+        // TODO: check if account is allowed to send message to these users
         return messagingService.createMessage(messageDto, authentication.name)
     }
 }

@@ -27,7 +27,7 @@ class JWTAuthenticationFilter(authManager: AuthenticationManager) : UsernamePass
         res: HttpServletResponse?
     ): Authentication {
         try {
-            val creds = ObjectMapper().readValue(req.inputStream, com.zcorp.opensportmanagement.model.User::class.java)
+            val creds = ObjectMapper().readValue(req.inputStream, com.zcorp.opensportmanagement.model.Account::class.java)
 
             return authenticationManager.authenticate(
                     UsernamePasswordAuthenticationToken(

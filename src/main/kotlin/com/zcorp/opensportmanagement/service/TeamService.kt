@@ -13,13 +13,13 @@ import com.zcorp.opensportmanagement.model.Place
 import com.zcorp.opensportmanagement.model.Season
 import com.zcorp.opensportmanagement.model.Team
 import com.zcorp.opensportmanagement.model.TeamMember
-import com.zcorp.opensportmanagement.model.User
+import com.zcorp.opensportmanagement.model.Account
 import com.zcorp.opensportmanagement.repository.OpponentRepository
 import com.zcorp.opensportmanagement.repository.PlaceRepository
 import com.zcorp.opensportmanagement.repository.SeasonRepository
 import com.zcorp.opensportmanagement.repository.TeamMemberRepository
 import com.zcorp.opensportmanagement.repository.TeamRepository
-import com.zcorp.opensportmanagement.repository.UserRepository
+import com.zcorp.opensportmanagement.repository.AccountRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -31,7 +31,7 @@ import javax.transaction.Transactional
 open class TeamService @Autowired constructor(
     private val teamRepository: TeamRepository,
     private val teamMemberRepository: TeamMemberRepository,
-    private val userRepository: UserRepository,
+    private val accountRepository: AccountRepository,
     private val seasonRepository: SeasonRepository,
     private val placeRepository: PlaceRepository,
     private val opponentRepository: OpponentRepository
@@ -57,12 +57,12 @@ open class TeamService @Autowired constructor(
 
     @Transactional
     open fun createTeam(teamDto: TeamDto, creatorUsername: String): TeamDto {
-        val user = userRepository.findByUsername(creatorUsername) ?: throw NotFoundException("User $creatorUsername does not exist")
+        val user = accountRepository.findByUsername(creatorUsername) ?: throw NotFoundException("Account $creatorUsername does not exist")
         var team = Team(teamDto.name, teamDto.sport, teamDto.genderKind, teamDto.ageGroup, teamDto.imgUrl)
         team = teamRepository.save(team)
         val teamMember = TeamMember(mutableSetOf(TeamMember.Role.ADMIN), team)
         user.addTeamMember(teamMember)
-        userRepository.save(user)
+        accountRepository.save(user)
         return team.toDto()
     }
 
@@ -149,12 +149,12 @@ open class TeamService @Autowired constructor(
         val firstName = teamMemberDto.firstName
         val lastName = teamMemberDto.lastName
         val username = firstName + lastName
-        val userToSave = User(username, firstName, lastName, bCryptPasswordEncoder.encode("password"),
+        val userToSave = Account(username, firstName, lastName, bCryptPasswordEncoder.encode("password"),
                 teamMemberDto.email, teamMemberDto.phoneNumber)
-        val user = userRepository.findByEmail(teamMemberDto.email) ?: userRepository.save(userToSave)
+        val user = accountRepository.findByEmail(teamMemberDto.email) ?: accountRepository.save(userToSave)
         val teamMember = TeamMember(teamMemberDto.roles.toMutableSet(), team)
         user.addTeamMember(teamMember)
-        val savedUser = userRepository.save(user)
+        val savedUser = accountRepository.save(user)
         return savedUser.getMemberOf().first { it.team.id == teamId }.toDto()
     }
 }

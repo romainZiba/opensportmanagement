@@ -57,7 +57,7 @@ class PlaceControllerTest {
     @WithMockUser("toto")
     fun `Get place when authenticated should return response code 'OK'`() {
         whenever(placeServiceMock.getPlace(placeId)).thenReturn(placeMock.toDto())
-        whenever(accessControllerMock.isUserAllowedToAccessTeam(any(), any())).thenReturn(true)
+        whenever(accessControllerMock.isAccountAllowedToAccessTeam(any(), any())).thenReturn(true)
         this.mockMvc.perform(get("/places/$placeId"))
                 .andExpect(status().isOk)
                 .andExpect(MockMvcResultMatchers.content()

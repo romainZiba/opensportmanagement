@@ -32,7 +32,7 @@ open class ChampionshipController @Autowired constructor(
         authentication: Authentication
     ): ResponseEntity<ChampionshipDto> {
         val championshipDto = championshipService.getChampionship(championshipId)
-        if (accessController.isUserAllowedToAccessTeam(authentication, championshipDto.teamId!!)) {
+        if (accessController.isAccountAllowedToAccessTeam(authentication, championshipDto.teamId!!)) {
             return ResponseEntity.ok(championshipDto)
         }
         throw UserForbiddenException()

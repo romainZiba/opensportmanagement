@@ -1,6 +1,6 @@
 = Users REST api
 
-== Get information about the current logged user
+== Get information about the current logged account
 
 .request
 include::{snippets}/get_user_info/http-request.adoc[]
@@ -11,7 +11,7 @@ include::{snippets}/get_user_info/http-response.adoc[]
 .fields
 include::{snippets}/get_user_info/response-fields.adoc[]
 
-== Create a new user
+== Create a new account
 
 .request
 include::{snippets}/create_user/http-request.adoc[]

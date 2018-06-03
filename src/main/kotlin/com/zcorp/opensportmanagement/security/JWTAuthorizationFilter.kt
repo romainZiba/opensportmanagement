@@ -47,7 +47,7 @@ class JWTAuthorizationFilter(authManager: AuthenticationManager) : BasicAuthenti
         if (JWTUtils.refreshRequired(decodedToken)) {
             res.addCookie(JWTUtils.getAccessCookie(authentication))
         }
-        // User is authorized
+        // Account is authorized
         SecurityContextHolder.getContext().authentication = authentication
         chain.doFilter(req, res)
     }

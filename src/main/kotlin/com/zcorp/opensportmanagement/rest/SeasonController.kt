@@ -29,7 +29,7 @@ open class SeasonController @Autowired constructor(
         authentication: Authentication
     ): SeasonDto {
         val seasonDto = seasonService.getSeason(seasonId)
-        if (accessController.isUserAllowedToAccessTeam(authentication, seasonDto.teamId!!)) {
+        if (accessController.isAccountAllowedToAccessTeam(authentication, seasonDto.teamId!!)) {
             return seasonDto
         }
         throw UserForbiddenException()

@@ -25,7 +25,7 @@ open class OpponentController @Autowired constructor(
         authentication: Authentication
     ): ResponseEntity<OpponentDto> {
         val opponentDto = opponentService.getOpponent(opponentId)
-        if (accessController.isUserAllowedToAccessTeam(authentication, opponentDto.teamId!!)) {
+        if (accessController.isAccountAllowedToAccessTeam(authentication, opponentDto.teamId!!)) {
             return ResponseEntity.ok(opponentDto)
         }
         throw UserForbiddenException()

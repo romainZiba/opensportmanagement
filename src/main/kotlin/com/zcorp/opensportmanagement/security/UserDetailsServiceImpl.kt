@@ -1,6 +1,6 @@
 package com.zcorp.opensportmanagement.security
 
-import com.zcorp.opensportmanagement.repository.UserRepository
+import com.zcorp.opensportmanagement.repository.AccountRepository
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.User
@@ -13,13 +13,13 @@ import java.util.LinkedList
 
 @Service
 @Qualifier("osm_user_details")
-open class UserDetailsServiceImpl(private val userRepository: UserRepository) : UserDetailsService {
+open class UserDetailsServiceImpl(private val accountRepository: AccountRepository) : UserDetailsService {
     @Transactional(readOnly = true)
     @Throws(UsernameNotFoundException::class)
     override fun loadUserByUsername(username: String): UserDetails {
-        var user = userRepository.findByUsername(username)
+        var user = accountRepository.findByUsername(username)
         if (user == null) {
-            user = userRepository.findByEmail(username) ?: throw UsernameNotFoundException(username)
+            user = accountRepository.findByEmail(username) ?: throw UsernameNotFoundException(username)
         }
         return User(user.username,
                 user.password,

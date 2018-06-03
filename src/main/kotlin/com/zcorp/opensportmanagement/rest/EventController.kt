@@ -34,7 +34,7 @@ open class EventController @Autowired constructor(
         authentication: Authentication
     ): ResponseEntity<EventDto> {
         val eventDto = eventService.getEvent(eventId)
-        if (accessController.isUserAllowedToAccessTeam(authentication, eventDto.teamId!!)) {
+        if (accessController.isAccountAllowedToAccessTeam(authentication, eventDto.teamId!!)) {
             return ResponseEntity.ok(eventDto)
         }
         throw UserForbiddenException()
@@ -60,7 +60,7 @@ open class EventController @Autowired constructor(
         authentication: Authentication
     ): ResponseEntity<EventDto> {
         var eventDto = eventService.getEvent(eventId)
-        if (accessController.isUserAllowedToAccessTeam(authentication, eventDto.teamId!!)) {
+        if (accessController.isAccountAllowedToAccessTeam(authentication, eventDto.teamId!!)) {
             eventDto = eventService.participate(authentication.name, eventId, present, LocalDateTime.now())
             return ResponseEntity.ok(eventDto)
         }
@@ -73,7 +73,7 @@ open class EventController @Autowired constructor(
         authentication: Authentication
     ): ResponseEntity<List<MessageDto>> {
         val eventDto = eventService.getEvent(eventId)
-        if (accessController.isUserAllowedToAccessTeam(authentication, eventDto.teamId!!)) {
+        if (accessController.isAccountAllowedToAccessTeam(authentication, eventDto.teamId!!)) {
             return ResponseEntity.ok(messagingService.getMessagesFromEvent(eventId))
         }
         throw UserForbiddenException()
@@ -86,7 +86,7 @@ open class EventController @Autowired constructor(
         authentication: Authentication
     ): ResponseEntity<MessageDto> {
         val eventDto = eventService.getEvent(eventId)
-        if (accessController.isUserAllowedToAccessTeam(authentication, eventDto.teamId!!)) {
+        if (accessController.isAccountAllowedToAccessTeam(authentication, eventDto.teamId!!)) {
             return ResponseEntity.ok(messagingService.createMessage(messageDto, authentication.name, eventId))
         }
         throw UserForbiddenException()

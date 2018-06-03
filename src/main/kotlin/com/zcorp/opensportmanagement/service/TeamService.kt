@@ -148,8 +148,7 @@ open class TeamService @Autowired constructor(
         val team = teamRepository.findById(teamId).orElseThrow { NotFoundException("Team $teamId does not exist") }
         val firstName = teamMemberDto.firstName
         val lastName = teamMemberDto.lastName
-        val username = firstName + lastName
-        val userToSave = Account(username, firstName, lastName, bCryptPasswordEncoder.encode("password"),
+        val userToSave = Account(firstName, lastName, bCryptPasswordEncoder.encode("password"),
                 teamMemberDto.email, teamMemberDto.phoneNumber)
         val user = accountRepository.findByEmail(teamMemberDto.email) ?: accountRepository.save(userToSave)
         val teamMember = TeamMember(teamMemberDto.roles.toMutableSet(), team)

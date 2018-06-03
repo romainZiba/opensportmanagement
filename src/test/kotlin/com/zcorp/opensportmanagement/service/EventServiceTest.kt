@@ -34,6 +34,7 @@ import java.time.LocalTime
 import java.util.Optional
 
 class EventServiceTest {
+    private val username = "foo"
     private val teamId = 5
     private val placeId = 1
     private val mockTeam = Team("SuperNam", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "", teamId)
@@ -45,7 +46,6 @@ class EventServiceTest {
             .team(mockTeam)
             .build()
     private val teamMemberId = 12
-    private val username = "username"
     private val firstName = "firstname"
     private val lastName = "ln"
     private val password = "whatever"
@@ -53,7 +53,7 @@ class EventServiceTest {
     private val phoneNumber = "55965"
     private val eventId = 7
 
-    private val mockUser = Account(username, firstName, lastName, password, email, phoneNumber)
+    private val mockUser = Account(firstName, lastName, password, email, phoneNumber)
     private val mockTeamMember = TeamMember(mutableSetOf(TeamMember.Role.ADMIN), mockTeam, "", teamMemberId)
 
     private val eventRepoMock: EventRepository = mock()
@@ -153,13 +153,13 @@ class EventServiceTest {
         whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
         whenever(teamMemberRepoMock.findByUsername(any(), any())).thenReturn(null)
         assert {
-            eventService.participate("Foo", eventId, true, LocalDateTime.of(2018, 1, 30, 10, 0))
+            eventService.participate(username, eventId, true, LocalDateTime.of(2018, 1, 30, 10, 0))
         }.thrownError { isInstanceOf(NotFoundException::class) }
     }
 
     @Test
     fun `user trying to participate to an event that does not exist should not be possible`() {
-        whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
+        whenever(teamMemberRepoMock.findByUsername(username, teamId)).thenReturn(mockTeamMember)
         whenever(eventRepoMock.findById(any())).thenReturn(Optional.empty())
         assert {
             eventService.participate(username, eventId, true, LocalDateTime.of(2018, 1, 30, 10, 0))
@@ -168,7 +168,7 @@ class EventServiceTest {
 
     @Test
     fun `user trying to participate to a past event should not be possible`() {
-        whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
+        whenever(teamMemberRepoMock.findByUsername(username, teamId)).thenReturn(mockTeamMember)
         whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
         assert {
             eventService.participate(username, eventId, true, LocalDateTime.of(2018, 2, 1, 10, 0))
@@ -179,10 +179,10 @@ class EventServiceTest {
     fun `user trying to participate to a future event more than x days before should not be possible`() {
         mockEvent.id = eventId
         mockTeamMember.account = mockUser
-        whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
+        whenever(teamMemberRepoMock.findByUsername(username, teamId)).thenReturn(mockTeamMember)
         whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
         whenever(eventRepoMock.save(mockEvent)).thenReturn(mockEvent)
-        whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
+        whenever(teamMemberRepoMock.findByUsername(username, teamId)).thenReturn(mockTeamMember)
         assert {
             eventService.participate(username, eventId, true, LocalDateTime.of(2018, 1, 20, 10, 0))
         }.thrownError { isInstanceOf(SubscriptionNotPermittedException::class) }
@@ -192,10 +192,10 @@ class EventServiceTest {
     fun `user trying to participate to a future event should add him in the present members`() {
         mockEvent.id = eventId
         mockTeamMember.account = mockUser
-        whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
+        whenever(teamMemberRepoMock.findByUsername(username, teamId)).thenReturn(mockTeamMember)
         whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
         whenever(eventRepoMock.save(mockEvent)).thenReturn(mockEvent)
-        whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
+        whenever(teamMemberRepoMock.findByUsername(username, teamId)).thenReturn(mockTeamMember)
         val eventDto = eventService.participate(username, eventId, true, LocalDateTime.of(2018, 1, 30, 10, 0))
         assert(mockEvent.presentMembers).hasSize(1)
         assert(mockEvent.absentMembers).hasSize(0)
@@ -223,10 +223,10 @@ class EventServiceTest {
         mockEvent.id = eventId
         mockEvent.maxMembers = 0
         mockTeamMember.account = mockUser
-        whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
+        whenever(teamMemberRepoMock.findByUsername(username, teamId)).thenReturn(mockTeamMember)
         whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
         whenever(eventRepoMock.save(mockEvent)).thenReturn(mockEvent)
-        whenever(teamMemberRepoMock.findByUsername(mockUser.username, teamId)).thenReturn(mockTeamMember)
+        whenever(teamMemberRepoMock.findByUsername(username, teamId)).thenReturn(mockTeamMember)
         assert(mockEvent.presentMembers).hasSize(0)
         val eventDto = eventService.participate(username, eventId, true, LocalDateTime.of(2018, 1, 30, 10, 0))
         assert(mockEvent.presentMembers).hasSize(0)

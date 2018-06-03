@@ -54,7 +54,7 @@ class PlaceControllerTest {
     }
 
     @Test
-    @WithMockUser("toto")
+    @WithMockUser("foo")
     fun `Get place when authenticated should return response code 'OK'`() {
         whenever(placeServiceMock.getPlace(placeId)).thenReturn(placeMock.toDto())
         whenever(accessControllerMock.isAccountAllowedToAccessTeam(any(), any())).thenReturn(true)
@@ -72,7 +72,7 @@ class PlaceControllerTest {
     }
 
     @Test
-    @WithMockUser("toto")
+    @WithMockUser("foo")
     fun `Delete place when not admin should return response code 'FORBIDDEN'`() {
         whenever(placeServiceMock.getPlace(placeId)).thenReturn(placeMock.toDto())
         whenever(accessControllerMock.isTeamAdmin(any(), any())).thenReturn(false)
@@ -81,7 +81,7 @@ class PlaceControllerTest {
     }
 
     @Test
-    @WithMockUser("toto")
+    @WithMockUser("foo")
     fun `Delete place when admin should return response code 'OK'`() {
         whenever(placeServiceMock.getPlace(placeId)).thenReturn(placeMock.toDto())
         whenever(accessControllerMock.isTeamAdmin(any(), any())).thenReturn(true)

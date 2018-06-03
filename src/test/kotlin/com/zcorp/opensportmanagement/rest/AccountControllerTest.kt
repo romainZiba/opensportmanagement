@@ -1,6 +1,7 @@
 package com.zcorp.opensportmanagement.rest
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.whenever
 import com.zcorp.opensportmanagement.model.Account
 import com.zcorp.opensportmanagement.service.AccountService
@@ -37,11 +38,11 @@ class AccountControllerTest {
     @MockBean
     private lateinit var accountService: AccountService
 
-    private val username = "toto"
-    private val user = Account("toto", "To", "To", "password", "", "")
+    private val username = "foo"
+    private val user = Account("To", "To", "password", "mail@foo", "")
 
     @Test
-    @WithMockUser("toto")
+    @WithMockUser("foo")
     fun `GET on 'users-me' when authenticated should return a response with status 'OK'`() {
         whenever(accountService.findByUsername(username)).thenReturn(user.toDto())
         this.mockMvc.perform(get("/users/me").accept(MediaType.APPLICATION_JSON))
@@ -62,7 +63,7 @@ class AccountControllerTest {
     }
 
     @Test
-    @WithMockUser("toto")
+    @WithMockUser("foo")
     fun `GET on 'users-me' when an user does not exist should return a response with status 'FORBIDDEN'`() {
         whenever(accountService.findByUsername(username)).thenReturn(null)
         this.mockMvc.perform(
@@ -92,7 +93,7 @@ class AccountControllerTest {
     }
     @Test
     fun `Create an existing user should return a response with status 'CONFLICT'`() {
-        whenever(accountService.findByUsername(username)).thenReturn(user.toDto())
+        whenever(accountService.findByUsername(any())).thenReturn(user.toDto())
         this.mockMvc.perform(
                 post("/users")
                         .accept(MediaType.APPLICATION_JSON)

@@ -67,7 +67,7 @@ class TeamControllerTest {
     }
 
     @Test
-    @WithMockUser("toto")
+    @WithMockUser("foo")
     fun `Get teams when authenticated should return OK`() {
         whenever(accessController.getUserTeamIds(any())).thenReturn(listOf(teamId))
         whenever(teamServiceMock.getTeams(listOf(teamId))).thenReturn(listOf(mockTeam).map { it.toDto() })
@@ -85,7 +85,7 @@ class TeamControllerTest {
     }
 
     @Test
-    @WithMockUser("toto")
+    @WithMockUser("foo")
     fun `Create team when authenticated should return CREATED`() {
         val teamDto = TeamDto("The team", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "")
         val savedTeam = TeamDto("The team", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "", 2)
@@ -106,7 +106,7 @@ class TeamControllerTest {
     }
 
     @Test
-    @WithMockUser("toto")
+    @WithMockUser("foo")
     fun `GET places when authenticated should return a response with status 'OK'`() {
         whenever(accessController.isAccountAllowedToAccessTeam(any(), any())).thenReturn(true)
         whenever(teamServiceMock.getPlaces(any())).thenReturn(mockPlacesDto)
@@ -117,7 +117,7 @@ class TeamControllerTest {
     }
 
     @Test
-    @WithMockUser("toto")
+    @WithMockUser("foo")
     fun `Get opponents when authenticated should return a response with status 'OK'`() {
         whenever(accessController.isAccountAllowedToAccessTeam(any(), any())).thenReturn(true)
         this.mockMvc.perform(get("/teams/1/opponents"))
@@ -125,7 +125,7 @@ class TeamControllerTest {
     }
 
     @Test
-    @WithMockUser("toto")
+    @WithMockUser("foo")
     fun `Create event with an empty name should return a response with status 'BAD REQUEST'`() {
         whenever(accessController.isAccountAllowedToAccessTeam(any(), any())).thenReturn(true)
         whenever(eventServiceMock.createEvent(any(), any())).thenThrow(BadParameterException(""))
@@ -140,7 +140,7 @@ class TeamControllerTest {
     }
 
     @Test
-    @WithMockUser("toto")
+    @WithMockUser("foo")
     fun `Create place should return a response with status 'CREATED'`() {
         val dto = mockPlacesDto[0]
         val placeDto = PlaceDto(dto.name, dto.address, dto.city, PlaceType.STADIUM)

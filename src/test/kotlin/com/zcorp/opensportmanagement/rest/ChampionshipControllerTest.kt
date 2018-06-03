@@ -61,7 +61,7 @@ class ChampionshipControllerTest {
     }
 
     @Test
-    @WithMockUser("toto")
+    @WithMockUser("foo")
     fun `Get championship when authenticated should return response code 'OK'`() {
         whenever(championshipServiceMock.getChampionship(any())).thenReturn(mockChampionship.toDto())
         whenever(accessControllerMock.isAccountAllowedToAccessTeam(any(), any())).thenReturn(true)
@@ -77,7 +77,7 @@ class ChampionshipControllerTest {
     }
 
     @Test
-    @WithMockUser("toto")
+    @WithMockUser("foo")
     fun `Create match when championship does not exist should return response code 'NOT FOUND'`() {
         val matchCreationDto = MatchCreationDto("Match", LocalDateTime.of(2025, 1, 1, 10, 0),
                 LocalDateTime.of(2025, 1, 1, 12, 0), 2, Match.MatchType.CHAMPIONSHIP, championshipId,

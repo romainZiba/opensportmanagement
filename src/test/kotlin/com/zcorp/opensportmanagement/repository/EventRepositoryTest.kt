@@ -35,8 +35,8 @@ open class EventRepositoryTest {
         val team = Team("", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "")
         val savedTeam = entityManager.persist(team)
 
-        val user1 = Account("user1", "first", "last", "pass", "email1", "")
-        val user2 = Account("user2", "second", "last", "pass", "email2", "")
+        val user1 = Account("first", "last", "pass", "email1", "")
+        val user2 = Account("second", "last", "pass", "email2", "")
         val savedUser1 = entityManager.persist(user1)
         val savedUser2 = entityManager.persist(user2)
 
@@ -71,8 +71,8 @@ open class EventRepositoryTest {
         val team = Team("", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "")
         val savedTeam = entityManager.persist(team)
 
-        val user1 = Account("user1", "first", "last", "pass", "email1", "")
-        val user2 = Account("user2", "second", "last", "pass", "email2", "")
+        val user1 = Account("first", "last", "pass", "email1", "")
+        val user2 = Account("second", "last", "pass", "email2", "")
         val savedUser1 = entityManager.persist(user1)
         val savedUser2 = entityManager.persist(user2)
 

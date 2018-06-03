@@ -2,6 +2,7 @@ package com.zcorp.opensportmanagement.model
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.zcorp.opensportmanagement.dto.AccountDto
+import java.util.UUID
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -14,13 +15,15 @@ import javax.validation.constraints.NotNull
 @Table(name = "account")
 @JsonIgnoreProperties("memberOf")
 data class Account(
-    @Id @NotNull val username: String,
-    var firstName: String,
-    var lastName: String,
-    var password: String,
-    @Column(unique = true) var email: String,
-    var phoneNumber: String?
+        var firstName: String,
+        var lastName: String,
+        var password: String,
+        @Column(unique = true) var email: String,
+        var phoneNumber: String?
 ) {
+
+    @Id
+    val username: String = UUID.randomUUID().toString()
 
     @OneToMany(mappedBy = "account", cascade = [CascadeType.ALL])
     private val memberOf: MutableSet<TeamMember> = mutableSetOf()

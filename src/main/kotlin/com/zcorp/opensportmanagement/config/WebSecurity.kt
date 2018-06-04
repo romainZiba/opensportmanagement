@@ -32,7 +32,6 @@ open class WebSecurity(
     override fun configure(http: HttpSecurity) {
         http.cors().and().authorizeRequests()
                 .antMatchers("/").permitAll()
-                .antMatchers(HttpMethod.POST, "/accounts").permitAll()
                 .antMatchers(HttpMethod.PUT, "/accounts/confirmation").permitAll()
                 .antMatchers(HttpMethod.GET, "/docs").permitAll()
                 // TODO: for authenticated users only

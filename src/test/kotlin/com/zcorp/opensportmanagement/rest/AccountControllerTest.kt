@@ -41,7 +41,17 @@ class AccountControllerTest {
     private lateinit var accountService: AccountService
 
     private val username = "foo"
+    private val adminUsername = "admin"
     private val mockAccount = Account("To", "To", "password", "mail@foo", "")
+    private val mockAdminAccount = Account(
+            firstName = "To",
+            lastName = "To",
+            password = "password",
+            email = "mail@admin",
+            phoneNumber = "",
+            temporary = false,
+            globalAdmin = true
+    )
 
     @Test
     @WithMockUser("foo")
@@ -55,7 +65,8 @@ class AccountControllerTest {
                         fieldWithPath("firstName").description("The account's first name."),
                         fieldWithPath("lastName").description("The account's last name."),
                         fieldWithPath("email").description("The account's email address."),
-                        fieldWithPath("phoneNumber").description("The account's phone number.")
+                        fieldWithPath("phoneNumber").description("The account's phone number."),
+                        fieldWithPath("globalAdmin").description("Whether the account is admin.")
                 )))
     }
 
@@ -74,9 +85,11 @@ class AccountControllerTest {
     }
 
     @Test
+    @WithMockUser("admin")
     fun `Create a not existing account should return a response with status 'CREATED'`() {
-        whenever(accountService.findByUsername(username)).thenReturn(null)
-        whenever(accountService.createUser(mockAccount)).thenReturn(mockAccount.toDto())
+        whenever(accountService.findByUsername(adminUsername)).thenReturn(mockAdminAccount.toDto())
+        whenever(accountService.findByEmail(username)).thenReturn(null)
+        whenever(accountService.createAccount(mockAccount)).thenReturn(mockAccount.toDto())
         this.mockMvc.perform(
                 post("/accounts")
                         .accept(MediaType.APPLICATION_JSON)
@@ -90,13 +103,16 @@ class AccountControllerTest {
                         fieldWithPath("firstName").description("The account's first name."),
                         fieldWithPath("lastName").description("The account's last name."),
                         fieldWithPath("email").description("The account's email address."),
-                        fieldWithPath("phoneNumber").description("The account's phone number.")
+                        fieldWithPath("phoneNumber").description("The account's phone number."),
+                        fieldWithPath("globalAdmin").description("Whether the account is admin.")
                 )))
     }
 
     @Test
+    @WithMockUser("admin")
     fun `Create an existing account should return a response with status 'CONFLICT'`() {
-        whenever(accountService.findByEmail(any())).thenReturn(mockAccount.toDto())
+        whenever(accountService.findByUsername(adminUsername)).thenReturn(mockAdminAccount.toDto())
+        whenever(accountService.findByEmail(mockAccount.email)).thenReturn(mockAccount.toDto())
         this.mockMvc.perform(
                 post("/accounts")
                         .accept(MediaType.APPLICATION_JSON)
@@ -122,7 +138,8 @@ class AccountControllerTest {
                         fieldWithPath("firstName").description("The account's first name."),
                         fieldWithPath("lastName").description("The account's last name."),
                         fieldWithPath("email").description("The account's email address."),
-                        fieldWithPath("phoneNumber").description("The account's phone number.")
+                        fieldWithPath("phoneNumber").description("The account's phone number."),
+                        fieldWithPath("globalAdmin").description("Whether the account is admin.")
                 )))
     }
 }

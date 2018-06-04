@@ -1,23 +1,23 @@
-= Users REST api
+= Accounts REST api
 
-== Get information about the current logged account
+== Get information about the current logged user
 
 .request
-include::{snippets}/get_user_info/http-request.adoc[]
+include::{snippets}/get_account_info/http-request.adoc[]
 
 .response
-include::{snippets}/get_user_info/http-response.adoc[]
+include::{snippets}/get_account_info/http-response.adoc[]
 
 .fields
-include::{snippets}/get_user_info/response-fields.adoc[]
+include::{snippets}/get_account_info/response-fields.adoc[]
 
 == Create a new account
 
 .request
-include::{snippets}/create_user/http-request.adoc[]
+include::{snippets}/create_account/http-request.adoc[]
 
 .response
-include::{snippets}/create_user/http-response.adoc[]
+include::{snippets}/create_account/http-response.adoc[]
 
 .fields
-include::{snippets}/create_user/response-fields.adoc[]
+include::{snippets}/create_account/response-fields.adoc[]

@@ -21,14 +21,20 @@ import javax.validation.Valid
 @RequestMapping("/accounts")
 open class AccountController @Autowired constructor(private val accountService: AccountService) {
 
-    // TODO: this endpoint should be available for a global admin only
     @PostMapping
-    open fun createAccount(@Valid @RequestBody account: Account): ResponseEntity<AccountDto> {
-        if (accountService.findByEmail(account.email) == null) {
-            val savedUser = accountService.createUser(account)
-            return ResponseEntity(savedUser, HttpStatus.CREATED)
+    open fun createAccount(
+        @Valid @RequestBody account: Account,
+        authentication: Authentication
+    ): ResponseEntity<AccountDto> {
+        val loggedUser = accountService.findByUsername(authentication.name) ?: throw UserForbiddenException()
+        if (loggedUser.globalAdmin) {
+            if (accountService.findByEmail(account.email) == null) {
+                val savedUser = accountService.createAccount(account)
+                return ResponseEntity(savedUser, HttpStatus.CREATED)
+            }
+            throw EntityAlreadyExistsException("Account " + account.username + " already exists")
         }
-        throw EntityAlreadyExistsException("Account " + account.username + " already exists")
+        throw UserForbiddenException()
     }
 
     @GetMapping("/me")

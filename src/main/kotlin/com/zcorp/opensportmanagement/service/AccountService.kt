@@ -30,7 +30,7 @@ open class AccountService @Autowired constructor(
     }
 
     @Transactional
-    open fun confirmAccount(confirmationDto: AccountConfirmationDto): AccountDto? {
+    open fun confirmAccount(confirmationDto: AccountConfirmationDto): AccountDto {
         val account = accountRepository.findByConfirmationId(confirmationDto.confirmationId)
                 ?: throw NotFoundException("User not found")
         account.temporary = false
@@ -52,7 +52,7 @@ open class AccountService @Autowired constructor(
     // TODO: delete account
 
     @Transactional
-    open fun createUser(account: Account): AccountDto {
+    open fun createAccount(account: Account): AccountDto {
         account.password = bCryptPasswordEncoder.encode(account.password)
         return accountRepository.save(account).toDto()
     }

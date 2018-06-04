@@ -19,7 +19,8 @@ data class Account(
     @Column(name = "password") var password: String,
     @Column(name = "email", unique = true) var email: String,
     @Column(name = "phone_number") var phoneNumber: String?,
-    @Column(name = "temporary") var temporary: Boolean = true
+    @Column(name = "temporary") var temporary: Boolean = true,
+    @Column(name = "global_admin") val globalAdmin: Boolean = false
 ) {
 
     @Id
@@ -42,6 +43,6 @@ data class Account(
     }
 
     fun toDto(): AccountDto {
-        return AccountDto(firstName, lastName, username, email, phoneNumber)
+        return AccountDto(firstName, lastName, username, email, phoneNumber, globalAdmin)
     }
 }

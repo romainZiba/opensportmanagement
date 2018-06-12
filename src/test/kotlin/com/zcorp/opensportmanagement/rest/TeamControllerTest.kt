@@ -6,6 +6,7 @@ import com.nhaarman.mockito_kotlin.whenever
 import com.zcorp.opensportmanagement.dto.EventCreationDto
 import com.zcorp.opensportmanagement.dto.PlaceDto
 import com.zcorp.opensportmanagement.dto.TeamDto
+import com.zcorp.opensportmanagement.model.Account
 import com.zcorp.opensportmanagement.model.Place.PlaceType
 import com.zcorp.opensportmanagement.model.Team
 import com.zcorp.opensportmanagement.model.TeamMember
@@ -60,6 +61,8 @@ class TeamControllerTest {
     private val mockTeam = Team("SuperNam", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "", teamId)
 
     private val mockPlacesDto = listOf(PlaceDto("name", "address", "city", PlaceType.STADIUM, teamId, 1))
+    private val mockGlobalAdmin = Account("foo", "foo", "password", "foo",
+            "0", false, true)
 
     @Test
     fun `Get teams when unauthenticated should return FORBIDDEN`() {
@@ -89,6 +92,7 @@ class TeamControllerTest {
     fun `Create team when authenticated should return CREATED`() {
         val teamDto = TeamDto("The team", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "")
         val savedTeam = TeamDto("The team", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "", 2)
+        whenever(accountServiceMock.findByUsername(any())).thenReturn(mockGlobalAdmin.toDto())
         whenever(teamServiceMock.createTeam(any(), any())).thenReturn(savedTeam)
         val teamMembers = setOf(TeamMember(mutableSetOf(TeamMember.Role.ADMIN), mockTeam, "AAA", 1))
         whenever(accountServiceMock.getTeamsAndRoles(any())).thenReturn(teamMembers)

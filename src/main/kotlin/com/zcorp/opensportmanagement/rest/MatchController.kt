@@ -39,7 +39,7 @@ open class MatchController @Autowired constructor(
         authentication: Authentication
     ): ResponseEntity<EventDto> {
         var matchDto = matchService.getMatch(matchId)
-        if (accessController.isAccountAllowedToAccessTeam(authentication, matchDto.teamId!!)) {
+        if (accessController.isTeamAdmin(authentication, matchDto.teamId!!)) {
             matchDto = matchService.changeScore(matchId, resultDto)
             return ResponseEntity.ok(matchDto)
         }

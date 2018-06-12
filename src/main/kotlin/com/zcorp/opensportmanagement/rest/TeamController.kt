@@ -63,14 +63,18 @@ open class TeamController @Autowired constructor(
         response: HttpServletResponse
     ): ResponseEntity<TeamDto> {
         val username = authentication.name
-        val savedTeam = teamService.createTeam(teamDto, username)
-        val authorities = accountService.getTeamsAndRoles(username)
-                ?.mapTo(LinkedList<GrantedAuthority>()) { OpenGrantedAuthority(it.team.id!!, it.roles) }
-        val copyAuthentication = UsernamePasswordAuthenticationToken(
-                authentication.principal, authentication.credentials, authorities)
-        val newCookie = JWTUtils.getAccessCookie(copyAuthentication)
-        response.addCookie(newCookie)
-        return ResponseEntity(savedTeam, HttpStatus.CREATED)
+        val user = accountService.findByUsername(username) ?: throw UserForbiddenException()
+        if (user.globalAdmin) {
+            val savedTeam = teamService.createTeam(teamDto, username)
+            val authorities = accountService.getTeamsAndRoles(username)
+                    ?.mapTo(LinkedList<GrantedAuthority>()) { OpenGrantedAuthority(it.team.id!!, it.roles) }
+            val copyAuthentication = UsernamePasswordAuthenticationToken(
+                    authentication.principal, authentication.credentials, authorities)
+            val newCookie = JWTUtils.getAccessCookie(copyAuthentication)
+            response.addCookie(newCookie)
+            return ResponseEntity(savedTeam, HttpStatus.CREATED)
+        }
+        throw UserForbiddenException()
     }
 
     @GetMapping("/{teamId}")
@@ -137,7 +141,6 @@ open class TeamController @Autowired constructor(
         @RequestBody opponentDto: OpponentDto,
         authentication: Authentication
     ): ResponseEntity<OpponentDto> {
-
         if (accessController.isTeamAdmin(authentication, teamId)) {
             val opponent = teamService.createOpponent(opponentDto, teamId)
             return ResponseEntity(opponent, HttpStatus.CREATED)
@@ -172,7 +175,7 @@ open class TeamController @Autowired constructor(
         @RequestBody seasonDto: SeasonDto,
         authentication: Authentication
     ): ResponseEntity<SeasonDto> {
-        if (accessController.isAccountAllowedToAccessTeam(authentication, teamId)) {
+        if (accessController.isTeamAdmin(authentication, teamId)) {
             val season = teamService.createSeason(seasonDto, teamId)
             return ResponseEntity(season, HttpStatus.CREATED)
         }

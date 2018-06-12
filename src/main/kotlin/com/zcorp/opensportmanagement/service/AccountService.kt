@@ -33,9 +33,12 @@ open class AccountService @Autowired constructor(
     open fun confirmAccount(confirmationDto: AccountConfirmationDto): AccountDto {
         val account = accountRepository.findByConfirmationId(confirmationDto.confirmationId)
                 ?: throw NotFoundException("User not found")
-        account.temporary = false
-        account.password = bCryptPasswordEncoder.encode(confirmationDto.password)
-        return accountRepository.save(account).toDto()
+        if (account.temporary) {
+            account.temporary = false
+            account.password = bCryptPasswordEncoder.encode(confirmationDto.password)
+            return accountRepository.save(account).toDto()
+        }
+        throw NotPossibleException("This account is already confirmed")
     }
 
     @Transactional

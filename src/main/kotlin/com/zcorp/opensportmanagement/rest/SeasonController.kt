@@ -1,5 +1,6 @@
 package com.zcorp.opensportmanagement.rest
 
+import com.zcorp.opensportmanagement.dto.ChampionshipCreationDto
 import com.zcorp.opensportmanagement.dto.ChampionshipDto
 import com.zcorp.opensportmanagement.dto.SeasonDto
 import com.zcorp.opensportmanagement.security.AccessController
@@ -52,8 +53,8 @@ open class SeasonController @Autowired constructor(
 
     @GetMapping("/{seasonId}/championships")
     open fun getChampionships(
-            @PathVariable("seasonId") seasonId: Int,
-            authentication: Authentication
+        @PathVariable("seasonId") seasonId: Int,
+        authentication: Authentication
     ): ResponseEntity<List<ChampionshipDto>> {
         val seasonDto = seasonService.getSeason(seasonId)
         if (accessController.isAccountAllowedToAccessTeam(authentication, seasonDto.teamId!!)) {
@@ -66,12 +67,12 @@ open class SeasonController @Autowired constructor(
     @PostMapping("/{seasonId}/championships")
     open fun createChampionship(
         @PathVariable("seasonId") seasonId: Int,
-        @RequestBody championshipDto: ChampionshipDto,
+        @RequestBody dto: ChampionshipCreationDto,
         authentication: Authentication
     ): ResponseEntity<ChampionshipDto> {
         val seasonDto = seasonService.getSeason(seasonId)
         if (accessController.isTeamAdmin(authentication, seasonDto.teamId!!)) {
-            val savedChampionship = seasonService.createChampionship(championshipDto, seasonId)
+            val savedChampionship = seasonService.createChampionship(dto, seasonId)
             return ResponseEntity(savedChampionship, HttpStatus.CREATED)
         }
         throw UserForbiddenException()

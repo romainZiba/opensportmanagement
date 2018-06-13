@@ -5,7 +5,8 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.rethinkdb.RethinkDB
 import com.rethinkdb.gen.ast.Db
 import com.rethinkdb.gen.ast.Table
-import com.rethinkdb.net.Cursor
+import com.zcorp.opensportmanagement.dto.EventDto
+import com.zcorp.opensportmanagement.dto.MessageCreationDto
 import com.zcorp.opensportmanagement.dto.MessageDto
 import com.zcorp.opensportmanagement.messaging.MessageChangesListener
 import com.zcorp.opensportmanagement.messaging.RethinkDBConnectionFactory
@@ -15,8 +16,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.time.OffsetDateTime
-import java.util.UUID
 import javax.naming.ServiceUnavailableException
 
 /**
@@ -93,7 +92,7 @@ class MessagingService @Autowired constructor(
         return emptyList()
     }
 
-    fun createMessage(messageDto: MessageDto, authorName: String, eventId: Int? = null): MessageDto {
+    fun createMessageInEvent(messageDto: MessageCreationDto, authorName: String, eventDto: EventDto): MessageDto {
         val author = accountService.findByUsername(authorName) ?: throw NotFoundException("Account $authorName does not exist")
         val connection = connectionFactory.createConnection()
         if (connection != null) {
@@ -101,46 +100,9 @@ class MessagingService @Autowired constructor(
             message.authorUsername = authorName
             message.authorFirstName = author.firstName
             message.authorLastName = author.lastName
-            message.time = OffsetDateTime.now()
             message.body = messageDto.body
-
-            val conversationId: String
-            val conversationTopic: String
-
-            if (eventId == null) {
-                conversationId = messageDto.conversationId ?: UUID.randomUUID().toString()
-                conversationTopic = messageDto.conversationTopic ?: "New subject"
-            } else {
-                if (messageDto.conversationId != null) {
-                    throw UnexpectedParameterException("conversationId")
-                }
-                if (messageDto.recipients.isNotEmpty()) {
-                    throw UnexpectedParameterException("recipients")
-                }
-                if (messageDto.conversationTopic != null) {
-                    throw UnexpectedParameterException("conversationTopic")
-                }
-                conversationId = "conversation_$eventId"
-                conversationTopic = "Thread of event"
-            }
-            message.conversationId = conversationId
-            val data: Cursor<Any> = table.filter(
-                    { row -> row.g(CONVERSATION_ID).eq(conversationId) })
-                    .pluck(CONVERSATION_TOPIC, RECIPIENTS)
-                    .limit(1)
-                    .run(connection)
-            if (data.hasNext()) {
-                // A message already exists with same conversation ID
-                val mapper = jacksonObjectMapper()
-                mapper.findAndRegisterModules()
-                val messageFromDB: Message = mapper.convertValue(data.next())
-                message.conversationTopic = messageFromDB.conversationTopic
-                message.recipients = messageFromDB.recipients
-            } else {
-                // This is the first message of a conversation
-                message.conversationTopic = conversationTopic
-                message.recipients = messageDto.recipients
-            }
+            message.conversationId = "conversation_${eventDto._id}"
+            message.conversationTopic = eventDto.name
             val run = table.insert(message).run<Any>(connection)
             log.info("Insert {}", run)
             return message.toDto()
@@ -156,7 +118,5 @@ class MessagingService @Autowired constructor(
         val table: Table = db.table(tableName)
         const val indexTime = "time"
         private const val CONVERSATION_ID = "conversationId"
-        private const val CONVERSATION_TOPIC = "conversationTopic"
-        private const val RECIPIENTS = "recipients"
     }
 }

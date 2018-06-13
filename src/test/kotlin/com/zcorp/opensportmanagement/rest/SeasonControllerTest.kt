@@ -3,14 +3,11 @@ package com.zcorp.opensportmanagement.rest
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.whenever
-import com.zcorp.opensportmanagement.dto.ChampionshipMatchCreationDto
 import com.zcorp.opensportmanagement.model.Championship
-import com.zcorp.opensportmanagement.model.Match
 import com.zcorp.opensportmanagement.model.Season
 import com.zcorp.opensportmanagement.model.Team
 import com.zcorp.opensportmanagement.security.AccessController
 import com.zcorp.opensportmanagement.service.ChampionshipService
-import com.zcorp.opensportmanagement.service.NotFoundException
 import com.zcorp.opensportmanagement.service.SeasonService
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -19,18 +16,14 @@ import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDoc
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)

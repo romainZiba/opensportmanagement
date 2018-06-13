@@ -14,10 +14,10 @@ import javax.transaction.Transactional
 
 @Service
 open class ChampionshipService @Autowired constructor(
-        private val championshipRepository: ChampionshipRepository,
-        private val placeRepository: PlaceRepository,
-        private val opponentRepository: OpponentRepository,
-        private val matchRepository: MatchRepository
+    private val championshipRepository: ChampionshipRepository,
+    private val placeRepository: PlaceRepository,
+    private val opponentRepository: OpponentRepository,
+    private val matchRepository: MatchRepository
 ) {
 
     @Transactional

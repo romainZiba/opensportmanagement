@@ -83,7 +83,7 @@ class ChampionshipServiceTest {
         val matchDto = ChampionshipMatchCreationDto(
                 name = "match",
                 fromDate = LocalDate.of(2018, 1, 1),
-                toDate = LocalDate.of(2018, 1 ,1),
+                toDate = LocalDate.of(2018, 1, 1),
                 fromTime = LocalTime.of(19, 50),
                 toTime = LocalTime.of(21, 50),
                 matchType = Match.MatchType.CHAMPIONSHIP,
@@ -101,7 +101,7 @@ class ChampionshipServiceTest {
         val matchDto = ChampionshipMatchCreationDto(
                 name = "match",
                 fromDate = LocalDate.of(2018, 1, 1),
-                toDate = LocalDate.of(2018, 1 ,1),
+                toDate = LocalDate.of(2018, 1, 1),
                 fromTime = LocalTime.of(19, 50),
                 toTime = LocalTime.of(21, 50),
                 matchType = Match.MatchType.CHAMPIONSHIP,
@@ -120,7 +120,7 @@ class ChampionshipServiceTest {
         val matchDto = ChampionshipMatchCreationDto(
                 name = "match",
                 fromDate = LocalDate.of(2018, 1, 1),
-                toDate = LocalDate.of(2018, 1 ,1),
+                toDate = LocalDate.of(2018, 1, 1),
                 fromTime = LocalTime.of(19, 50),
                 toTime = LocalTime.of(21, 50),
                 matchType = Match.MatchType.CHAMPIONSHIP,
@@ -140,7 +140,7 @@ class ChampionshipServiceTest {
         val dto = ChampionshipMatchCreationDto(
                 name = "match",
                 fromDate = LocalDate.of(2018, 1, 1),
-                toDate = LocalDate.of(2018, 1 ,1),
+                toDate = LocalDate.of(2018, 1, 1),
                 fromTime = LocalTime.of(19, 50),
                 toTime = LocalTime.of(21, 50),
                 matchType = Match.MatchType.CHAMPIONSHIP,

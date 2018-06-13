@@ -65,7 +65,7 @@ open class AccountService @Autowired constructor(
         val user = accountRepository.findByUsername(username) ?: throw NotFoundException("Account $username does not exist")
         user.firstName = dto.firstName
         user.lastName = dto.lastName
-        user.phoneNumber = dto.phoneNumber
+        user.phoneNumber = dto.phoneNumber ?: user.phoneNumber
         user.email = dto.email
         return accountRepository.save(user).toDto()
     }

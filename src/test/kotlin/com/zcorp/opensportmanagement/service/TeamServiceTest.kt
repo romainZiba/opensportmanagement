@@ -11,6 +11,7 @@ import assertk.assertions.isNotEmpty
 import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.whenever
+import com.zcorp.opensportmanagement.config.OsmProperties
 import com.zcorp.opensportmanagement.dto.PlaceDto
 import com.zcorp.opensportmanagement.model.Place
 import com.zcorp.opensportmanagement.model.Place.PlaceType
@@ -31,8 +32,17 @@ class TeamServiceTest {
     private val opponentRepoMock: OpponentRepository = mock()
     private val teamMemberRepoMock: TeamMemberRepository = mock()
     private val placeRepoMock: PlaceRepository = mock()
-    private val teamService: TeamService = TeamService(teamRepoMock, teamMemberRepoMock, accountRepoMock, seasonRepoMock,
-            placeRepoMock, opponentRepoMock)
+    private val emailServiceMock: EmailService = mock()
+    private val osmPropertiesMock: OsmProperties = mock()
+    private val teamService: TeamService = TeamService(
+            teamRepository = teamRepoMock,
+            teamMemberRepository = teamMemberRepoMock,
+            accountRepository = accountRepoMock,
+            seasonRepository = seasonRepoMock,
+            placeRepository = placeRepoMock,
+            opponentRepository = opponentRepoMock,
+            emailService = emailServiceMock,
+            properties = osmPropertiesMock)
     private val teamIds = listOf(5, 8, 13, 25)
     private val mockTeams = teamIds.map {
         Team("SuperName $it", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "", it)

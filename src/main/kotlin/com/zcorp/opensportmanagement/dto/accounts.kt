@@ -5,7 +5,7 @@ data class AccountDto(
     val lastName: String,
     val username: String,
     val email: String,
-    val phoneNumber: String?,
+    val phoneNumber: String,
     val globalAdmin: Boolean
 )
 

@@ -29,9 +29,9 @@ data class EventCreationDto(
     val name: String,
     val fromDate: LocalDate,
     val toDate: LocalDate,
-    var fromTime: LocalTime,
+    val fromTime: LocalTime,
     val toTime: LocalTime,
     val placeId: Int,
     val isRecurrent: Boolean = false,
-    var recurrenceDays: MutableSet<DayOfWeek> = mutableSetOf()
+    val recurrenceDays: MutableSet<DayOfWeek> = mutableSetOf()
 )

@@ -18,7 +18,7 @@ data class Account(
     @Column(name = "last_name") var lastName: String,
     @Column(name = "password") var password: String,
     @Column(name = "email", unique = true) var email: String,
-    @Column(name = "phone_number") var phoneNumber: String?,
+    @Column(name = "phone_number") var phoneNumber: String = "",
     @Column(name = "temporary") var temporary: Boolean = true,
     @Column(name = "global_admin") val globalAdmin: Boolean = false
 ) {

@@ -21,7 +21,7 @@ data class TeamMemberCreationDto(
     val lastName: String,
     val roles: Set<TeamMember.Role>,
     val email: String,
-    val phoneNumber: String?
+    val phoneNumber: String = ""
 )
 
 data class TeamMemberUpdateDto(val licenseNumber: String)

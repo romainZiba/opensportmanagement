@@ -1,6 +1,7 @@
 package com.zcorp.opensportmanagement.rest
 
 import com.zcorp.opensportmanagement.dto.EventDto
+import com.zcorp.opensportmanagement.dto.MessageCreationDto
 import com.zcorp.opensportmanagement.dto.MessageDto
 import com.zcorp.opensportmanagement.security.AccessController
 import com.zcorp.opensportmanagement.service.EventService
@@ -80,14 +81,14 @@ open class EventController @Autowired constructor(
     }
 
     @PostMapping("/{eventId}/messages")
-    fun createMessage(
+    fun createMessageInEvent(
         @NotNull @PathVariable("eventId") eventId: Int,
-        @RequestBody messageDto: MessageDto,
+        @RequestBody messageDto: MessageCreationDto,
         authentication: Authentication
     ): ResponseEntity<MessageDto> {
         val eventDto = eventService.getEvent(eventId)
         if (accessController.isAccountAllowedToAccessTeam(authentication, eventDto.teamId!!)) {
-            return ResponseEntity.ok(messagingService.createMessage(messageDto, authentication.name, eventId))
+            return ResponseEntity.ok(messagingService.createMessageInEvent(messageDto, authentication.name, eventDto))
         }
         throw UserForbiddenException()
     }

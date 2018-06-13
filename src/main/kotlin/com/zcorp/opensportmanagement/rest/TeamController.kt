@@ -1,8 +1,8 @@
 package com.zcorp.opensportmanagement.rest
 
-import com.zcorp.opensportmanagement.config.OsmProperties
 import com.zcorp.opensportmanagement.dto.EventCreationDto
 import com.zcorp.opensportmanagement.dto.EventDto
+import com.zcorp.opensportmanagement.dto.OpponentCreationDto
 import com.zcorp.opensportmanagement.dto.OpponentDto
 import com.zcorp.opensportmanagement.dto.PlaceDto
 import com.zcorp.opensportmanagement.dto.SeasonDto
@@ -16,7 +16,6 @@ import com.zcorp.opensportmanagement.security.OpenGrantedAuthority
 import com.zcorp.opensportmanagement.service.EventService
 import com.zcorp.opensportmanagement.service.TeamService
 import com.zcorp.opensportmanagement.service.AccountService
-import com.zcorp.opensportmanagement.service.EmailService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Pageable
 import org.springframework.data.rest.webmvc.RepositoryRestController
@@ -45,9 +44,7 @@ open class TeamController @Autowired constructor(
     private val teamService: TeamService,
     private val eventService: EventService,
     private val accessController: AccessController,
-    private val accountService: AccountService,
-    private val emailService: EmailService,
-    private val properties: OsmProperties
+    private val accountService: AccountService
 ) {
 
     @GetMapping
@@ -138,7 +135,7 @@ open class TeamController @Autowired constructor(
     @PostMapping("/{teamId}/opponents")
     open fun createOpponent(
         @NotNull @PathVariable("teamId") teamId: Int,
-        @RequestBody opponentDto: OpponentDto,
+        @RequestBody opponentDto: OpponentCreationDto,
         authentication: Authentication
     ): ResponseEntity<OpponentDto> {
         if (accessController.isTeamAdmin(authentication, teamId)) {
@@ -245,13 +242,7 @@ open class TeamController @Autowired constructor(
     ): ResponseEntity<TeamMemberDto> {
         if (accessController.isTeamAdmin(authentication, teamId)) {
             val team = teamService.getTeam(teamId)
-            val savedTeamMember = teamService.createTeamMember(dto, teamId)
-            emailService.sendMessage(listOf(savedTeamMember.email),
-                    "Rejoignez l'équipe ${team.name}",
-                    "Vous êtes invités à rejoindre l'équipe ${team.name}. \n\n " +
-                            "Veuillez confirmer votre inscription en suivant ce lien: " +
-                            "${properties.allowedOrigins[0]}/confirmation?id=${savedTeamMember.confirmationId}\n " +
-                            "Vous serez alors invité à modifier votre mot de passe.")
+            val savedTeamMember = teamService.createTeamMember(dto, teamId, team.name)
             return ResponseEntity.ok(savedTeamMember)
         }
         throw UserForbiddenException()

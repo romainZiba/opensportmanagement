@@ -1,5 +1,6 @@
 package com.zcorp.opensportmanagement.service
 
+import com.zcorp.opensportmanagement.dto.ChampionshipCreationDto
 import com.zcorp.opensportmanagement.dto.ChampionshipDto
 import com.zcorp.opensportmanagement.dto.SeasonDto
 import com.zcorp.opensportmanagement.model.Championship
@@ -29,10 +30,10 @@ open class SeasonService @Autowired constructor(
     }
 
     @Transactional
-    open fun createChampionship(championshipDto: ChampionshipDto, seasonId: Int): ChampionshipDto {
+    open fun createChampionship(dto: ChampionshipCreationDto, seasonId: Int): ChampionshipDto {
         val season = seasonRepository.findById(seasonId)
                 .orElseThrow { NotFoundException("Season $seasonId does not exist") }
-        val championship = Championship(championshipDto.name, season)
+        val championship = Championship(dto.name, season)
         return championshipRepository.save(championship).toDto()
     }
 }

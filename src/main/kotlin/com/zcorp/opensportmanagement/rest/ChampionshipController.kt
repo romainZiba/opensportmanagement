@@ -32,7 +32,7 @@ open class ChampionshipController @Autowired constructor(
         authentication: Authentication
     ): ResponseEntity<ChampionshipDto> {
         val championshipDto = championshipService.getChampionship(championshipId)
-        if (accessController.isAccountAllowedToAccessTeam(authentication, championshipDto.teamId!!)) {
+        if (accessController.isAccountAllowedToAccessTeam(authentication, championshipDto.teamId)) {
             return ResponseEntity.ok(championshipDto)
         }
         throw UserForbiddenException()
@@ -44,7 +44,7 @@ open class ChampionshipController @Autowired constructor(
         authentication: Authentication
     ): ResponseEntity<Any> {
         val championshipDto = championshipService.getChampionship(championshipId)
-        if (accessController.isTeamAdmin(authentication, championshipDto.teamId!!)) {
+        if (accessController.isTeamAdmin(authentication, championshipDto.teamId)) {
             championshipService.deleteChampionship(championshipId)
             return ResponseEntity.noContent().build()
         }
@@ -53,12 +53,12 @@ open class ChampionshipController @Autowired constructor(
 
     @PostMapping("/{championshipId}/matches")
     open fun createMatch(
-            @NotNull @PathVariable("championshipId") championshipId: Int,
-            @RequestBody dto: ChampionshipMatchCreationDto,
-            authentication: Authentication
+        @NotNull @PathVariable("championshipId") championshipId: Int,
+        @RequestBody dto: ChampionshipMatchCreationDto,
+        authentication: Authentication
     ): ResponseEntity<EventDto> {
         val championshipDto = championshipService.getChampionship(championshipId)
-        if (accessController.isTeamAdmin(authentication, championshipDto.teamId!!)) {
+        if (accessController.isTeamAdmin(authentication, championshipDto.teamId)) {
             val match = championshipService.createMatch(dto, championshipId, LocalDateTime.now())
             return ResponseEntity(match.toDto(), HttpStatus.CREATED)
         }

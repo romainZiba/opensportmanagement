@@ -1,7 +1,6 @@
 package com.zcorp.opensportmanagement.dto
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import com.zcorp.opensportmanagement.model.Season
 import java.time.LocalDate
 
 data class SeasonDto(

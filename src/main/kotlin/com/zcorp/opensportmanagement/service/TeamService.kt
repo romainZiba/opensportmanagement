@@ -1,6 +1,8 @@
 package com.zcorp.opensportmanagement.service
 
+import com.zcorp.opensportmanagement.config.OsmProperties
 import com.zcorp.opensportmanagement.dto.EventDto
+import com.zcorp.opensportmanagement.dto.OpponentCreationDto
 import com.zcorp.opensportmanagement.dto.OpponentDto
 import com.zcorp.opensportmanagement.dto.PlaceDto
 import com.zcorp.opensportmanagement.dto.SeasonDto
@@ -8,18 +10,18 @@ import com.zcorp.opensportmanagement.dto.TeamDto
 import com.zcorp.opensportmanagement.dto.TeamMemberCreationDto
 import com.zcorp.opensportmanagement.dto.TeamMemberDto
 import com.zcorp.opensportmanagement.dto.TeamMemberUpdateDto
+import com.zcorp.opensportmanagement.model.Account
 import com.zcorp.opensportmanagement.model.Opponent
 import com.zcorp.opensportmanagement.model.Place
 import com.zcorp.opensportmanagement.model.Season
 import com.zcorp.opensportmanagement.model.Team
 import com.zcorp.opensportmanagement.model.TeamMember
-import com.zcorp.opensportmanagement.model.Account
+import com.zcorp.opensportmanagement.repository.AccountRepository
 import com.zcorp.opensportmanagement.repository.OpponentRepository
 import com.zcorp.opensportmanagement.repository.PlaceRepository
 import com.zcorp.opensportmanagement.repository.SeasonRepository
 import com.zcorp.opensportmanagement.repository.TeamMemberRepository
 import com.zcorp.opensportmanagement.repository.TeamRepository
-import com.zcorp.opensportmanagement.repository.AccountRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -35,7 +37,9 @@ open class TeamService @Autowired constructor(
     private val accountRepository: AccountRepository,
     private val seasonRepository: SeasonRepository,
     private val placeRepository: PlaceRepository,
-    private val opponentRepository: OpponentRepository
+    private val opponentRepository: OpponentRepository,
+    private val emailService: EmailService,
+    private val properties: OsmProperties
 ) {
     private val bCryptPasswordEncoder = BCryptPasswordEncoder()
 
@@ -120,10 +124,13 @@ open class TeamService @Autowired constructor(
     }
 
     @Transactional
-    open fun createOpponent(opponentDto: OpponentDto, teamId: Int): OpponentDto {
+    open fun createOpponent(opponentDto: OpponentCreationDto, teamId: Int): OpponentDto {
         val team = teamRepository.findById(teamId)
                 .orElseThrow { NotFoundException("Team $teamId does not exist") }
-        val opponent = Opponent(opponentDto.name, opponentDto.phoneNumber, opponentDto.email, opponentDto.imgUrl, team)
+        val opponent = Opponent(name = opponentDto.name,
+                phoneNumber = opponentDto.phoneNumber,
+                email = opponentDto.email,
+                team = team)
         return opponentRepository.save(opponent).toDto()
     }
 
@@ -145,16 +152,26 @@ open class TeamService @Autowired constructor(
     }
 
     @Transactional
-    open fun createTeamMember(teamMemberDto: TeamMemberCreationDto, teamId: Int): TeamMemberDto {
+    open fun createTeamMember(teamMemberDto: TeamMemberCreationDto, teamId: Int, teamName: String): TeamMemberDto {
         val team = teamRepository.findById(teamId).orElseThrow { NotFoundException("Team $teamId does not exist") }
         val firstName = teamMemberDto.firstName
         val lastName = teamMemberDto.lastName
-        val userToSave = Account(firstName, lastName, bCryptPasswordEncoder.encode(UUID.randomUUID().toString()),
-                teamMemberDto.email, teamMemberDto.phoneNumber)
+        val userToSave = Account(
+                firstName = firstName,
+                lastName = lastName,
+                password = bCryptPasswordEncoder.encode(UUID.randomUUID().toString()),
+                email = teamMemberDto.email,
+                phoneNumber = teamMemberDto.phoneNumber)
         val user = accountRepository.findByEmail(teamMemberDto.email) ?: accountRepository.save(userToSave)
         val teamMember = TeamMember(teamMemberDto.roles.toMutableSet(), team)
         user.addTeamMember(teamMember)
         val savedUser = accountRepository.save(user)
+        emailService.sendMessage(listOf(savedUser.email),
+                "Rejoignez l'équipe ${team.name}",
+                "Vous êtes invités à rejoindre l'équipe ${team.name}. \n\n " +
+                        "Veuillez confirmer votre inscription en suivant ce lien: " +
+                        "${properties.allowedOrigins[0]}/confirmation?id=${savedUser.confirmationId}\n " +
+                        "Vous serez alors invité à modifier votre mot de passe.")
         return savedUser.getMemberOf().first { it.team.id == teamId }.toDto()
     }
 }

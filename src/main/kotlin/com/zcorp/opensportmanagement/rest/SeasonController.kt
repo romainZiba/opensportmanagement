@@ -3,6 +3,7 @@ package com.zcorp.opensportmanagement.rest
 import com.zcorp.opensportmanagement.dto.ChampionshipDto
 import com.zcorp.opensportmanagement.dto.SeasonDto
 import com.zcorp.opensportmanagement.security.AccessController
+import com.zcorp.opensportmanagement.service.ChampionshipService
 import com.zcorp.opensportmanagement.service.SeasonService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.rest.webmvc.RepositoryRestController
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 @RequestMapping("/seasons")
 open class SeasonController @Autowired constructor(
     private val seasonService: SeasonService,
+    private val championshipService: ChampionshipService,
     private val accessController: AccessController
 ) {
 
@@ -44,6 +46,19 @@ open class SeasonController @Autowired constructor(
         if (accessController.isTeamAdmin(authentication, seasonDto.teamId!!)) {
             seasonService.deleteSeason(seasonId)
             return ResponseEntity.noContent().build()
+        }
+        throw UserForbiddenException()
+    }
+
+    @GetMapping("/{seasonId}/championships")
+    open fun getChampionships(
+            @PathVariable("seasonId") seasonId: Int,
+            authentication: Authentication
+    ): ResponseEntity<List<ChampionshipDto>> {
+        val seasonDto = seasonService.getSeason(seasonId)
+        if (accessController.isAccountAllowedToAccessTeam(authentication, seasonDto.teamId!!)) {
+            val championships = championshipService.getChampionships(seasonId)
+            return ResponseEntity.ok(championships)
         }
         throw UserForbiddenException()
     }

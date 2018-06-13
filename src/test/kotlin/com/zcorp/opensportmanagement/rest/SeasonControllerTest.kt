@@ -11,6 +11,7 @@ import com.zcorp.opensportmanagement.model.Team
 import com.zcorp.opensportmanagement.security.AccessController
 import com.zcorp.opensportmanagement.service.ChampionshipService
 import com.zcorp.opensportmanagement.service.NotFoundException
+import com.zcorp.opensportmanagement.service.SeasonService
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -36,13 +37,15 @@ import java.time.LocalTime
 @AutoConfigureMockMvc
 @AutoConfigureRestDocs
 @ActiveProfiles("test")
-class ChampionshipControllerTest {
+class SeasonControllerTest {
 
     @Autowired
     private lateinit var mockMvc: MockMvc
 
     @MockBean
     private lateinit var championshipServiceMock: ChampionshipService
+    @MockBean
+    private lateinit var seasonServiceMock: SeasonService
 
     @MockBean
     private lateinit var accessControllerMock: AccessController
@@ -56,38 +59,19 @@ class ChampionshipControllerTest {
     private val mockChampionship = Championship("Championship", mockSeason, championshipId)
 
     @Test
-    fun `Get championship when unauthenticated should return response code 'FORBIDDEN'`() {
-        this.mockMvc.perform(get("/championships/$championshipId")).andExpect(status().isForbidden)
+    fun `Get championships when unauthenticated should return response code 'FORBIDDEN'`() {
+        this.mockMvc.perform(get("/seasons/$seasonId/championships")).andExpect(status().isForbidden)
     }
 
     @Test
     @WithMockUser("foo")
     fun `Get championship when authenticated should return response code 'OK'`() {
-        whenever(championshipServiceMock.getChampionship(any())).thenReturn(mockChampionship.toDto())
+        whenever(seasonServiceMock.getSeason(seasonId)).thenReturn(mockSeason.toDto())
+        whenever(championshipServiceMock.getChampionships(seasonId)).thenReturn(listOf(mockChampionship.toDto()))
         whenever(accessControllerMock.isAccountAllowedToAccessTeam(any(), any())).thenReturn(true)
-        this.mockMvc.perform(get("/championships/$championshipId"))
+        this.mockMvc.perform(get("/seasons/$seasonId/championships"))
                 .andExpect(status().isOk)
                 .andExpect(MockMvcResultMatchers.content()
-                        .json(jacksonObjectMapper().writeValueAsString(mockChampionship.toDto())))
-    }
-
-    @Test
-    fun `Create match when unauthenticated should return response code 'FORBIDDEN'`() {
-        this.mockMvc.perform(post("/championships/$championshipId/matches")).andExpect(status().isForbidden)
-    }
-
-    @Test
-    @WithMockUser("foo")
-    fun `Create match when championship does not exist should return response code 'NOT FOUND'`() {
-        val matchCreationDto = ChampionshipMatchCreationDto("Match", LocalDate.of(2025, 1, 1), LocalDate.of(2025, 1, 1),
-                LocalTime.of(10, 0), LocalTime.of(12, 0), 2, Match.MatchType.CHAMPIONSHIP, championshipId,
-                15, true)
-        whenever(championshipServiceMock.getChampionship(any())).thenThrow(NotFoundException(""))
-        this.mockMvc.perform(
-                post("/championships/$championshipId/matches")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .characterEncoding("UTF-8")
-                        .content(jacksonObjectMapper().findAndRegisterModules().writeValueAsString(matchCreationDto)))
-                .andExpect(status().isNotFound)
+                        .json(jacksonObjectMapper().writeValueAsString(listOf(mockChampionship.toDto()))))
     }
 }

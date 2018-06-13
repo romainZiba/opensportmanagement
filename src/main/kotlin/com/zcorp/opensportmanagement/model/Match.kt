@@ -90,12 +90,12 @@ class Match private constructor(builder: Builder) : AbstractEvent() {
             return this
         }
 
-        fun fromDate(fromDateTime: LocalDateTime): Builder {
+        fun fromDateTime(fromDateTime: LocalDateTime): Builder {
             this.fromDateTime = fromDateTime
             return this
         }
 
-        fun toDate(toDateTime: LocalDateTime?): Builder {
+        fun toDateTime(toDateTime: LocalDateTime?): Builder {
             this.toDateTime = toDateTime
             return this
         }

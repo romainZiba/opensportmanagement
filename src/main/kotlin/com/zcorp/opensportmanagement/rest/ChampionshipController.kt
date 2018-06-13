@@ -2,7 +2,7 @@ package com.zcorp.opensportmanagement.rest
 
 import com.zcorp.opensportmanagement.dto.ChampionshipDto
 import com.zcorp.opensportmanagement.dto.EventDto
-import com.zcorp.opensportmanagement.dto.MatchCreationDto
+import com.zcorp.opensportmanagement.dto.ChampionshipMatchCreationDto
 import com.zcorp.opensportmanagement.security.AccessController
 import com.zcorp.opensportmanagement.service.ChampionshipService
 import org.springframework.beans.factory.annotation.Autowired
@@ -53,9 +53,9 @@ open class ChampionshipController @Autowired constructor(
 
     @PostMapping("/{championshipId}/matches")
     open fun createMatch(
-        @NotNull @PathVariable("championshipId") championshipId: Int,
-        @RequestBody dto: MatchCreationDto,
-        authentication: Authentication
+            @NotNull @PathVariable("championshipId") championshipId: Int,
+            @RequestBody dto: ChampionshipMatchCreationDto,
+            authentication: Authentication
     ): ResponseEntity<EventDto> {
         val championshipDto = championshipService.getChampionship(championshipId)
         if (accessController.isTeamAdmin(authentication, championshipDto.teamId!!)) {

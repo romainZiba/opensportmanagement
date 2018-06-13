@@ -87,7 +87,7 @@ open class TeamService @Autowired constructor(
     open fun createSeason(seasonDto: SeasonDto, teamId: Int): SeasonDto {
         val team = teamRepository.findById(teamId)
                 .orElseThrow { NotFoundException("Team $teamId does not exist") }
-        var season = Season(seasonDto.name, seasonDto.fromDate, seasonDto.toDate, seasonDto.status, team)
+        var season = Season(seasonDto.name, seasonDto.fromDate, seasonDto.toDate, team)
         season = seasonRepository.save(season)
         return season.toDto()
     }

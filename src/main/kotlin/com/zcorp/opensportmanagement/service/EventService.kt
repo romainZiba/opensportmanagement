@@ -3,6 +3,7 @@ package com.zcorp.opensportmanagement.service
 import com.zcorp.opensportmanagement.config.EventsProperties
 import com.zcorp.opensportmanagement.dto.EventCreationDto
 import com.zcorp.opensportmanagement.dto.EventDto
+import com.zcorp.opensportmanagement.model.AbstractEvent
 import com.zcorp.opensportmanagement.model.Event
 import com.zcorp.opensportmanagement.repository.EventRepository
 import com.zcorp.opensportmanagement.repository.PlaceRepository
@@ -52,11 +53,15 @@ open class EventService @Autowired constructor(
     @Transactional
     @Throws(BadParameterException::class)
     open fun createEvent(teamId: Int, dto: EventCreationDto) {
-        val eventName = dto.name
+        val eventType = dto.type
+        val eventName = when (eventType) {
+        // TODO: i18n
+            AbstractEvent.EventType.TRAINING -> "Entrainement"
+            else -> (dto.name ?: "Evènement")
+        }
         if (eventName.isEmpty()) {
             throw BadParameterException("Name of the event must not be empty")
         }
-
         val team = teamRepository.findById(teamId)
                 .orElseThrow { NotFoundException("Team $teamId does not exist") }
         val eventBuilder = Event.Builder().name(eventName)

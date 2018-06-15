@@ -6,6 +6,7 @@ import com.nhaarman.mockito_kotlin.whenever
 import com.zcorp.opensportmanagement.dto.EventCreationDto
 import com.zcorp.opensportmanagement.dto.PlaceDto
 import com.zcorp.opensportmanagement.dto.TeamDto
+import com.zcorp.opensportmanagement.model.AbstractEvent
 import com.zcorp.opensportmanagement.model.Account
 import com.zcorp.opensportmanagement.model.Place.PlaceType
 import com.zcorp.opensportmanagement.model.Team
@@ -133,8 +134,13 @@ class TeamControllerTest {
     fun `Create event with an empty name should return a response with status 'BAD REQUEST'`() {
         whenever(accessController.isAccountAllowedToAccessTeam(any(), any())).thenReturn(true)
         whenever(eventServiceMock.createEvent(any(), any())).thenThrow(BadParameterException(""))
-        val eventCreationDto = EventCreationDto("", LocalDate.of(2050, 1, 1), LocalDate.of(2050, 2, 1),
-                LocalTime.of(16, 0), LocalTime.of(18, 0), 1)
+        val eventCreationDto = EventCreationDto(
+                fromDate = LocalDate.of(2050, 1, 1),
+                toDate = LocalDate.of(2050, 2, 1),
+                fromTime = LocalTime.of(16, 0),
+                toTime = LocalTime.of(18, 0),
+                placeId = 1,
+                type = AbstractEvent.EventType.OTHER)
         this.mockMvc.perform(
                 post("/teams/1/events")
                         .contentType(APPLICATION_JSON)

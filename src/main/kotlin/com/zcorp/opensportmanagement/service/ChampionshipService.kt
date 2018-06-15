@@ -19,6 +19,9 @@ open class ChampionshipService @Autowired constructor(
     private val opponentRepository: OpponentRepository,
     private val matchRepository: MatchRepository
 ) {
+    companion object {
+        const val MATCH_NAME = "Match"
+    }
 
     @Transactional
     @Throws(NotFoundException::class)
@@ -55,7 +58,7 @@ open class ChampionshipService @Autowired constructor(
         if (fromDateTime.isBefore(now)) {
             throw NotPossibleException("From date can not be in the past")
         }
-        val match = Match.Builder().name(dto.name)
+        val match = Match.Builder().name(MATCH_NAME)
                 .fromDateTime(fromDateTime)
                 .toDateTime(LocalDateTime.of(dto.toDate, dto.toTime))
                 .place(stadium)

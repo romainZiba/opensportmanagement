@@ -81,7 +81,6 @@ class ChampionshipServiceTest {
     @Test
     fun `create match for a championship that does not exist should not be possible`() {
         val matchDto = ChampionshipMatchCreationDto(
-                name = "match",
                 fromDate = LocalDate.of(2018, 1, 1),
                 toDate = LocalDate.of(2018, 1, 1),
                 fromTime = LocalTime.of(19, 50),
@@ -99,7 +98,6 @@ class ChampionshipServiceTest {
     @Test
     fun `create match with a place that does not exist should not be possible`() {
         val matchDto = ChampionshipMatchCreationDto(
-                name = "match",
                 fromDate = LocalDate.of(2018, 1, 1),
                 toDate = LocalDate.of(2018, 1, 1),
                 fromTime = LocalTime.of(19, 50),
@@ -118,7 +116,6 @@ class ChampionshipServiceTest {
     @Test
     fun `create match with an opponent that does not exist should not be possible`() {
         val matchDto = ChampionshipMatchCreationDto(
-                name = "match",
                 fromDate = LocalDate.of(2018, 1, 1),
                 toDate = LocalDate.of(2018, 1, 1),
                 fromTime = LocalTime.of(19, 50),
@@ -138,7 +135,6 @@ class ChampionshipServiceTest {
     @Test
     fun `create match in the past should not be possible`() {
         val dto = ChampionshipMatchCreationDto(
-                name = "match",
                 fromDate = LocalDate.of(2018, 1, 1),
                 toDate = LocalDate.of(2018, 1, 1),
                 fromTime = LocalTime.of(19, 50),
@@ -157,7 +153,7 @@ class ChampionshipServiceTest {
 
     @Test
     fun `create match sometimes work`() {
-        val dto = ChampionshipMatchCreationDto(name = "match",
+        val dto = ChampionshipMatchCreationDto(
                 fromDate = LocalDate.now().plusDays(7),
                 toDate = LocalDate.now().plusDays(7),
                 fromTime = LocalTime.of(19, 50),

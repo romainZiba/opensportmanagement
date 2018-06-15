@@ -16,12 +16,13 @@ import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.whenever
 import com.zcorp.opensportmanagement.config.EventsProperties
 import com.zcorp.opensportmanagement.dto.EventCreationDto
+import com.zcorp.opensportmanagement.model.AbstractEvent
+import com.zcorp.opensportmanagement.model.Account
 import com.zcorp.opensportmanagement.model.Event
 import com.zcorp.opensportmanagement.model.Place
 import com.zcorp.opensportmanagement.model.Place.PlaceType
 import com.zcorp.opensportmanagement.model.Team
 import com.zcorp.opensportmanagement.model.TeamMember
-import com.zcorp.opensportmanagement.model.Account
 import com.zcorp.opensportmanagement.repository.EventRepository
 import com.zcorp.opensportmanagement.repository.PlaceRepository
 import com.zcorp.opensportmanagement.repository.TeamMemberRepository
@@ -68,8 +69,14 @@ class EventServiceTest {
     fun `create event with an empty name should be forbidden`() {
         val fromDateTime = LocalDateTime.of(2018, 1, 1, 0, 0)
         val toDateTime = LocalDateTime.of(2018, 1, 1, 10, 0)
-        val dto = EventCreationDto("", fromDateTime.toLocalDate(), toDateTime.toLocalDate(),
-                fromDateTime.toLocalTime(), toDateTime.toLocalTime(), mockPlace.id!!)
+        val dto = EventCreationDto(
+                name = "",
+                fromDate = fromDateTime.toLocalDate(),
+                toDate = toDateTime.toLocalDate(),
+                fromTime = fromDateTime.toLocalTime(),
+                toTime = toDateTime.toLocalTime(),
+                placeId = mockPlace.id!!,
+                type = AbstractEvent.EventType.OTHER)
         assert {
             eventService.createEvent(teamId, dto)
         }.thrownError {
@@ -84,8 +91,14 @@ class EventServiceTest {
         whenever(placeRepoMock.findById(any())).thenReturn(Optional.of(mockPlace))
         val fromDateTime = LocalDateTime.of(2018, 1, 1, 0, 0)
         val toDateTime = LocalDateTime.of(2018, 1, 1, 10, 0)
-        val dto = EventCreationDto("event", fromDateTime.toLocalDate(), toDateTime.toLocalDate(),
-                fromDateTime.toLocalTime(), toDateTime.toLocalTime(), mockPlace.id!!)
+        val dto = EventCreationDto(
+                name = "event",
+                fromDate = fromDateTime.toLocalDate(),
+                toDate = toDateTime.toLocalDate(),
+                fromTime = fromDateTime.toLocalTime(),
+                toTime = toDateTime.toLocalTime(),
+                placeId = mockPlace.id!!,
+                type = AbstractEvent.EventType.OTHER)
         eventService.createEvent(teamId, dto)
         argumentCaptor<Event>().apply {
             verify(eventRepoMock, times(1)).save(capture())
@@ -106,8 +119,15 @@ class EventServiceTest {
         val toDate = LocalDate.of(2018, 1, 8)
         val fromTime = LocalTime.of(10, 0)
         val toTime = LocalTime.of(11, 0)
-        val dto = EventCreationDto("event", fromDate, toDate, fromTime, toTime, mockPlace.id!!,
-                true, mutableSetOf(DayOfWeek.WEDNESDAY))
+        val dto = EventCreationDto(name = "event",
+                fromDate = fromDate,
+                toDate = toDate,
+                fromTime = fromTime,
+                toTime = toTime,
+                placeId = mockPlace.id!!,
+                isRecurrent = true,
+                recurrenceDays = mutableSetOf(DayOfWeek.WEDNESDAY),
+                type = AbstractEvent.EventType.OTHER)
         eventService.createEvent(teamId, dto)
         argumentCaptor<List<Event>>().apply {
             verify(eventRepoMock, times(1)).saveAll(capture())
@@ -131,8 +151,16 @@ class EventServiceTest {
         val toDate = LocalDate.of(2018, 3, 31)
         val fromTime = LocalTime.of(10, 0)
         val toTime = LocalTime.of(11, 0)
-        val dto = EventCreationDto("event", fromDate, toDate, fromTime, toTime, mockPlace.id!!,
-                true, mutableSetOf(DayOfWeek.WEDNESDAY, DayOfWeek.TUESDAY))
+        val dto = EventCreationDto(
+                name = "event",
+                fromDate = fromDate,
+                toDate = toDate,
+                fromTime = fromTime,
+                toTime = toTime,
+                placeId = mockPlace.id!!,
+                isRecurrent = true,
+                recurrenceDays = mutableSetOf(DayOfWeek.WEDNESDAY, DayOfWeek.TUESDAY),
+                type = AbstractEvent.EventType.OTHER)
         eventService.createEvent(teamId, dto)
         argumentCaptor<List<Event>>().apply {
             verify(eventRepoMock, times(1)).saveAll(capture())

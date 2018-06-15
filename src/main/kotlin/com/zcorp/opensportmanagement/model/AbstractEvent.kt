@@ -19,7 +19,6 @@ import javax.persistence.Table
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "event_type")
 abstract class AbstractEvent protected constructor() {
-
     lateinit var name: String
     @ManyToOne @JoinColumn(name = "team_id") lateinit var team: Team
     lateinit var fromDateTime: LocalDateTime
@@ -76,12 +75,14 @@ abstract class AbstractEvent protected constructor() {
 
     enum class EventType(val type: String) {
         MATCH(match),
+        TRAINING(training),
         OTHER(other)
     }
 
     companion object {
         const val match = "MATCH"
         const val other = "OTHER"
+        const val training = "TRAINING"
         const val MAX_MEMBERS: Int = 100
     }
 }

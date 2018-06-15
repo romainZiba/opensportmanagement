@@ -78,9 +78,16 @@ class ChampionshipControllerTest {
     @Test
     @WithMockUser("foo")
     fun `Create match when championship does not exist should return response code 'NOT FOUND'`() {
-        val matchCreationDto = ChampionshipMatchCreationDto("Match", LocalDate.of(2025, 1, 1), LocalDate.of(2025, 1, 1),
-                LocalTime.of(10, 0), LocalTime.of(12, 0), 2, Match.MatchType.CHAMPIONSHIP, championshipId,
-                15, true)
+        val matchCreationDto = ChampionshipMatchCreationDto(
+                fromDate = LocalDate.of(2025, 1, 1),
+                toDate = LocalDate.of(2025, 1, 1),
+                fromTime = LocalTime.of(10, 0),
+                toTime = LocalTime.of(12, 0),
+                placeId = 2,
+                matchType = Match.MatchType.CHAMPIONSHIP,
+                championshipId = championshipId,
+                opponentId = 15,
+                isTeamLocal = true)
         whenever(championshipServiceMock.getChampionship(any())).thenThrow(NotFoundException(""))
         this.mockMvc.perform(
                 post("/championships/$championshipId/matches")

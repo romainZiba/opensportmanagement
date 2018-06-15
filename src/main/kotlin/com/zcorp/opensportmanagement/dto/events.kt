@@ -1,6 +1,7 @@
 package com.zcorp.opensportmanagement.dto
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.zcorp.opensportmanagement.model.AbstractEvent
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -26,12 +27,13 @@ data class EventDto(
 )
 
 data class EventCreationDto(
-    val name: String,
     val fromDate: LocalDate,
     val toDate: LocalDate,
     val fromTime: LocalTime,
     val toTime: LocalTime,
     val placeId: Int,
+    val type: AbstractEvent.EventType,
+    val name: String? = null,
     val isRecurrent: Boolean = false,
     val recurrenceDays: MutableSet<DayOfWeek> = mutableSetOf()
 )

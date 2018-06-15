@@ -19,12 +19,16 @@ class Event private constructor(builder: Builder) : AbstractEvent() {
     }
 
     override fun toDto(): EventDto {
-        return EventDto(this.id, this.name, this.fromDateTime, this.toDateTime,
-                this.place.id!!,
-                this.presentMembers.map { it.toDto() }.toList(),
-                this.absentMembers.map { it.toDto() }.toList(),
-                this.waitingMembers.map { it.toDto() }.toList(),
-                team.id)
+        return EventDto(
+                _id = this.id,
+                name = this.name,
+                fromDateTime = this.fromDateTime,
+                toDateTime = this.toDateTime,
+                placeId = this.place.id!!,
+                presentMembers = this.presentMembers.map { it.toDto() }.toList(),
+                absentMembers = this.absentMembers.map { it.toDto() }.toList(),
+                waitingMembers = this.waitingMembers.map { it.toDto() }.toList(),
+                teamId = team.id)
     }
 
     class Builder {

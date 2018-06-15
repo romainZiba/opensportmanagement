@@ -5,7 +5,6 @@ import java.time.LocalDate
 import java.time.LocalTime
 
 data class ChampionshipMatchCreationDto(
-    val name: String,
     val fromDate: LocalDate,
     val toDate: LocalDate,
     val fromTime: LocalTime,

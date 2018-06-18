@@ -1,12 +1,12 @@
 package com.zcorp.opensportmanagement.rest
 
 import com.zcorp.opensportmanagement.dto.EventDto
+import com.zcorp.opensportmanagement.dto.EventModificationDto
 import com.zcorp.opensportmanagement.dto.MessageCreationDto
 import com.zcorp.opensportmanagement.dto.MessageDto
 import com.zcorp.opensportmanagement.security.AccessController
 import com.zcorp.opensportmanagement.service.EventService
 import com.zcorp.opensportmanagement.service.MessagingService
-import com.zcorp.opensportmanagement.service.NotFoundException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.rest.webmvc.RepositoryRestController
 import org.springframework.http.ResponseEntity
@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import java.time.LocalDateTime
-import javax.validation.constraints.NotNull
 
 @RepositoryRestController
 @RequestMapping("/events")
@@ -54,10 +53,24 @@ open class EventController @Autowired constructor(
         throw UserForbiddenException()
     }
 
+    @PutMapping("/{eventId}")
+    open fun modifyEvent(
+        @PathVariable("eventId") eventId: Int,
+        @RequestBody eventModifDto: EventModificationDto,
+        authentication: Authentication
+    ): ResponseEntity<EventDto> {
+        val eventDto = eventService.getEvent(eventId)
+        if (accessController.isTeamAdmin(authentication, eventDto.teamId!!)) {
+            val dto = eventService.updateEvent(eventId, eventModifDto, LocalDateTime.now())
+            return ResponseEntity.ok(dto)
+        }
+        throw UserForbiddenException()
+    }
+
     @PutMapping("/{eventId}/{present}")
     open fun participate(
-        @NotNull @PathVariable("eventId") eventId: Int,
-        @NotNull @PathVariable("present") present: Boolean,
+        @PathVariable("eventId") eventId: Int,
+        @PathVariable("present") present: Boolean,
         authentication: Authentication
     ): ResponseEntity<EventDto> {
         var eventDto = eventService.getEvent(eventId)
@@ -65,12 +78,12 @@ open class EventController @Autowired constructor(
             eventDto = eventService.participate(authentication.name, eventId, present, LocalDateTime.now())
             return ResponseEntity.ok(eventDto)
         }
-        throw NotFoundException("Match not found")
+        throw UserForbiddenException()
     }
 
     @GetMapping("/{eventId}/messages")
     fun getMessages(
-        @NotNull @PathVariable("eventId") eventId: Int,
+        @PathVariable("eventId") eventId: Int,
         authentication: Authentication
     ): ResponseEntity<List<MessageDto>> {
         val eventDto = eventService.getEvent(eventId)
@@ -82,7 +95,7 @@ open class EventController @Autowired constructor(
 
     @PostMapping("/{eventId}/messages")
     fun createMessageInEvent(
-        @NotNull @PathVariable("eventId") eventId: Int,
+        @PathVariable("eventId") eventId: Int,
         @RequestBody messageDto: MessageCreationDto,
         authentication: Authentication
     ): ResponseEntity<MessageDto> {

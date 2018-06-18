@@ -3,6 +3,7 @@ package com.zcorp.opensportmanagement.service
 import com.zcorp.opensportmanagement.config.EventsProperties
 import com.zcorp.opensportmanagement.dto.EventCreationDto
 import com.zcorp.opensportmanagement.dto.EventDto
+import com.zcorp.opensportmanagement.dto.EventModificationDto
 import com.zcorp.opensportmanagement.model.AbstractEvent
 import com.zcorp.opensportmanagement.model.Event
 import com.zcorp.opensportmanagement.repository.EventRepository
@@ -12,7 +13,6 @@ import com.zcorp.opensportmanagement.repository.TeamRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
-import javax.persistence.NoResultException
 import javax.transaction.Transactional
 
 @Service
@@ -26,11 +26,7 @@ open class EventService @Autowired constructor(
 ) {
     @Transactional
     open fun getEvent(eventId: Int): EventDto {
-        try {
-            return eventRepository.getEventById(eventId).toDto()
-        } catch (e: NoResultException) {
-            throw NotFoundException("Event $eventId does not exist")
-        }
+        return eventRepository.getEventById(eventId)?.toDto() ?: throw NotFoundException("Event $eventId not found")
     }
 
     @Transactional
@@ -105,6 +101,21 @@ open class EventService @Autowired constructor(
             throw SubscriptionNotPermittedException("Event $eventId is not open for subscriptions yet")
         }
         event.participate(teamMember, present)
+        return eventRepository.save(event).toDto()
+    }
+
+    @Transactional
+    open fun updateEvent(eventId: Int, dto: EventModificationDto, comparedDate: LocalDateTime): EventDto {
+        val event = eventRepository.findById(eventId).orElseThrow { NotFoundException("Event $eventId does not exist") }
+        val place = placeRepository.findById(dto.placeId).orElseThrow { NotFoundException("Place ${dto.placeId} does not exist") }
+        val dtoFromDateTime = LocalDateTime.of(dto.fromDate, dto.fromTime)
+        val dtoToDateTime = LocalDateTime.of(dto.toDate, dto.toTime)
+        if (dtoFromDateTime.isBefore(comparedDate)) throw NotPossibleException("From date can not be in the past")
+        if (dtoFromDateTime.isAfter(dtoToDateTime)) throw NotPossibleException("To date must be greater than from date")
+        if (event.fromDateTime.isBefore(comparedDate)) throw NotPossibleException("Event has already occurred")
+        event.fromDateTime = dtoFromDateTime
+        event.toDateTime = dtoToDateTime
+        event.place = place
         return eventRepository.save(event).toDto()
     }
 }

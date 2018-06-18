@@ -16,6 +16,7 @@ import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.whenever
 import com.zcorp.opensportmanagement.config.EventsProperties
 import com.zcorp.opensportmanagement.dto.EventCreationDto
+import com.zcorp.opensportmanagement.dto.EventModificationDto
 import com.zcorp.opensportmanagement.model.AbstractEvent
 import com.zcorp.opensportmanagement.model.Account
 import com.zcorp.opensportmanagement.model.Event
@@ -276,5 +277,94 @@ class EventServiceTest {
         assert(eventDto.visitorTeamImgUrl).isNull()
         assert(eventDto.visitorTeamName).isNull()
         assert(eventDto.visitorTeamScore).isNull()
+    }
+
+    @Test
+    fun `trying to update a past event should fail`() {
+        whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
+        whenever(placeRepoMock.findById(any())).thenReturn(Optional.of(mockPlace))
+        whenever(eventRepoMock.save<Event>(any())).thenAnswer { it.arguments[0] }
+        val fromDateTime = LocalDateTime.of(2018, 8, 1, 20, 0)
+        val toDateTime = LocalDateTime.of(2018, 8, 1, 22, 0)
+        val comparedDateTime = LocalDateTime.of(2018, 8, 1, 10, 0)
+        val eventModifDto = EventModificationDto(
+                fromDate = fromDateTime.toLocalDate(),
+                fromTime = fromDateTime.toLocalTime(),
+                toDate = toDateTime.toLocalDate(),
+                toTime = toDateTime.toLocalTime(),
+                placeId = placeId
+        )
+        assert {
+            eventService.updateEvent(mockEvent.id, eventModifDto, comparedDateTime)
+        }.thrownError {
+            isInstanceOf(NotPossibleException::class)
+            message().isEqualTo("Event has already occurred")
+        }
+    }
+
+    @Test
+    fun `trying to set a start date greater than an end date should fail`() {
+        whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
+        whenever(placeRepoMock.findById(any())).thenReturn(Optional.of(mockPlace))
+        whenever(eventRepoMock.save<Event>(any())).thenAnswer { it.arguments[0] }
+        val fromDateTime = LocalDateTime.of(2018, 1, 1, 23, 0)
+        val toDateTime = LocalDateTime.of(2018, 1, 1, 21, 0)
+        val comparedDateTime = LocalDateTime.of(2018, 1, 1, 10, 0)
+        val eventModifDto = EventModificationDto(
+                fromDate = fromDateTime.toLocalDate(),
+                fromTime = fromDateTime.toLocalTime(),
+                toDate = toDateTime.toLocalDate(),
+                toTime = toDateTime.toLocalTime(),
+                placeId = placeId
+        )
+        assert {
+            eventService.updateEvent(mockEvent.id, eventModifDto, comparedDateTime)
+        }.thrownError {
+            isInstanceOf(NotPossibleException::class)
+            message().isEqualTo("To date must be greater than from date")
+        }
+    }
+
+    @Test
+    fun `trying to set a from date in the past should fail`() {
+        whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
+        whenever(placeRepoMock.findById(any())).thenReturn(Optional.of(mockPlace))
+        whenever(eventRepoMock.save<Event>(any())).thenAnswer { it.arguments[0] }
+        val fromDateTime = LocalDateTime.of(2018, 1, 1, 20, 0)
+        val toDateTime = LocalDateTime.of(2018, 1, 1, 22, 0)
+        val comparedDateTime = LocalDateTime.of(2018, 1, 2, 0, 0)
+        val eventModifDto = EventModificationDto(
+                fromDate = fromDateTime.toLocalDate(),
+                fromTime = fromDateTime.toLocalTime(),
+                toDate = toDateTime.toLocalDate(),
+                toTime = toDateTime.toLocalTime(),
+                placeId = placeId
+        )
+        assert {
+            eventService.updateEvent(mockEvent.id, eventModifDto, comparedDateTime)
+        }.thrownError {
+            isInstanceOf(NotPossibleException::class)
+            message().isEqualTo("From date can not be in the past")
+        }
+    }
+
+    @Test
+    fun `trying to update an event should work`() {
+        whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
+        whenever(placeRepoMock.findById(any())).thenReturn(Optional.of(mockPlace))
+        whenever(eventRepoMock.save<Event>(any())).thenAnswer { it.arguments[0] }
+        val fromDateTime = LocalDateTime.of(2018, 1, 1, 20, 0)
+        val toDateTime = LocalDateTime.of(2018, 1, 1, 22, 0)
+        val comparedDateTime = LocalDateTime.of(2018, 1, 1, 10, 0)
+        val eventModifDto = EventModificationDto(
+                fromDate = fromDateTime.toLocalDate(),
+                fromTime = fromDateTime.toLocalTime(),
+                toDate = toDateTime.toLocalDate(),
+                toTime = toDateTime.toLocalTime(),
+                placeId = placeId
+        )
+        val updatedDto = eventService.updateEvent(mockEvent.id, eventModifDto, comparedDateTime)
+        assert(updatedDto.fromDateTime).isEqualTo(fromDateTime)
+        assert(updatedDto.toDateTime).isEqualTo(toDateTime)
     }
 }

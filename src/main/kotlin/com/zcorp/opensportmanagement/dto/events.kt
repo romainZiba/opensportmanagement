@@ -37,3 +37,11 @@ data class EventCreationDto(
     val isRecurrent: Boolean = false,
     val recurrenceDays: MutableSet<DayOfWeek> = mutableSetOf()
 )
+
+data class EventModificationDto(
+    val fromDate: LocalDate,
+    val toDate: LocalDate,
+    val fromTime: LocalTime,
+    val toTime: LocalTime,
+    val placeId: Int
+)

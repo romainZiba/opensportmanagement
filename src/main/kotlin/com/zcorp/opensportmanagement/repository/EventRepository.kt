@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param
 import java.time.LocalDateTime
 
 interface EventRepository : JpaRepository<AbstractEvent, Int> {
-    fun getEventById(id: Int): AbstractEvent
+    fun getEventById(id: Int): AbstractEvent?
     fun getEventsByNotifiedFalseAndFromDateTimeBefore(fromDate: LocalDateTime): List<AbstractEvent>
     @Query("SELECT m FROM TeamMember m, AbstractEvent ev " +
             " LEFT JOIN ev.presentMembers present " +

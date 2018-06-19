@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
+import java.time.LocalDateTime
 
 interface TeamRepository : JpaRepository<Team, Int> {
     fun findByIdIn(ids: List<Int>): List<Team>
@@ -28,6 +29,13 @@ interface TeamRepository : JpaRepository<Team, Int> {
 
     @Query("SELECT e FROM AbstractEvent e WHERE e.team.id = :teamId ORDER BY e.fromDateTime")
     fun getEvents(teamId: Int, pageable: Pageable): Page<AbstractEvent>
+
+    @Query("SELECT e " +
+            " FROM AbstractEvent e " +
+            " WHERE e.team.id = :teamId " +
+            " AND :date <= e.fromDateTime " +
+            " ORDER BY e.fromDateTime")
+    fun getEvents(teamId: Int, pageable: Pageable, date: LocalDateTime): Page<AbstractEvent>
 
     @Query("SELECT o FROM Opponent o WHERE o.team.id = :teamId")
     fun getOpponents(teamId: Int): List<Opponent>

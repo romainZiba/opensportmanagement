@@ -27,6 +27,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 import java.util.UUID
 import javax.transaction.Transactional
 
@@ -97,8 +98,11 @@ open class TeamService @Autowired constructor(
     }
 
     @Transactional
-    open fun getEvents(teamId: Int, pageable: Pageable): Page<EventDto> {
-        return teamRepository.getEvents(teamId, pageable).map { event -> event.toDto() }
+    open fun getEvents(teamId: Int, pageable: Pageable, fromDate: LocalDateTime? = null): Page<EventDto> {
+        return when (fromDate) {
+            null -> teamRepository.getEvents(teamId, pageable).map { event -> event.toDto() }
+            else -> teamRepository.getEvents(teamId, pageable, fromDate).map { event -> event.toDto() }
+        }
     }
 
     @Transactional

@@ -13,9 +13,9 @@ import com.zcorp.opensportmanagement.dto.TeamMemberUpdateDto
 import com.zcorp.opensportmanagement.security.AccessController
 import com.zcorp.opensportmanagement.security.JWTUtils
 import com.zcorp.opensportmanagement.security.OpenGrantedAuthority
+import com.zcorp.opensportmanagement.service.AccountService
 import com.zcorp.opensportmanagement.service.EventService
 import com.zcorp.opensportmanagement.service.TeamService
-import com.zcorp.opensportmanagement.service.AccountService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Pageable
 import org.springframework.data.rest.webmvc.RepositoryRestController
@@ -34,6 +34,9 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter.ISO_DATE_TIME
 import java.util.LinkedList
 import javax.servlet.http.HttpServletResponse
 import javax.validation.constraints.NotNull
@@ -95,12 +98,14 @@ open class TeamController @Autowired constructor(
     @GetMapping("/{teamId}/events")
     open fun getEvents(
         @PathVariable("teamId") teamId: Int,
+        @RequestParam("date") dateAsString: String? = null,
         pageable: Pageable,
         authentication: Authentication,
         assembler: PagedResourcesAssembler<EventDto>
     ): ResponseEntity<PagedResources<Resource<EventDto>>> {
         if (accessController.isAccountAllowedToAccessTeam(authentication, teamId)) {
-            val eventsPage = teamService.getEvents(teamId, pageable)
+            val date = if (dateAsString === null) null else LocalDateTime.parse(dateAsString, ISO_DATE_TIME)
+            val eventsPage = teamService.getEvents(teamId, pageable, date)
             return ResponseEntity.ok(assembler.toResource(eventsPage))
         }
         throw UserForbiddenException()

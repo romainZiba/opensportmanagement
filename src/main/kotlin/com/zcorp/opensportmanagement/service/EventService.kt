@@ -6,6 +6,8 @@ import com.zcorp.opensportmanagement.dto.EventDto
 import com.zcorp.opensportmanagement.dto.EventModificationDto
 import com.zcorp.opensportmanagement.model.AbstractEvent
 import com.zcorp.opensportmanagement.model.Event
+import com.zcorp.opensportmanagement.model.MemberResponse
+import com.zcorp.opensportmanagement.repository.MemberResponseRepository
 import com.zcorp.opensportmanagement.repository.EventRepository
 import com.zcorp.opensportmanagement.repository.PlaceRepository
 import com.zcorp.opensportmanagement.repository.TeamMemberRepository
@@ -18,6 +20,7 @@ import javax.transaction.Transactional
 @Service
 open class EventService @Autowired constructor(
     private val eventRepository: EventRepository,
+    private val memberResponseRepository: MemberResponseRepository,
     private val teamMemberRepository: TeamMemberRepository,
     private val placeRepository: PlaceRepository,
     private val teamRepository: TeamRepository,
@@ -100,8 +103,14 @@ open class EventService @Autowired constructor(
         if (event.fromDateTime.isAfter(now.plusDays(properties.daysBefore))) {
             throw SubscriptionNotPermittedException("Event $eventId is not open for subscriptions yet")
         }
-        event.participate(teamMember, present)
-        return eventRepository.save(event).toDto()
+        val status = when {
+            present && event.isFull() -> MemberResponse.Status.WAITING
+            present -> MemberResponse.Status.PRESENT
+            !present -> MemberResponse.Status.ABSENT
+            else -> MemberResponse.Status.ABSENT
+        }
+        memberResponseRepository.save(MemberResponse(event, teamMember, status))
+        return event.toDto()
     }
 
     @Transactional

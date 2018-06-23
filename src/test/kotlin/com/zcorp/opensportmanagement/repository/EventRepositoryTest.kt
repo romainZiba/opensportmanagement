@@ -4,23 +4,27 @@ import assertk.assert
 import assertk.assertions.containsExactly
 import assertk.assertions.isEmpty
 import assertk.assertions.isNotEmpty
+import com.zcorp.opensportmanagement.model.Account
 import com.zcorp.opensportmanagement.model.Event
+import com.zcorp.opensportmanagement.model.MemberResponse
 import com.zcorp.opensportmanagement.model.Place
 import com.zcorp.opensportmanagement.model.Team
 import com.zcorp.opensportmanagement.model.TeamMember
-import com.zcorp.opensportmanagement.model.Account
-import org.junit.Test
-import org.junit.runner.RunWith
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.junit4.SpringRunner
+import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDateTime
 
-@RunWith(SpringRunner::class)
+@ExtendWith(SpringExtension::class)
 @DataJpaTest
 @ActiveProfiles("test")
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 open class EventRepositoryTest {
 
     @Autowired
@@ -29,74 +33,77 @@ open class EventRepositoryTest {
     @Autowired
     private lateinit var eventRepository: EventRepository
 
-    @Test
-    fun `should return team member that has not responded`() {
-        // given
+    private lateinit var savedTeamMember1: TeamMember
+    private lateinit var savedTeamMember2: TeamMember
+    private lateinit var savedPlace: Place
+    private lateinit var savedTeam: Team
+
+    @BeforeEach
+    fun init() {
+        // Given a team
         val team = Team("", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "")
-        val savedTeam = entityManager.persist(team)
+        savedTeam = entityManager.persist(team)
 
-        val user1 = Account("first", "last", "pass", "email1", "")
-        val user2 = Account("second", "last", "pass", "email2", "")
-        val savedUser1 = entityManager.persist(user1)
-        val savedUser2 = entityManager.persist(user2)
+        // Given accounts
+        val account1 = Account("first", "last", "pass", "email1", "")
+        val account2 = Account("second", "last", "pass", "email2", "")
+        val savedAccount1 = entityManager.persist(account1)
+        val savedAccount2 = entityManager.persist(account2)
 
+        // Given team members
         val teamMember1 = TeamMember(mutableSetOf(), savedTeam, "")
         val teamMember2 = TeamMember(mutableSetOf(), savedTeam, "")
-        teamMember1.account = savedUser1
-        teamMember2.account = savedUser2
-        val savedTeamMember1 = entityManager.persist(teamMember1)
-        val savedTeamMember2 = entityManager.persist(teamMember2)
+        teamMember1.account = savedAccount1
+        teamMember2.account = savedAccount2
+        savedTeamMember1 = entityManager.persist(teamMember1)
+        savedTeamMember2 = entityManager.persist(teamMember2)
 
+        // Given a place
         val place = Place("The stadium", "", "NYC", Place.PlaceType.STADIUM, savedTeam)
-        val savedPlace = entityManager.persist(place)
+        savedPlace = entityManager.persist(place)
+    }
 
+    @Test
+    fun `should return team member that has not responded`() {
         val event = Event.Builder()
                 .name("event")
                 .team(savedTeam)
                 .fromDate(LocalDateTime.of(2019, 1, 1, 10, 0))
                 .place(savedPlace)
                 .build()
-        event.absentMembers.add(savedTeamMember2)
-        val savedEvent = entityManager.persistAndFlush(event)
 
-        // when
-        val teamMembersToNotify = eventRepository.getMembersThatHaveNotResponded(savedEvent.id)
+        val savedEvent = entityManager.persistAndFlush(event)
+        entityManager.persist(MemberResponse(savedEvent, savedTeamMember2, MemberResponse.Status.ABSENT))
+
+        val teamMembersToNotify = eventRepository.getMembersThatHaveNotResponded(event.id)
         assert(teamMembersToNotify).isNotEmpty()
         assert(teamMembersToNotify).containsExactly(savedTeamMember1)
     }
 
     @Test
     fun `should return empty list when all team members have responded`() {
-        // given
-        val team = Team("", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "")
-        val savedTeam = entityManager.persist(team)
-
-        val user1 = Account("first", "last", "pass", "email1", "")
-        val user2 = Account("second", "last", "pass", "email2", "")
-        val savedUser1 = entityManager.persist(user1)
-        val savedUser2 = entityManager.persist(user2)
-
-        val teamMember1 = TeamMember(mutableSetOf(), savedTeam, "")
-        val teamMember2 = TeamMember(mutableSetOf(), savedTeam, "")
-        teamMember1.account = savedUser1
-        teamMember2.account = savedUser2
-        val savedTeamMember1 = entityManager.persist(teamMember1)
-        val savedTeamMember2 = entityManager.persist(teamMember2)
-
-        val place = Place("The stadium", "", "NYC", Place.PlaceType.STADIUM, savedTeam)
-        val savedPlace = entityManager.persist(place)
-
         val event = Event.Builder()
                 .name("event")
                 .team(savedTeam)
                 .fromDate(LocalDateTime.of(2019, 1, 1, 10, 0))
                 .place(savedPlace)
                 .build()
-        event.presentMembers.add(savedTeamMember1)
-        event.absentMembers.add(savedTeamMember2)
         val savedEvent = entityManager.persistAndFlush(event)
+        entityManager.persist(MemberResponse(savedEvent, savedTeamMember1, MemberResponse.Status.PRESENT))
+        entityManager.persist(MemberResponse(savedEvent, savedTeamMember2, MemberResponse.Status.ABSENT))
+        val teamMembersToNotify = eventRepository.getMembersThatHaveNotResponded(savedEvent.id)
+        assert(teamMembersToNotify).isEmpty()
+    }
 
-        // when
+    @Test
+    fun `should return list containing all team members when none has responded`() {
+        val event = Event.Builder()
+                .name("event")
+                .team(savedTeam)
+                .fromDate(LocalDateTime.of(2019, 1, 1, 10, 0))
+                .place(savedPlace)
+                .build()
+        val savedEvent = entityManager.persistAndFlush(event)
         val teamMembersToNotify = eventRepository.getMembersThatHaveNotResponded(savedEvent.id)
         assert(teamMembersToNotify).isEmpty()
     }

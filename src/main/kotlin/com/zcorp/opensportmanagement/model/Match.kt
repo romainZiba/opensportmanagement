@@ -38,12 +38,22 @@ class Match private constructor(builder: Builder) : AbstractEvent() {
     }
 
     override fun toDto(): EventDto {
-        val eventDto = EventDto(this.id, this.name, this.fromDateTime, this.toDateTime,
-                this.place.id!!,
-                this.presentMembers.map { it.toDto() }.toList(),
-                this.absentMembers.map { it.toDto() }.toList(),
-                this.waitingMembers.map { it.toDto() }.toList(),
-                team.id)
+        val eventDto = EventDto(
+                _id = this.id,
+                name = this.name,
+                fromDateTime = this.fromDateTime,
+                toDateTime = this.toDateTime,
+                placeId = this.place.id!!,
+                presentMembers = this.membersResponse
+                        .filter { it.status == MemberResponse.Status.PRESENT }
+                        .map { it.teamMember.toDto() }.toList(),
+                absentMembers = this.membersResponse
+                        .filter { it.status == MemberResponse.Status.ABSENT }
+                        .map { it.teamMember.toDto() }.toList(),
+                waitingMembers = this.membersResponse
+                        .filter { it.status == MemberResponse.Status.WAITING }
+                        .map { it.teamMember.toDto() }.toList(),
+                teamId = team.id)
         eventDto.isDone = this.isDone
         if (this.isTeamLocal) {
             eventDto.localTeamName = this.team.name

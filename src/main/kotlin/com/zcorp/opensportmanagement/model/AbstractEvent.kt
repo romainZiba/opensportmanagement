@@ -10,8 +10,8 @@ import javax.persistence.Id
 import javax.persistence.Inheritance
 import javax.persistence.InheritanceType
 import javax.persistence.JoinColumn
-import javax.persistence.ManyToMany
 import javax.persistence.ManyToOne
+import javax.persistence.OneToMany
 import javax.persistence.Table
 
 @Entity
@@ -23,10 +23,8 @@ abstract class AbstractEvent protected constructor() {
     @ManyToOne @JoinColumn(name = "team_id") lateinit var team: Team
     lateinit var fromDateTime: LocalDateTime
     var toDateTime: LocalDateTime? = null
-    @ManyToMany val presentMembers: MutableSet<TeamMember> = mutableSetOf()
-    @ManyToMany val absentMembers: MutableSet<TeamMember> = mutableSetOf()
-    @ManyToMany val waitingMembers: MutableSet<TeamMember> = mutableSetOf()
-    @GeneratedValue @Id var id: Int = -1
+    @OneToMany(mappedBy = "event") val membersResponse: MutableSet<MemberResponse> = mutableSetOf()
+    @GeneratedValue @Id @Column(name = "event_id") var id: Int = -1
 
     @ManyToOne
     lateinit var place: Place
@@ -34,6 +32,10 @@ abstract class AbstractEvent protected constructor() {
 
     @Column(name = "notified")
     var notified: Boolean = false
+
+    fun isFull(): Boolean {
+        return membersResponse.filter { it.status == MemberResponse.Status.PRESENT }.size == maxMembers
+    }
 
     abstract fun toDto(): EventDto
 
@@ -54,23 +56,6 @@ abstract class AbstractEvent protected constructor() {
 
     override fun hashCode(): Int {
         return id
-    }
-
-    fun participate(player: TeamMember, present: Boolean): AbstractEvent {
-        if (present) {
-            if (presentMembers.size < maxMembers) {
-                presentMembers.add(player)
-                absentMembers.remove(player)
-                waitingMembers.remove(player)
-            } else {
-                waitingMembers.add(player)
-            }
-        } else {
-            presentMembers.remove(player)
-            waitingMembers.remove(player)
-            absentMembers.add(player)
-        }
-        return this
     }
 
     enum class EventType(val type: String) {

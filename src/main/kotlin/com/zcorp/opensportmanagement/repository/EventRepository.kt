@@ -11,13 +11,12 @@ interface EventRepository : JpaRepository<AbstractEvent, Int> {
     fun getEventById(id: Int): AbstractEvent?
     fun getEventsByNotifiedFalseAndFromDateTimeBefore(fromDate: LocalDateTime): List<AbstractEvent>
     @Query("SELECT m FROM TeamMember m, AbstractEvent ev " +
-            " LEFT JOIN ev.presentMembers present " +
-            " LEFT JOIN ev.absentMembers absent " +
-            " LEFT JOIN ev.waitingMembers waiting " +
             " WHERE ev.id = :eventId " +
-            "      AND ev.team.id = m.team.id " +
-            "      AND (present IS NULL OR m.id != present.id) " +
-            "      AND (absent IS NULL OR m.id != absent.id) " +
-            "      AND (waiting IS NULL OR m.id != waiting.id)")
+            " AND m.team.id = ev.team.id " +
+            " AND m.id NOT IN (SELECT DISTINCT(response.teamMember.id) " +
+            "                   FROM TeamMember m1, AbstractEvent ev1 " +
+            "                   LEFT JOIN ev1.membersResponse response " +
+            "                   WHERE ev1.id = :eventId " +
+            "                   AND ev1.team.id = m1.team.id)")
     fun getMembersThatHaveNotResponded(@Param("eventId") eventId: Int): List<TeamMember>
 }

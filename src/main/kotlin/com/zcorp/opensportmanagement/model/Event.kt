@@ -25,9 +25,15 @@ class Event private constructor(builder: Builder) : AbstractEvent() {
                 fromDateTime = this.fromDateTime,
                 toDateTime = this.toDateTime,
                 placeId = this.place.id!!,
-                presentMembers = this.presentMembers.map { it.toDto() }.toList(),
-                absentMembers = this.absentMembers.map { it.toDto() }.toList(),
-                waitingMembers = this.waitingMembers.map { it.toDto() }.toList(),
+                presentMembers = this.membersResponse
+                        .filter { it.status == MemberResponse.Status.PRESENT }
+                        .map { it.teamMember.toDto() }.toList(),
+                absentMembers = this.membersResponse
+                        .filter { it.status == MemberResponse.Status.ABSENT }
+                        .map { it.teamMember.toDto() }.toList(),
+                waitingMembers = this.membersResponse
+                        .filter { it.status == MemberResponse.Status.WAITING }
+                        .map { it.teamMember.toDto() }.toList(),
                 teamId = team.id)
     }
 

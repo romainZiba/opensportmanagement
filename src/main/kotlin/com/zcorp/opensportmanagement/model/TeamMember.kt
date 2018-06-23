@@ -4,6 +4,7 @@ import com.zcorp.opensportmanagement.dto.TeamMemberDto
 import javax.persistence.ElementCollection
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
+import javax.persistence.Column
 import javax.persistence.Id
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
@@ -17,7 +18,7 @@ data class TeamMember(
     @ElementCollection val roles: MutableSet<Role>,
     @ManyToOne @JoinColumn(name = "TEAM_ID") val team: Team,
     var licenseNumber: String = "",
-    @Id @GeneratedValue val id: Int? = null
+    @Id @GeneratedValue @Column(name = "member_id") val id: Int? = null
 ) {
 
     @ManyToOne

@@ -1,16 +1,14 @@
 package com.zcorp.opensportmanagement.service
 
 import assertk.assert
-import assertk.assertions.containsExactly
 import assertk.assertions.hasSize
-import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
 import assertk.assertions.isInstanceOf
-import assertk.assertions.isNull
 import assertk.assertions.message
 import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.argumentCaptor
 import com.nhaarman.mockito_kotlin.mock
+import com.nhaarman.mockito_kotlin.reset
 import com.nhaarman.mockito_kotlin.times
 import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.whenever
@@ -20,33 +18,30 @@ import com.zcorp.opensportmanagement.dto.EventModificationDto
 import com.zcorp.opensportmanagement.model.AbstractEvent
 import com.zcorp.opensportmanagement.model.Account
 import com.zcorp.opensportmanagement.model.Event
+import com.zcorp.opensportmanagement.model.MemberResponse
 import com.zcorp.opensportmanagement.model.Place
 import com.zcorp.opensportmanagement.model.Place.PlaceType
 import com.zcorp.opensportmanagement.model.Team
 import com.zcorp.opensportmanagement.model.TeamMember
 import com.zcorp.opensportmanagement.repository.EventRepository
+import com.zcorp.opensportmanagement.repository.MemberResponseRepository
 import com.zcorp.opensportmanagement.repository.PlaceRepository
 import com.zcorp.opensportmanagement.repository.TeamMemberRepository
 import com.zcorp.opensportmanagement.repository.TeamRepository
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.Optional
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EventServiceTest {
     private val username = "foo"
     private val teamId = 5
     private val placeId = 1
-    private val mockTeam = Team("SuperNam", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "", teamId)
-    private val mockPlace = Place("The place", "", "Toulouse", PlaceType.STADIUM, mockTeam, placeId)
-    private val mockEvent = Event.Builder().name("TheOne")
-            .fromDate(LocalDateTime.of(2018, 1, 31, 10, 0))
-            .toDate(LocalDateTime.of(2018, 1, 31, 12, 0))
-            .place(mockPlace)
-            .team(mockTeam)
-            .build()
     private val teamMemberId = 12
     private val firstName = "firstname"
     private val lastName = "ln"
@@ -55,6 +50,14 @@ class EventServiceTest {
     private val phoneNumber = "55965"
     private val eventId = 7
 
+    private val mockTeam = Team("SuperNam", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "", teamId)
+    private val mockPlace = Place("The place", "", "Toulouse", PlaceType.STADIUM, mockTeam, placeId)
+    private val mockEvent = Event.Builder().name("TheOne")
+            .fromDate(LocalDateTime.of(2018, 1, 31, 10, 0))
+            .toDate(LocalDateTime.of(2018, 1, 31, 12, 0))
+            .place(mockPlace)
+            .team(mockTeam)
+            .build()
     private val mockUser = Account(firstName, lastName, password, email, phoneNumber)
     private val mockTeamMember = TeamMember(mutableSetOf(TeamMember.Role.ADMIN), mockTeam, "", teamMemberId)
 
@@ -62,9 +65,27 @@ class EventServiceTest {
     private val placeRepoMock: PlaceRepository = mock()
     private val teamRepoMock: TeamRepository = mock()
     private val teamMemberRepoMock: TeamMemberRepository = mock()
+    private val memberResponseRepoMock: MemberResponseRepository = mock()
     private val emailServiceMock: EmailService = mock()
     private val propertiesMock = EventsProperties(daysBefore = 7)
-    private val eventService = EventService(eventRepoMock, teamMemberRepoMock, placeRepoMock, teamRepoMock, emailServiceMock, propertiesMock)
+    private val eventService = EventService(eventRepository = eventRepoMock,
+            memberResponseRepository = memberResponseRepoMock,
+            teamMemberRepository = teamMemberRepoMock,
+            placeRepository = placeRepoMock,
+            teamRepository = teamRepoMock,
+            emailService = emailServiceMock,
+            properties = propertiesMock
+    )
+
+    @BeforeEach
+    fun init() {
+        reset(eventRepoMock,
+                placeRepoMock,
+                teamRepoMock,
+                teamMemberRepoMock,
+                memberResponseRepoMock,
+                emailServiceMock)
+    }
 
     @Test
     fun `create event with an empty name should be forbidden`() {
@@ -225,26 +246,15 @@ class EventServiceTest {
         whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
         whenever(eventRepoMock.save(mockEvent)).thenReturn(mockEvent)
         whenever(teamMemberRepoMock.findByUsername(username, teamId)).thenReturn(mockTeamMember)
-        val eventDto = eventService.participate(username, eventId, true, LocalDateTime.of(2018, 1, 30, 10, 0))
-        assert(mockEvent.presentMembers).hasSize(1)
-        assert(mockEvent.absentMembers).hasSize(0)
-        assert(mockEvent.waitingMembers).hasSize(0)
-        verify(eventRepoMock, times(1)).save(mockEvent)
-        assert(eventDto.name).isEqualTo(mockEvent.name)
-        assert(eventDto._id).isEqualTo(mockEvent.id)
-        assert(eventDto.absentMembers).isEmpty()
-        assert(eventDto.waitingMembers).isEmpty()
-        assert(eventDto.presentMembers).containsExactly(mockTeamMember.toDto())
-        assert(eventDto.fromDateTime).isEqualTo(mockEvent.fromDateTime)
-        assert(eventDto.toDateTime).isEqualTo(mockEvent.toDateTime)
-        assert(eventDto.placeId).isEqualTo(mockEvent.place.id)
-        assert(eventDto.isDone).isNull()
-        assert(eventDto.localTeamName).isNull()
-        assert(eventDto.localTeamScore).isNull()
-        assert(eventDto.localTeamImgUrl).isNull()
-        assert(eventDto.visitorTeamImgUrl).isNull()
-        assert(eventDto.visitorTeamName).isNull()
-        assert(eventDto.visitorTeamScore).isNull()
+        eventService.participate(username, eventId, true, LocalDateTime.of(2018, 1, 30, 10, 0))
+
+        argumentCaptor<MemberResponse>().apply {
+            verify(memberResponseRepoMock, times(1)).save(capture())
+            assert(allValues).hasSize(1)
+            assert(firstValue.event).isEqualTo(mockEvent)
+            assert(firstValue.teamMember).isEqualTo(mockTeamMember)
+            assert(firstValue.status).isEqualTo(MemberResponse.Status.WAITING)
+        }
     }
 
     @Test
@@ -256,27 +266,16 @@ class EventServiceTest {
         whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
         whenever(eventRepoMock.save(mockEvent)).thenReturn(mockEvent)
         whenever(teamMemberRepoMock.findByUsername(username, teamId)).thenReturn(mockTeamMember)
-        assert(mockEvent.presentMembers).hasSize(0)
-        val eventDto = eventService.participate(username, eventId, true, LocalDateTime.of(2018, 1, 30, 10, 0))
-        assert(mockEvent.presentMembers).hasSize(0)
-        assert(mockEvent.absentMembers).hasSize(0)
-        assert(mockEvent.waitingMembers).hasSize(1)
-        verify(eventRepoMock, times(1)).save(mockEvent)
-        assert(eventDto.name).isEqualTo(mockEvent.name)
-        assert(eventDto._id).isEqualTo(mockEvent.id)
-        assert(eventDto.absentMembers).isEmpty()
-        assert(eventDto.presentMembers).isEmpty()
-        assert(eventDto.waitingMembers).containsExactly(mockTeamMember.toDto())
-        assert(eventDto.fromDateTime).isEqualTo(mockEvent.fromDateTime)
-        assert(eventDto.toDateTime).isEqualTo(mockEvent.toDateTime)
-        assert(eventDto.placeId).isEqualTo(mockEvent.place.id)
-        assert(eventDto.isDone).isNull()
-        assert(eventDto.localTeamName).isNull()
-        assert(eventDto.localTeamScore).isNull()
-        assert(eventDto.localTeamImgUrl).isNull()
-        assert(eventDto.visitorTeamImgUrl).isNull()
-        assert(eventDto.visitorTeamName).isNull()
-        assert(eventDto.visitorTeamScore).isNull()
+
+        eventService.participate(username, eventId, true, LocalDateTime.of(2018, 1, 30, 10, 0))
+
+        argumentCaptor<MemberResponse>().apply {
+            verify(memberResponseRepoMock, times(1)).save(capture())
+            assert(allValues).hasSize(1)
+            assert(firstValue.event).isEqualTo(mockEvent)
+            assert(firstValue.teamMember).isEqualTo(mockTeamMember)
+            assert(firstValue.status).isEqualTo(MemberResponse.Status.WAITING)
+        }
     }
 
     @Test

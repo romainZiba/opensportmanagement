@@ -44,7 +44,7 @@ server:
     key-alias: opensportmanagement
 opensportmanagement:
   events:
-    daysBefore: 7
+    daysBefore: 50
   notifications:
     daysBefore: 7
     enabled: false

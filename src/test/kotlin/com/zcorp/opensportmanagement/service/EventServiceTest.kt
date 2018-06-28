@@ -1,6 +1,7 @@
 package com.zcorp.opensportmanagement.service
 
 import assertk.assert
+import assertk.assertAll
 import assertk.assertions.hasSize
 import assertk.assertions.isEqualTo
 import assertk.assertions.isInstanceOf
@@ -40,9 +41,13 @@ import java.util.Optional
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EventServiceTest {
     private val username = "foo"
+    private val username2 = "foo2"
+    private val username3 = "foo3"
     private val teamId = 5
     private val placeId = 1
     private val teamMemberId = 12
+    private val teamMember2Id = 45
+    private val teamMember3Id = 76
     private val firstName = "firstname"
     private val lastName = "ln"
     private val password = "whatever"
@@ -58,8 +63,28 @@ class EventServiceTest {
             .place(mockPlace)
             .team(mockTeam)
             .build()
-    private val mockUser = Account(firstName, lastName, password, email, phoneNumber)
+    private val mockUser = Account(firstName = firstName,
+            lastName = lastName,
+            password = password,
+            email = email,
+            phoneNumber = phoneNumber,
+            username = username)
+    private val mockUser2 = Account(firstName = "second_firstName",
+            lastName = "second_lastName",
+            password = password,
+            email = "second_email@camail.com",
+            phoneNumber = phoneNumber,
+            username = username2)
+    private val mockUser3 = Account(firstName = "third_firstName",
+            lastName = "third_lastName",
+            password = password,
+            email = "third_email@camail.com",
+            phoneNumber = phoneNumber,
+            username = username3)
     private val mockTeamMember = TeamMember(mutableSetOf(TeamMember.Role.ADMIN), mockTeam, "", teamMemberId)
+    private val mockTeamMember2 = TeamMember(mutableSetOf(TeamMember.Role.ADMIN), mockTeam, "", teamMember2Id)
+    private val mockTeamMember3 = TeamMember(mutableSetOf(TeamMember.Role.ADMIN), mockTeam, "", teamMember3Id)
+
 
     private val eventRepoMock: EventRepository = mock()
     private val placeRepoMock: PlaceRepository = mock()
@@ -76,6 +101,12 @@ class EventServiceTest {
             emailService = emailServiceMock,
             properties = propertiesMock
     )
+
+    init {
+        mockTeamMember.account = mockUser
+        mockTeamMember2.account = mockUser2
+        mockTeamMember3.account = mockUser3
+    }
 
     @BeforeEach
     fun init() {
@@ -228,7 +259,6 @@ class EventServiceTest {
     @Test
     fun `user trying to participate to a future event more than x days before should not be possible`() {
         mockEvent.id = eventId
-        mockTeamMember.account = mockUser
         whenever(teamMemberRepoMock.findByUsername(username, teamId)).thenReturn(mockTeamMember)
         whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
         whenever(eventRepoMock.save(mockEvent)).thenReturn(mockEvent)
@@ -241,13 +271,11 @@ class EventServiceTest {
     @Test
     fun `user trying to participate to a future event should add him in the present members`() {
         mockEvent.id = eventId
-        mockTeamMember.account = mockUser
         whenever(teamMemberRepoMock.findByUsername(username, teamId)).thenReturn(mockTeamMember)
         whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
         whenever(eventRepoMock.save(mockEvent)).thenReturn(mockEvent)
         whenever(teamMemberRepoMock.findByUsername(username, teamId)).thenReturn(mockTeamMember)
         eventService.participate(username, eventId, true, LocalDateTime.of(2018, 1, 30, 10, 0))
-
         argumentCaptor<MemberResponse>().apply {
             verify(memberResponseRepoMock, times(1)).save(capture())
             assert(allValues).hasSize(1)
@@ -261,20 +289,44 @@ class EventServiceTest {
     fun `user trying to participate to a future event already full should add him in the waiting members`() {
         mockEvent.id = eventId
         mockEvent.maxMembers = 0
-        mockTeamMember.account = mockUser
         whenever(teamMemberRepoMock.findByUsername(username, teamId)).thenReturn(mockTeamMember)
         whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
         whenever(eventRepoMock.save(mockEvent)).thenReturn(mockEvent)
         whenever(teamMemberRepoMock.findByUsername(username, teamId)).thenReturn(mockTeamMember)
-
         eventService.participate(username, eventId, true, LocalDateTime.of(2018, 1, 30, 10, 0))
-
         argumentCaptor<MemberResponse>().apply {
             verify(memberResponseRepoMock, times(1)).save(capture())
             assert(allValues).hasSize(1)
             assert(firstValue.event).isEqualTo(mockEvent)
             assert(firstValue.teamMember).isEqualTo(mockTeamMember)
             assert(firstValue.status).isEqualTo(MemberResponse.Status.WAITING)
+        }
+    }
+
+    @Test
+    fun `user withdrawing from an event already full should add him in the absent members and first waiting member should be present`() {
+        mockEvent.id = eventId
+        mockEvent.maxMembers = 1
+        mockEvent.membersResponse.add(MemberResponse(mockEvent, mockTeamMember, MemberResponse.Status.PRESENT, LocalDateTime.of(2018, 1, 1, 1, 0)))
+        mockEvent.membersResponse.add(MemberResponse(mockEvent, mockTeamMember2, MemberResponse.Status.WAITING, LocalDateTime.of(2018, 1, 2, 1, 0)))
+        mockEvent.membersResponse.add(MemberResponse(mockEvent, mockTeamMember3, MemberResponse.Status.WAITING, LocalDateTime.of(2018, 1, 1, 1, 0)))
+
+        whenever(teamMemberRepoMock.findByUsername(username, teamId)).thenReturn(mockTeamMember)
+        whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
+        whenever(eventRepoMock.save(mockEvent)).thenReturn(mockEvent)
+        whenever(teamMemberRepoMock.findByUsername(username, teamId)).thenReturn(mockTeamMember)
+        eventService.participate(username, eventId, false, LocalDateTime.of(2018, 1, 30, 10, 0))
+        argumentCaptor<MemberResponse>().apply {
+            verify(memberResponseRepoMock, times(2)).save(capture())
+            assertAll {
+                assert(allValues).hasSize(2)
+                assert(firstValue.teamMember).isEqualTo(mockTeamMember3)
+                assert(firstValue.status).isEqualTo(MemberResponse.Status.PRESENT)
+                assert(firstValue.event).isEqualTo(mockEvent)
+                assert(secondValue.teamMember).isEqualTo(mockTeamMember)
+                assert(secondValue.status).isEqualTo(MemberResponse.Status.ABSENT)
+                assert(secondValue.event).isEqualTo(mockEvent)
+            }
         }
     }
 

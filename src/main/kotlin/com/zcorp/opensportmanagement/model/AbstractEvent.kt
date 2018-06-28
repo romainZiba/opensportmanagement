@@ -37,6 +37,13 @@ abstract class AbstractEvent protected constructor() {
         return membersResponse.filter { it.status == MemberResponse.Status.PRESENT }.size == maxMembers
     }
 
+    fun isMemberPresent(username: String): Boolean {
+        return membersResponse
+                .filter { memberResponse -> memberResponse.status == MemberResponse.Status.PRESENT }
+                .map { memberResponse -> memberResponse.teamMember.account.username }
+                .any { name -> name == username }
+    }
+
     abstract fun toDto(): EventDto
 
     override fun toString(): String {

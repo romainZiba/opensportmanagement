@@ -20,12 +20,11 @@ data class Account(
     @Column(name = "email", unique = true) var email: String,
     @Column(name = "phone_number") var phoneNumber: String = "",
     @Column(name = "temporary") var temporary: Boolean = true,
-    @Column(name = "global_admin") val globalAdmin: Boolean = false
-) {
-
+    @Column(name = "global_admin") val globalAdmin: Boolean = false,
     @Id
     @Column(name = "username")
     val username: String = UUID.randomUUID().toString()
+) {
 
     @Column(name = "confirmation_id", unique = true)
     val confirmationId: String = UUID.randomUUID().toString()

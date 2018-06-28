@@ -7,8 +7,8 @@ import com.zcorp.opensportmanagement.dto.EventModificationDto
 import com.zcorp.opensportmanagement.model.AbstractEvent
 import com.zcorp.opensportmanagement.model.Event
 import com.zcorp.opensportmanagement.model.MemberResponse
-import com.zcorp.opensportmanagement.repository.MemberResponseRepository
 import com.zcorp.opensportmanagement.repository.EventRepository
+import com.zcorp.opensportmanagement.repository.MemberResponseRepository
 import com.zcorp.opensportmanagement.repository.PlaceRepository
 import com.zcorp.opensportmanagement.repository.TeamMemberRepository
 import com.zcorp.opensportmanagement.repository.TeamRepository
@@ -96,18 +96,35 @@ open class EventService @Autowired constructor(
     @Transactional
     open fun participate(username: String, eventId: Int, present: Boolean, now: LocalDateTime): EventDto {
         val event = eventRepository.findById(eventId).orElseThrow { NotFoundException("Event $eventId does not exist") }
-        val teamMember = teamMemberRepository.findByUsername(username, event.team.id!!) ?: throw NotFoundException("Team member $username does not exist")
-        if (event.fromDateTime.isBefore(now)) {
-            throw SubscriptionNotPermittedException("Event $eventId has already occurred")
+        val teamMember = teamMemberRepository.findByUsername(username, event.team.id!!)
+                ?: throw NotFoundException("Team member $username does not exist")
+        when {
+            event.fromDateTime.isBefore(now) ->
+                throw SubscriptionNotPermittedException("Event $eventId has already occurred")
+            event.fromDateTime.isAfter(now.plusDays(properties.daysBefore)) ->
+                throw SubscriptionNotPermittedException("Event $eventId is not open for subscriptions yet")
         }
-        if (event.fromDateTime.isAfter(now.plusDays(properties.daysBefore))) {
-            throw SubscriptionNotPermittedException("Event $eventId is not open for subscriptions yet")
-        }
+        val eventFull = event.isFull()
         val status = when {
-            present && event.isFull() -> MemberResponse.Status.WAITING
+            present && eventFull -> MemberResponse.Status.WAITING
             present -> MemberResponse.Status.PRESENT
             !present -> MemberResponse.Status.ABSENT
             else -> MemberResponse.Status.ABSENT
+        }
+        if (!present && eventFull && event.isMemberPresent(username)) {
+            val firstWaitingMember = event.membersResponse
+                    .filter { it.status == MemberResponse.Status.WAITING }
+                    .sortedBy { it.subscriptionDate }
+                    .map { it.teamMember }
+                    .firstOrNull()
+            if (firstWaitingMember != null) {
+                memberResponseRepository.save(MemberResponse(event, firstWaitingMember, MemberResponse.Status.PRESENT))
+                // TODO: better mail please...
+                emailService.sendMessage(
+                        to = listOf(firstWaitingMember.account.email),
+                        subject = "Convoqué !",
+                        text = "Tu participes à ${event.name}")
+            }
         }
         memberResponseRepository.save(MemberResponse(event, teamMember, status))
         return event.toDto()

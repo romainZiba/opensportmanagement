@@ -5,8 +5,8 @@ import com.zcorp.opensportmanagement.dto.AccountDto
 import com.zcorp.opensportmanagement.dto.AccountUpdateDto
 import com.zcorp.opensportmanagement.model.Account
 import com.zcorp.opensportmanagement.model.TeamMember
-import com.zcorp.opensportmanagement.repository.TeamRepository
 import com.zcorp.opensportmanagement.repository.AccountRepository
+import com.zcorp.opensportmanagement.repository.TeamRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
@@ -14,9 +14,9 @@ import javax.transaction.Transactional
 
 @Service
 open class AccountService @Autowired constructor(
-    private val teamRepository: TeamRepository,
-    private val accountRepository: AccountRepository,
-    private val bCryptPasswordEncoder: BCryptPasswordEncoder
+        private val teamRepository: TeamRepository,
+        private val accountRepository: AccountRepository,
+        private val bCryptPasswordEncoder: BCryptPasswordEncoder
 ) {
 
     @Transactional
@@ -73,5 +73,10 @@ open class AccountService @Autowired constructor(
     @Transactional
     open fun getTeamsAndRoles(username: String): Set<TeamMember>? {
         return accountRepository.findByUsername(username)?.getMemberOf()
+    }
+
+    @Transactional
+    open fun getAccountsCount(): Long {
+        return accountRepository.count()
     }
 }

@@ -30,6 +30,7 @@ import com.zcorp.opensportmanagement.repository.PlaceRepository
 import com.zcorp.opensportmanagement.repository.TeamMemberRepository
 import com.zcorp.opensportmanagement.repository.TeamRepository
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.DayOfWeek
@@ -85,7 +86,6 @@ class EventServiceTest {
     private val mockTeamMember2 = TeamMember(mutableSetOf(TeamMember.Role.ADMIN), mockTeam, "", teamMember2Id)
     private val mockTeamMember3 = TeamMember(mutableSetOf(TeamMember.Role.ADMIN), mockTeam, "", teamMember3Id)
 
-
     private val eventRepoMock: EventRepository = mock()
     private val placeRepoMock: PlaceRepository = mock()
     private val teamRepoMock: TeamRepository = mock()
@@ -116,26 +116,6 @@ class EventServiceTest {
                 teamMemberRepoMock,
                 memberResponseRepoMock,
                 emailServiceMock)
-    }
-
-    @Test
-    fun `create event with an empty name should be forbidden`() {
-        val fromDateTime = LocalDateTime.of(2018, 1, 1, 0, 0)
-        val toDateTime = LocalDateTime.of(2018, 1, 1, 10, 0)
-        val dto = EventCreationDto(
-                name = "",
-                fromDate = fromDateTime.toLocalDate(),
-                toDate = toDateTime.toLocalDate(),
-                fromTime = fromDateTime.toLocalTime(),
-                toTime = toDateTime.toLocalTime(),
-                placeId = mockPlace.id!!,
-                type = AbstractEvent.EventType.OTHER)
-        assert {
-            eventService.createEvent(teamId, dto)
-        }.thrownError {
-            isInstanceOf(BadParameterException::class)
-            message().isEqualTo("Name of the event must not be empty")
-        }
     }
 
     @Test
@@ -230,45 +210,6 @@ class EventServiceTest {
     }
 
     @Test
-    fun `user that does not exist trying to participate to an event should not be possible`() {
-        whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
-        whenever(teamMemberRepoMock.findByUsername(any(), any())).thenReturn(null)
-        assert {
-            eventService.participate(username, eventId, true, LocalDateTime.of(2018, 1, 30, 10, 0))
-        }.thrownError { isInstanceOf(NotFoundException::class) }
-    }
-
-    @Test
-    fun `user trying to participate to an event that does not exist should not be possible`() {
-        whenever(teamMemberRepoMock.findByUsername(username, teamId)).thenReturn(mockTeamMember)
-        whenever(eventRepoMock.findById(any())).thenReturn(Optional.empty())
-        assert {
-            eventService.participate(username, eventId, true, LocalDateTime.of(2018, 1, 30, 10, 0))
-        }.thrownError { isInstanceOf(NotFoundException::class) }
-    }
-
-    @Test
-    fun `user trying to participate to a past event should not be possible`() {
-        whenever(teamMemberRepoMock.findByUsername(username, teamId)).thenReturn(mockTeamMember)
-        whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
-        assert {
-            eventService.participate(username, eventId, true, LocalDateTime.of(2018, 2, 1, 10, 0))
-        }.thrownError { isInstanceOf(SubscriptionNotPermittedException::class) }
-    }
-
-    @Test
-    fun `user trying to participate to a future event more than x days before should not be possible`() {
-        mockEvent.id = eventId
-        whenever(teamMemberRepoMock.findByUsername(username, teamId)).thenReturn(mockTeamMember)
-        whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
-        whenever(eventRepoMock.save(mockEvent)).thenReturn(mockEvent)
-        whenever(teamMemberRepoMock.findByUsername(username, teamId)).thenReturn(mockTeamMember)
-        assert {
-            eventService.participate(username, eventId, true, LocalDateTime.of(2018, 1, 20, 10, 0))
-        }.thrownError { isInstanceOf(SubscriptionNotPermittedException::class) }
-    }
-
-    @Test
     fun `user trying to participate to a future event should add him in the present members`() {
         mockEvent.id = eventId
         whenever(teamMemberRepoMock.findByUsername(username, teamId)).thenReturn(mockTeamMember)
@@ -331,75 +272,6 @@ class EventServiceTest {
     }
 
     @Test
-    fun `trying to update a past event should fail`() {
-        whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
-        whenever(placeRepoMock.findById(any())).thenReturn(Optional.of(mockPlace))
-        whenever(eventRepoMock.save<Event>(any())).thenAnswer { it.arguments[0] }
-        val fromDateTime = LocalDateTime.of(2018, 8, 1, 20, 0)
-        val toDateTime = LocalDateTime.of(2018, 8, 1, 22, 0)
-        val comparedDateTime = LocalDateTime.of(2018, 8, 1, 10, 0)
-        val eventModifDto = EventModificationDto(
-                fromDate = fromDateTime.toLocalDate(),
-                fromTime = fromDateTime.toLocalTime(),
-                toDate = toDateTime.toLocalDate(),
-                toTime = toDateTime.toLocalTime(),
-                placeId = placeId
-        )
-        assert {
-            eventService.updateEvent(mockEvent.id, eventModifDto, comparedDateTime)
-        }.thrownError {
-            isInstanceOf(NotPossibleException::class)
-            message().isEqualTo("Event has already occurred")
-        }
-    }
-
-    @Test
-    fun `trying to set a start date greater than an end date should fail`() {
-        whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
-        whenever(placeRepoMock.findById(any())).thenReturn(Optional.of(mockPlace))
-        whenever(eventRepoMock.save<Event>(any())).thenAnswer { it.arguments[0] }
-        val fromDateTime = LocalDateTime.of(2018, 1, 1, 23, 0)
-        val toDateTime = LocalDateTime.of(2018, 1, 1, 21, 0)
-        val comparedDateTime = LocalDateTime.of(2018, 1, 1, 10, 0)
-        val eventModifDto = EventModificationDto(
-                fromDate = fromDateTime.toLocalDate(),
-                fromTime = fromDateTime.toLocalTime(),
-                toDate = toDateTime.toLocalDate(),
-                toTime = toDateTime.toLocalTime(),
-                placeId = placeId
-        )
-        assert {
-            eventService.updateEvent(mockEvent.id, eventModifDto, comparedDateTime)
-        }.thrownError {
-            isInstanceOf(NotPossibleException::class)
-            message().isEqualTo("To date must be greater than from date")
-        }
-    }
-
-    @Test
-    fun `trying to set a from date in the past should fail`() {
-        whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
-        whenever(placeRepoMock.findById(any())).thenReturn(Optional.of(mockPlace))
-        whenever(eventRepoMock.save<Event>(any())).thenAnswer { it.arguments[0] }
-        val fromDateTime = LocalDateTime.of(2018, 1, 1, 20, 0)
-        val toDateTime = LocalDateTime.of(2018, 1, 1, 22, 0)
-        val comparedDateTime = LocalDateTime.of(2018, 1, 2, 0, 0)
-        val eventModifDto = EventModificationDto(
-                fromDate = fromDateTime.toLocalDate(),
-                fromTime = fromDateTime.toLocalTime(),
-                toDate = toDateTime.toLocalDate(),
-                toTime = toDateTime.toLocalTime(),
-                placeId = placeId
-        )
-        assert {
-            eventService.updateEvent(mockEvent.id, eventModifDto, comparedDateTime)
-        }.thrownError {
-            isInstanceOf(NotPossibleException::class)
-            message().isEqualTo("From date can not be in the past")
-        }
-    }
-
-    @Test
     fun `trying to update an event should work`() {
         whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
         whenever(placeRepoMock.findById(any())).thenReturn(Optional.of(mockPlace))
@@ -417,5 +289,164 @@ class EventServiceTest {
         val updatedDto = eventService.updateEvent(mockEvent.id, eventModifDto, comparedDateTime)
         assert(updatedDto.fromDateTime).isEqualTo(fromDateTime)
         assert(updatedDto.toDateTime).isEqualTo(toDateTime)
+    }
+
+    @Test
+    fun `cancel an event should work`() {
+        whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
+        whenever(eventRepoMock.save<Event>(any())).thenAnswer { it.arguments[0] }
+
+        val comparedDateTime = LocalDateTime.of(2018, 1, 1, 20, 0)
+        val dto = eventService.cancelEvent(mockEvent.id, comparedDateTime)
+        argumentCaptor<Event>().apply {
+            verify(eventRepoMock, times(1)).save(capture())
+            assert(allValues).hasSize(1)
+            assert(firstValue.cancelled).isEqualTo(true)
+        }
+        assert(dto.cancelled).isEqualTo(true)
+    }
+
+    @Nested
+    inner class ErrorCases {
+
+        @Test
+        fun `create event with an empty name should be forbidden`() {
+            val fromDateTime = LocalDateTime.of(2018, 1, 1, 0, 0)
+            val toDateTime = LocalDateTime.of(2018, 1, 1, 10, 0)
+            val dto = EventCreationDto(
+                    name = "",
+                    fromDate = fromDateTime.toLocalDate(),
+                    toDate = toDateTime.toLocalDate(),
+                    fromTime = fromDateTime.toLocalTime(),
+                    toTime = toDateTime.toLocalTime(),
+                    placeId = mockPlace.id!!,
+                    type = AbstractEvent.EventType.OTHER)
+            assert {
+                eventService.createEvent(teamId, dto)
+            }.thrownError {
+                isInstanceOf(BadParameterException::class)
+                message().isEqualTo("Name of the event must not be empty")
+            }
+        }
+
+        @Test
+        fun `user that does not exist trying to participate to an event should not be possible`() {
+            whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
+            whenever(teamMemberRepoMock.findByUsername(any(), any())).thenReturn(null)
+            assert {
+                eventService.participate(username, eventId, true, LocalDateTime.of(2018, 1, 30, 10, 0))
+            }.thrownError { isInstanceOf(NotFoundException::class) }
+        }
+
+        @Test
+        fun `user trying to participate to an event that does not exist should not be possible`() {
+            whenever(teamMemberRepoMock.findByUsername(username, teamId)).thenReturn(mockTeamMember)
+            whenever(eventRepoMock.findById(any())).thenReturn(Optional.empty())
+            assert {
+                eventService.participate(username, eventId, true, LocalDateTime.of(2018, 1, 30, 10, 0))
+            }.thrownError { isInstanceOf(NotFoundException::class) }
+        }
+
+        @Test
+        fun `user trying to participate to a past event should not be possible`() {
+            whenever(teamMemberRepoMock.findByUsername(username, teamId)).thenReturn(mockTeamMember)
+            whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
+            assert {
+                eventService.participate(username, eventId, true, LocalDateTime.of(2018, 2, 1, 10, 0))
+            }.thrownError { isInstanceOf(SubscriptionNotPermittedException::class) }
+        }
+
+        @Test
+        fun `user trying to participate to a future event more than x days before should not be possible`() {
+            mockEvent.id = eventId
+            whenever(teamMemberRepoMock.findByUsername(username, teamId)).thenReturn(mockTeamMember)
+            whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
+            whenever(eventRepoMock.save(mockEvent)).thenReturn(mockEvent)
+            whenever(teamMemberRepoMock.findByUsername(username, teamId)).thenReturn(mockTeamMember)
+            assert {
+                eventService.participate(username, eventId, true, LocalDateTime.of(2018, 1, 20, 10, 0))
+            }.thrownError { isInstanceOf(SubscriptionNotPermittedException::class) }
+        }
+
+        @Test
+        fun `trying to update a past event should fail`() {
+            whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
+            whenever(placeRepoMock.findById(any())).thenReturn(Optional.of(mockPlace))
+            whenever(eventRepoMock.save<Event>(any())).thenAnswer { it.arguments[0] }
+            val fromDateTime = LocalDateTime.of(2018, 8, 1, 20, 0)
+            val toDateTime = LocalDateTime.of(2018, 8, 1, 22, 0)
+            val comparedDateTime = LocalDateTime.of(2018, 8, 1, 10, 0)
+            val eventModifDto = EventModificationDto(
+                    fromDate = fromDateTime.toLocalDate(),
+                    fromTime = fromDateTime.toLocalTime(),
+                    toDate = toDateTime.toLocalDate(),
+                    toTime = toDateTime.toLocalTime(),
+                    placeId = placeId
+            )
+            assert {
+                eventService.updateEvent(mockEvent.id, eventModifDto, comparedDateTime)
+            }.thrownError {
+                isInstanceOf(NotPossibleException::class)
+                message().isEqualTo("Event has already occurred")
+            }
+        }
+
+        @Test
+        fun `trying to set a start date greater than an end date should fail`() {
+            whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
+            whenever(placeRepoMock.findById(any())).thenReturn(Optional.of(mockPlace))
+            whenever(eventRepoMock.save<Event>(any())).thenAnswer { it.arguments[0] }
+            val fromDateTime = LocalDateTime.of(2018, 1, 1, 23, 0)
+            val toDateTime = LocalDateTime.of(2018, 1, 1, 21, 0)
+            val comparedDateTime = LocalDateTime.of(2018, 1, 1, 10, 0)
+            val eventModifDto = EventModificationDto(
+                    fromDate = fromDateTime.toLocalDate(),
+                    fromTime = fromDateTime.toLocalTime(),
+                    toDate = toDateTime.toLocalDate(),
+                    toTime = toDateTime.toLocalTime(),
+                    placeId = placeId
+            )
+            assert {
+                eventService.updateEvent(mockEvent.id, eventModifDto, comparedDateTime)
+            }.thrownError {
+                isInstanceOf(NotPossibleException::class)
+                message().isEqualTo("To date must be greater than from date")
+            }
+        }
+
+        @Test
+        fun `trying to set a from date in the past should fail`() {
+            whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
+            whenever(placeRepoMock.findById(any())).thenReturn(Optional.of(mockPlace))
+            whenever(eventRepoMock.save<Event>(any())).thenAnswer { it.arguments[0] }
+            val fromDateTime = LocalDateTime.of(2018, 1, 1, 20, 0)
+            val toDateTime = LocalDateTime.of(2018, 1, 1, 22, 0)
+            val comparedDateTime = LocalDateTime.of(2018, 1, 2, 0, 0)
+            val eventModifDto = EventModificationDto(
+                    fromDate = fromDateTime.toLocalDate(),
+                    fromTime = fromDateTime.toLocalTime(),
+                    toDate = toDateTime.toLocalDate(),
+                    toTime = toDateTime.toLocalTime(),
+                    placeId = placeId
+            )
+            assert {
+                eventService.updateEvent(mockEvent.id, eventModifDto, comparedDateTime)
+            }.thrownError {
+                isInstanceOf(NotPossibleException::class)
+                message().isEqualTo("From date can not be in the past")
+            }
+        }
+
+        @Test
+        fun `cancel a past event should fail`() {
+            whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
+            val comparedDateTime = LocalDateTime.of(2018, 2, 1, 20, 0)
+            assert {
+                eventService.cancelEvent(mockEvent.id, comparedDateTime)
+            }.thrownError {
+                isInstanceOf(NotPossibleException::class)
+                message().isEqualTo("The event has already occurred")
+            }
+        }
     }
 }

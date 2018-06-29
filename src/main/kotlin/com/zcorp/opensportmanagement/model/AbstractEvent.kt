@@ -33,6 +33,9 @@ abstract class AbstractEvent protected constructor() {
     @Column(name = "notified")
     var notified: Boolean = false
 
+    @Column(name = "cancelled")
+    var cancelled: Boolean = false
+
     fun isFull(): Boolean {
         return membersResponse.filter { it.status == MemberResponse.Status.PRESENT }.size == maxMembers
     }

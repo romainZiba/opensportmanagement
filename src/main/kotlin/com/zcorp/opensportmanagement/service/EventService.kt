@@ -144,4 +144,14 @@ open class EventService @Autowired constructor(
         event.place = place
         return eventRepository.save(event).toDto()
     }
+
+    @Transactional
+    open fun cancelEvent(eventId: Int, comparedDate: LocalDateTime): EventDto {
+        val event = eventRepository.findById(eventId).orElseThrow { NotFoundException("Event $eventId does not exist") }
+        if (event.fromDateTime.isBefore(comparedDate)) {
+            throw NotPossibleException("The event has already occurred")
+        }
+        event.cancelled = true
+        return eventRepository.save(event).toDto()
+    }
 }

@@ -7,7 +7,6 @@ import com.zcorp.opensportmanagement.dto.EventDto
 import com.zcorp.opensportmanagement.dto.EventModificationDto
 import com.zcorp.opensportmanagement.security.AccessController
 import com.zcorp.opensportmanagement.service.EventService
-import com.zcorp.opensportmanagement.service.MessagingService
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -41,8 +40,6 @@ class EventControllerTest {
     private lateinit var eventServiceMock: EventService
     @MockBean
     private lateinit var accessController: AccessController
-    @MockBean
-    private lateinit var messagingServiceMock: MessagingService
 
     @Test
     @WithMockUser("foo")
@@ -68,7 +65,8 @@ class EventControllerTest {
                 presentMembers = listOf(),
                 absentMembers = listOf(),
                 waitingMembers = listOf(),
-                teamId = teamId
+                teamId = teamId,
+                cancelled = false
         )
         val updatedEventDto = EventDto(
                 _id = eventId,
@@ -78,7 +76,8 @@ class EventControllerTest {
                 placeId = placeId,
                 presentMembers = listOf(),
                 absentMembers = listOf(),
-                waitingMembers = listOf()
+                waitingMembers = listOf(),
+                cancelled = false
         )
         whenever(accessController.isTeamAdmin(any(), any())).thenReturn(true)
         whenever(eventServiceMock.getEvent(eventId)).thenReturn(eventDto)
@@ -106,7 +105,8 @@ class EventControllerTest {
                                 "  \"visitorTeamImgUrl\" : null,\n" +
                                 "  \"visitorTeamScore\" : null,\n" +
                                 "  \"localTeamScore\" : null,\n" +
-                                "  \"done\" : null\n" +
+                                "  \"done\" : null,\n" +
+                                "  \"cancelled\" : false\n" +
                                 "}", true))
                 .andDo(MockMvcRestDocumentation.document("update_event", PayloadDocumentation.responseFields(
                         PayloadDocumentation.fieldWithPath("_id")
@@ -138,6 +138,103 @@ class EventControllerTest {
                         PayloadDocumentation.fieldWithPath("visitorTeamScore")
                                 .description("The score of the team which visits"),
                         PayloadDocumentation.fieldWithPath("done")
-                                .description("Whether or not the match has been done"))))
+                                .description("Whether or not the match has been done"),
+                        PayloadDocumentation.fieldWithPath("cancelled")
+                                .description("Event is cancelled or not"))))
+    }
+
+    @Test
+    @WithMockUser("foo")
+    fun `Cancel event should return a response with status 'OK'`() {
+        val fromDateTime = LocalDateTime.of(2018, 1, 1, 1, 0)
+        val toDateTime = LocalDateTime.of(2018, 1, 1, 2, 0)
+        val placeId = 1
+        val eventId = 58
+        val teamId = 10
+        val eventDto = EventDto(
+                _id = eventId,
+                name = "event",
+                fromDateTime = fromDateTime,
+                toDateTime = toDateTime,
+                placeId = placeId,
+                presentMembers = listOf(),
+                absentMembers = listOf(),
+                waitingMembers = listOf(),
+                teamId = teamId,
+                cancelled = false
+        )
+        val cancelledDto = EventDto(
+                _id = eventId,
+                name = "event",
+                fromDateTime = fromDateTime,
+                toDateTime = toDateTime,
+                placeId = placeId,
+                presentMembers = listOf(),
+                absentMembers = listOf(),
+                waitingMembers = listOf(),
+                teamId = teamId,
+                cancelled = true
+        )
+        whenever(accessController.isTeamAdmin(any(), any())).thenReturn(true)
+        whenever(eventServiceMock.getEvent(eventId)).thenReturn(eventDto)
+        whenever(eventServiceMock.cancelEvent(any(), any())).thenReturn(cancelledDto)
+        this.mockMvc.perform(
+                put("/events/$eventId/cancelled")
+                        .contentType(APPLICATION_JSON)
+                        .characterEncoding("UTF-8"))
+                .andExpect(status().isOk)
+                .andExpect(MockMvcResultMatchers
+                        .content()
+                        .json("{\n" +
+                                "  \"_id\" : $eventId,\n" +
+                                "  \"name\" : \"event\",\n" +
+                                "  \"fromDateTime\" : \"2018-01-01T01:00:00\",\n" +
+                                "  \"toDateTime\" : \"2018-01-01T02:00:00\",\n" +
+                                "  \"placeId\" : $placeId,\n" +
+                                "  \"presentMembers\" : [ ],\n" +
+                                "  \"absentMembers\" : [ ],\n" +
+                                "  \"waitingMembers\" : [ ],\n" +
+                                "  \"localTeamName\" : null,\n" +
+                                "  \"visitorTeamName\" : null,\n" +
+                                "  \"localTeamImgUrl\" : null,\n" +
+                                "  \"visitorTeamImgUrl\" : null,\n" +
+                                "  \"visitorTeamScore\" : null,\n" +
+                                "  \"localTeamScore\" : null,\n" +
+                                "  \"done\" : null,\n" +
+                                "  \"cancelled\" : true\n" +
+                                "}", true))
+                .andDo(MockMvcRestDocumentation.document("update_event", PayloadDocumentation.responseFields(
+                        PayloadDocumentation.fieldWithPath("_id")
+                                .description("The identifier of the event"),
+                        PayloadDocumentation.fieldWithPath("name")
+                                .description("The name of the event"),
+                        PayloadDocumentation.fieldWithPath("fromDateTime")
+                                .description("The date when the event starts"),
+                        PayloadDocumentation.fieldWithPath("toDateTime")
+                                .description("The date when the event ends"),
+                        PayloadDocumentation.fieldWithPath("placeId")
+                                .description("The identifier of the place where the event takes place"),
+                        PayloadDocumentation.fieldWithPath("presentMembers")
+                                .description("The members who are present"),
+                        PayloadDocumentation.fieldWithPath("absentMembers")
+                                .description("The members who are absent"),
+                        PayloadDocumentation.fieldWithPath("waitingMembers")
+                                .description("The members who are in waiting list"),
+                        PayloadDocumentation.fieldWithPath("localTeamName")
+                                .description("The name of the local team"),
+                        PayloadDocumentation.fieldWithPath("visitorTeamName")
+                                .description("The name of the team which visits"),
+                        PayloadDocumentation.fieldWithPath("localTeamImgUrl")
+                                .description("The url of the image of the local team"),
+                        PayloadDocumentation.fieldWithPath("visitorTeamImgUrl")
+                                .description("The url of the image of the team which visits"),
+                        PayloadDocumentation.fieldWithPath("localTeamScore")
+                                .description("The score of the local team"),
+                        PayloadDocumentation.fieldWithPath("visitorTeamScore")
+                                .description("The score of the team which visits"),
+                        PayloadDocumentation.fieldWithPath("done")
+                                .description("Whether or not the match has been done"),
+                        PayloadDocumentation.fieldWithPath("cancelled")
+                                .description("Event is cancelled or not"))))
     }
 }

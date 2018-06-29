@@ -73,10 +73,23 @@ open class EventController @Autowired constructor(
         @PathVariable("present") present: Boolean,
         authentication: Authentication
     ): ResponseEntity<EventDto> {
-        var eventDto = eventService.getEvent(eventId)
+        val eventDto = eventService.getEvent(eventId)
         if (accessController.isAccountAllowedToAccessTeam(authentication, eventDto.teamId!!)) {
-            eventDto = eventService.participate(authentication.name, eventId, present, LocalDateTime.now())
-            return ResponseEntity.ok(eventDto)
+            val dto = eventService.participate(authentication.name, eventId, present, LocalDateTime.now())
+            return ResponseEntity.ok(dto)
+        }
+        throw UserForbiddenException()
+    }
+
+    @PutMapping("/{eventId}/cancelled")
+    open fun cancel(
+        @PathVariable("eventId") eventId: Int,
+        authentication: Authentication
+    ): ResponseEntity<EventDto> {
+        val eventDto = eventService.getEvent(eventId)
+        if (accessController.isTeamAdmin(authentication, eventDto.teamId!!)) {
+            val updatedDto = eventService.cancelEvent(eventId, LocalDateTime.now())
+            return ResponseEntity.ok(updatedDto)
         }
         throw UserForbiddenException()
     }

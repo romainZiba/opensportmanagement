@@ -14,9 +14,9 @@ import javax.transaction.Transactional
 
 @Service
 open class AccountService @Autowired constructor(
-        private val teamRepository: TeamRepository,
-        private val accountRepository: AccountRepository,
-        private val bCryptPasswordEncoder: BCryptPasswordEncoder
+    private val teamRepository: TeamRepository,
+    private val accountRepository: AccountRepository,
+    private val bCryptPasswordEncoder: BCryptPasswordEncoder
 ) {
 
     @Transactional

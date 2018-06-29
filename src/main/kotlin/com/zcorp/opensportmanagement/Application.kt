@@ -22,7 +22,7 @@ open class Application {
     @Bean
     @Transactional
     open fun init(
-            accountService: AccountService
+        accountService: AccountService
     ) = CommandLineRunner {
         if (accountService.getAccountsCount() == 0L) {
             val admin = Account(firstName = "admin",

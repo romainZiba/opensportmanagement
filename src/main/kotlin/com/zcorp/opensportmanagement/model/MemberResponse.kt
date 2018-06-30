@@ -31,8 +31,6 @@ data class MemberResponse(
     override fun hashCode(): Int {
         var result = event.hashCode()
         result = 31 * result + teamMember.hashCode()
-        result = 31 * result + status.hashCode()
-        result = 31 * result + subscriptionDate.hashCode()
         return result
     }
 

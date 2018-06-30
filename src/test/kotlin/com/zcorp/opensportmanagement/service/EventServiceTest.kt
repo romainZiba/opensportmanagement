@@ -348,6 +348,19 @@ class EventServiceTest {
         }
 
         @Test
+        fun `Participating to a cancelled event should not be possible`() {
+            mockEvent.cancelled = true
+            whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
+            whenever(teamMemberRepoMock.findByUsername(any(), any())).thenReturn(mockTeamMember)
+            assert {
+                eventService.participate(username, eventId, true, LocalDateTime.of(2018, 1, 30, 10, 0))
+            }.thrownError {
+                isInstanceOf(NotPossibleException::class)
+                message().isEqualTo("Event ${mockEvent.id} is cancelled")
+            }
+        }
+
+        @Test
         fun `user trying to participate to a past event should not be possible`() {
             whenever(teamMemberRepoMock.findByUsername(username, teamId)).thenReturn(mockTeamMember)
             whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))

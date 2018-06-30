@@ -35,6 +35,7 @@ open class EventService @Autowired constructor(
     @Transactional
     open fun notifyEvents(comparedDate: LocalDateTime): Int {
         val events = eventRepository.getEventsByNotifiedFalseAndFromDateTimeBefore(comparedDate)
+                .filter { event -> !event.cancelled }
         for (event in events) {
             val noResponseMembers = eventRepository.getMembersThatHaveNotResponded(event.id)
             val teamMembersToNotify = noResponseMembers.map { it.account.email }.toList()
@@ -99,6 +100,8 @@ open class EventService @Autowired constructor(
         val teamMember = teamMemberRepository.findByUsername(username, event.team.id!!)
                 ?: throw NotFoundException("Team member $username does not exist")
         when {
+            event.cancelled ->
+                throw SubscriptionNotPermittedException("Event $eventId is cancelled")
             event.fromDateTime.isBefore(now) ->
                 throw SubscriptionNotPermittedException("Event $eventId has already occurred")
             event.fromDateTime.isAfter(now.plusDays(properties.daysBefore)) ->
@@ -126,7 +129,8 @@ open class EventService @Autowired constructor(
                         text = "Tu participes à ${event.name}")
             }
         }
-        memberResponseRepository.save(MemberResponse(event, teamMember, status))
+        val response = memberResponseRepository.save(MemberResponse(event, teamMember, status))
+        event.membersResponse.add(response)
         return event.toDto()
     }
 

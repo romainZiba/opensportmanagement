@@ -19,7 +19,7 @@ open class UserDetailsServiceImpl(private val accountRepository: AccountReposito
     override fun loadUserByUsername(username: String): UserDetails {
         var user = accountRepository.findByUsername(username)
         if (user == null) {
-            user = accountRepository.findByEmail(username) ?: throw UsernameNotFoundException(username)
+            user = accountRepository.findByEmailIgnoreCase(username) ?: throw UsernameNotFoundException(username)
         }
         return User(user.username,
                 user.password,

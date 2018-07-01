@@ -26,7 +26,7 @@ open class AccountService @Autowired constructor(
 
     @Transactional
     open fun findByEmail(email: String): AccountDto? {
-        return accountRepository.findByEmail(email)?.toDto()
+        return accountRepository.findByEmailIgnoreCase(email)?.toDto()
     }
 
     @Transactional

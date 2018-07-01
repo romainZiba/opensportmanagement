@@ -166,7 +166,7 @@ open class TeamService @Autowired constructor(
                 password = bCryptPasswordEncoder.encode(UUID.randomUUID().toString()),
                 email = teamMemberDto.email,
                 phoneNumber = teamMemberDto.phoneNumber)
-        val user = accountRepository.findByEmail(teamMemberDto.email) ?: accountRepository.save(userToSave)
+        val user = accountRepository.findByEmailIgnoreCase(teamMemberDto.email) ?: accountRepository.save(userToSave)
         val teamMember = TeamMember(teamMemberDto.roles.toMutableSet(), team)
         user.addTeamMember(teamMember)
         val savedUser = accountRepository.save(user)

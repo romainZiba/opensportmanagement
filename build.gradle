@@ -114,6 +114,7 @@ test {
         html.enabled = true
     }
     outputs.dir snippetsDir
+    useJUnitPlatform()
 }
 
 asciidoctor {

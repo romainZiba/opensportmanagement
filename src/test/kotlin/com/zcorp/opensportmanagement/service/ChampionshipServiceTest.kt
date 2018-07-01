@@ -29,7 +29,7 @@ import com.zcorp.opensportmanagement.repository.ChampionshipRepository
 import com.zcorp.opensportmanagement.repository.MatchRepository
 import com.zcorp.opensportmanagement.repository.OpponentRepository
 import com.zcorp.opensportmanagement.repository.PlaceRepository
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import org.mockito.AdditionalMatchers.not
 import java.time.LocalDate
 import java.time.LocalDateTime

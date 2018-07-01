@@ -13,7 +13,7 @@ interface EventRepository : JpaRepository<AbstractEvent, Int> {
     @Query("SELECT m FROM TeamMember m, AbstractEvent ev " +
             " WHERE ev.id = :eventId " +
             " AND m.team.id = ev.team.id " +
-            " AND m.id NOT IN (SELECT DISTINCT(response.teamMember.id) " +
+            " AND m NOT IN (SELECT DISTINCT(response.teamMember) " +
             "                   FROM TeamMember m1, AbstractEvent ev1 " +
             "                   LEFT JOIN ev1.membersResponse response " +
             "                   WHERE ev1.id = :eventId " +

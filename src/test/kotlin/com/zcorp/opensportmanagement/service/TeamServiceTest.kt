@@ -16,13 +16,13 @@ import com.zcorp.opensportmanagement.dto.PlaceDto
 import com.zcorp.opensportmanagement.model.Place
 import com.zcorp.opensportmanagement.model.Place.PlaceType
 import com.zcorp.opensportmanagement.model.Team
+import com.zcorp.opensportmanagement.repository.AccountRepository
 import com.zcorp.opensportmanagement.repository.OpponentRepository
 import com.zcorp.opensportmanagement.repository.PlaceRepository
 import com.zcorp.opensportmanagement.repository.SeasonRepository
 import com.zcorp.opensportmanagement.repository.TeamMemberRepository
 import com.zcorp.opensportmanagement.repository.TeamRepository
-import com.zcorp.opensportmanagement.repository.AccountRepository
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import java.util.Optional
 
 class TeamServiceTest {

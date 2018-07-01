@@ -10,6 +10,7 @@ import com.zcorp.opensportmanagement.model.MemberResponse
 import com.zcorp.opensportmanagement.model.Place
 import com.zcorp.opensportmanagement.model.Team
 import com.zcorp.opensportmanagement.model.TeamMember
+import com.zcorp.opensportmanagement.service.AccountService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -17,6 +18,8 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
+import org.springframework.context.annotation.Import
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDateTime
@@ -25,6 +28,7 @@ import java.time.LocalDateTime
 @DataJpaTest
 @ActiveProfiles("test")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Import(AccountService::class, BCryptPasswordEncoder::class)
 open class EventRepositoryTest {
 
     @Autowired
@@ -105,6 +109,7 @@ open class EventRepositoryTest {
                 .build()
         val savedEvent = entityManager.persistAndFlush(event)
         val teamMembersToNotify = eventRepository.getMembersThatHaveNotResponded(savedEvent.id)
-        assert(teamMembersToNotify).isEmpty()
+        assert(teamMembersToNotify).isNotEmpty()
+        assert(teamMembersToNotify).containsExactly(savedTeamMember1, savedTeamMember2)
     }
 }

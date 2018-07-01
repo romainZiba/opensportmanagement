@@ -1,22 +1,22 @@
 package com.zcorp.opensportmanagement.service
 
+import assertk.assert
 import assertk.assertions.hasSize
 import assertk.assertions.isEqualTo
+import assertk.assertions.isInstanceOf
 import assertk.assertions.isNull
 import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.times
 import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.whenever
-import com.zcorp.opensportmanagement.model.Team
 import com.zcorp.opensportmanagement.model.Account
-import com.zcorp.opensportmanagement.repository.TeamRepository
+import com.zcorp.opensportmanagement.model.Team
 import com.zcorp.opensportmanagement.repository.AccountRepository
-import org.junit.Test
+import com.zcorp.opensportmanagement.repository.TeamRepository
+import org.junit.jupiter.api.Test
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import java.util.Optional
-import assertk.assert
-import assertk.assertions.isInstanceOf
 
 class AccountServiceTest {
     private val username = "foo"

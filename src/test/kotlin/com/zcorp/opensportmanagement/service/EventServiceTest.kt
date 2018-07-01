@@ -56,15 +56,12 @@ class EventServiceTest {
     private val email = "this@camail.com"
     private val phoneNumber = "55965"
     private val eventId = 7
+    private val cancelledEventId = 17
 
     private val mockTeam = Team("SuperNam", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "", teamId)
     private val mockPlace = Place("The place", "", "Toulouse", PlaceType.STADIUM, mockTeam, placeId)
-    private val mockEvent = Event.Builder().name("TheOne")
-            .fromDate(LocalDateTime.of(2018, 1, 31, 10, 0))
-            .toDate(LocalDateTime.of(2018, 1, 31, 12, 0))
-            .place(mockPlace)
-            .team(mockTeam)
-            .build()
+    private val mockEvent: AbstractEvent
+    private val cancelledMockEvent: AbstractEvent
     private val mockUser = Account(firstName = firstName,
             lastName = lastName,
             password = password,
@@ -107,6 +104,22 @@ class EventServiceTest {
         mockTeamMember.account = mockUser
         mockTeamMember2.account = mockUser2
         mockTeamMember3.account = mockUser3
+        mockEvent = Event.Builder()
+                .name("TheOne")
+                .fromDate(LocalDateTime.of(2018, 1, 31, 10, 0))
+                .toDate(LocalDateTime.of(2018, 1, 31, 12, 0))
+                .place(mockPlace)
+                .team(mockTeam)
+                .build()
+        mockEvent.id = eventId
+        cancelledMockEvent = Event.Builder()
+                .name("TheCancelledOne")
+                .fromDate(LocalDateTime.of(2018, 1, 31, 10, 0))
+                .toDate(LocalDateTime.of(2018, 1, 31, 12, 0))
+                .place(mockPlace)
+                .team(mockTeam)
+                .build()
+        cancelledMockEvent.id = cancelledEventId
     }
 
     @BeforeEach
@@ -117,6 +130,11 @@ class EventServiceTest {
                 teamMemberRepoMock,
                 memberResponseRepoMock,
                 emailServiceMock)
+        mockEvent.cancelled = false
+        cancelledMockEvent.cancelled = true
+        mockEvent.maxMembers = 20
+        cancelledMockEvent.maxMembers = 20
+        mockEvent.membersResponse.clear()
     }
 
     @Test
@@ -212,29 +230,29 @@ class EventServiceTest {
 
     @Test
     fun `user trying to participate to a future event should add him in the present members`() {
-        mockEvent.id = eventId
         whenever(teamMemberRepoMock.findByUsername(username, teamId)).thenReturn(mockTeamMember)
         whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
         whenever(eventRepoMock.save(mockEvent)).thenReturn(mockEvent)
         whenever(teamMemberRepoMock.findByUsername(username, teamId)).thenReturn(mockTeamMember)
+        whenever(memberResponseRepoMock.save<MemberResponse>(any())).thenAnswer { it.arguments[0] }
         eventService.participate(username, eventId, true, LocalDateTime.of(2018, 1, 30, 10, 0))
         argumentCaptor<MemberResponse>().apply {
             verify(memberResponseRepoMock, times(1)).save(capture())
             assert(allValues).hasSize(1)
             assert(firstValue.event).isEqualTo(mockEvent)
             assert(firstValue.teamMember).isEqualTo(mockTeamMember)
-            assert(firstValue.status).isEqualTo(MemberResponse.Status.WAITING)
+            assert(firstValue.status).isEqualTo(MemberResponse.Status.PRESENT)
         }
     }
 
     @Test
     fun `user trying to participate to a future event already full should add him in the waiting members`() {
-        mockEvent.id = eventId
         mockEvent.maxMembers = 0
         whenever(teamMemberRepoMock.findByUsername(username, teamId)).thenReturn(mockTeamMember)
         whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
         whenever(eventRepoMock.save(mockEvent)).thenReturn(mockEvent)
         whenever(teamMemberRepoMock.findByUsername(username, teamId)).thenReturn(mockTeamMember)
+        whenever(memberResponseRepoMock.save<MemberResponse>(any())).thenAnswer { it.arguments[0] }
         eventService.participate(username, eventId, true, LocalDateTime.of(2018, 1, 30, 10, 0))
         argumentCaptor<MemberResponse>().apply {
             verify(memberResponseRepoMock, times(1)).save(capture())
@@ -247,7 +265,6 @@ class EventServiceTest {
 
     @Test
     fun `user withdrawing from an event already full should add him in the absent members and first waiting member should be present`() {
-        mockEvent.id = eventId
         mockEvent.maxMembers = 1
         mockEvent.membersResponse.add(MemberResponse(mockEvent, mockTeamMember, MemberResponse.Status.PRESENT, LocalDateTime.of(2018, 1, 1, 1, 0)))
         mockEvent.membersResponse.add(MemberResponse(mockEvent, mockTeamMember2, MemberResponse.Status.WAITING, LocalDateTime.of(2018, 1, 2, 1, 0)))
@@ -257,6 +274,7 @@ class EventServiceTest {
         whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
         whenever(eventRepoMock.save(mockEvent)).thenReturn(mockEvent)
         whenever(teamMemberRepoMock.findByUsername(username, teamId)).thenReturn(mockTeamMember)
+        whenever(memberResponseRepoMock.save<MemberResponse>(any())).thenAnswer { it.arguments[0] }
         eventService.participate(username, eventId, false, LocalDateTime.of(2018, 1, 30, 10, 0))
         argumentCaptor<MemberResponse>().apply {
             verify(memberResponseRepoMock, times(2)).save(capture())
@@ -358,14 +376,13 @@ class EventServiceTest {
 
         @Test
         fun `Participating to a cancelled event should not be possible`() {
-            mockEvent.cancelled = true
-            whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
+            whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(cancelledMockEvent))
             whenever(teamMemberRepoMock.findByUsername(any(), any())).thenReturn(mockTeamMember)
             assert {
-                eventService.participate(username, eventId, true, LocalDateTime.of(2018, 1, 30, 10, 0))
+                eventService.participate(username, cancelledEventId, true, LocalDateTime.of(2018, 1, 30, 10, 0))
             }.thrownError {
-                isInstanceOf(NotPossibleException::class)
-                message().isEqualTo("Event ${mockEvent.id} is cancelled")
+                isInstanceOf(SubscriptionNotPermittedException::class)
+                message().isEqualTo("Event ${cancelledMockEvent.id} is cancelled")
             }
         }
 
@@ -380,7 +397,6 @@ class EventServiceTest {
 
         @Test
         fun `user trying to participate to a future event more than x days before should not be possible`() {
-            mockEvent.id = eventId
             whenever(teamMemberRepoMock.findByUsername(username, teamId)).thenReturn(mockTeamMember)
             whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
             whenever(eventRepoMock.save(mockEvent)).thenReturn(mockEvent)

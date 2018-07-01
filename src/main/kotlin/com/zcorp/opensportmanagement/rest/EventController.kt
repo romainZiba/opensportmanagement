@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import java.time.LocalDateTime
-import javax.servlet.http.HttpServletRequest
 
 @RepositoryRestController
 @RequestMapping("/events")
@@ -131,17 +130,18 @@ open class EventController @Autowired constructor(
     @PostMapping("/{eventId}/notifications")
     fun notifyUsersThatHaveNotResponded(
         @PathVariable("eventId") eventId: Int,
-        authentication: Authentication,
-        req: HttpServletRequest
+        authentication: Authentication
     ): ResponseEntity<Any> {
         val eventDto = eventService.getEvent(eventId)
         if (accessController.isTeamAdmin(authentication, eventDto.teamId!!)) {
             val toNotify = eventService.getMembersMailNotResponded(eventId)
-            mailService.sendMessage(
-                    to = toNotify,
-                    subject = "Répond!",
-                    text = "Merci d'indiquer ta disponibilité pour l'évènement ${eventDto.name} en suivant ce lien " +
-                            "${properties.allowedOrigins[0]}/events/$eventId")
+            if (toNotify.isNotEmpty()) {
+                mailService.sendMessage(
+                        to = toNotify,
+                        subject = "Répond!",
+                        text = "Merci d'indiquer ta disponibilité pour l'évènement ${eventDto.name} en suivant ce lien " +
+                                "${properties.allowedOrigins[0]}/events/$eventId")
+            }
             return ResponseEntity.ok().build()
         }
         throw UserForbiddenException()

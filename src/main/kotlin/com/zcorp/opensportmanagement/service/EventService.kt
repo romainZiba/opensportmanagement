@@ -158,4 +158,11 @@ open class EventService @Autowired constructor(
         event.cancelled = true
         return eventRepository.save(event).toDto()
     }
+
+    @Transactional
+    open fun getMembersMailNotResponded(eventId: Int): List<String> {
+        return eventRepository.getMembersThatHaveNotResponded(eventId)
+                .map { it.account.email }
+                .distinct()
+    }
 }

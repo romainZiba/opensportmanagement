@@ -2,6 +2,7 @@ package com.zcorp.opensportmanagement.service
 
 import assertk.assert
 import assertk.assertAll
+import assertk.assertions.containsExactly
 import assertk.assertions.hasSize
 import assertk.assertions.isEqualTo
 import assertk.assertions.isInstanceOf
@@ -304,6 +305,14 @@ class EventServiceTest {
             assert(firstValue.cancelled).isEqualTo(true)
         }
         assert(dto.cancelled).isEqualTo(true)
+    }
+
+    @Test
+    fun `get emails of members that have not responded yet`() {
+        whenever(eventRepoMock.getMembersThatHaveNotResponded(eventId)).thenReturn(listOf(mockTeamMember, mockTeamMember3))
+        val emails = eventService.getMembersMailNotResponded(eventId)
+        assert(emails).hasSize(2)
+        assert(emails).containsExactly(mockTeamMember.account.email, mockTeamMember3.account.email)
     }
 
     @Nested

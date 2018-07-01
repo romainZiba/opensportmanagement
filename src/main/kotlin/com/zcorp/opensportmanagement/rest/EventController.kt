@@ -1,12 +1,15 @@
 package com.zcorp.opensportmanagement.rest
 
+import com.zcorp.opensportmanagement.config.OsmProperties
 import com.zcorp.opensportmanagement.dto.EventDto
 import com.zcorp.opensportmanagement.dto.EventModificationDto
 import com.zcorp.opensportmanagement.dto.MessageCreationDto
 import com.zcorp.opensportmanagement.dto.MessageDto
 import com.zcorp.opensportmanagement.security.AccessController
+import com.zcorp.opensportmanagement.service.EmailService
 import com.zcorp.opensportmanagement.service.EventService
 import com.zcorp.opensportmanagement.service.MessagingService
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.rest.webmvc.RepositoryRestController
 import org.springframework.http.ResponseEntity
@@ -19,14 +22,20 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import java.time.LocalDateTime
+import javax.servlet.http.HttpServletRequest
 
 @RepositoryRestController
 @RequestMapping("/events")
 open class EventController @Autowired constructor(
     private val eventService: EventService,
     private val messagingService: MessagingService,
-    private val accessController: AccessController
+    private val accessController: AccessController,
+    private val mailService: EmailService,
+    private val properties: OsmProperties
 ) {
+    companion object {
+        val LOG = LoggerFactory.getLogger(EventController::class.java)
+    }
 
     @GetMapping("/{eventId}")
     open fun getEvent(
@@ -115,6 +124,25 @@ open class EventController @Autowired constructor(
         val eventDto = eventService.getEvent(eventId)
         if (accessController.isAccountAllowedToAccessTeam(authentication, eventDto.teamId!!)) {
             return ResponseEntity.ok(messagingService.createMessageInEvent(messageDto, authentication.name, eventDto))
+        }
+        throw UserForbiddenException()
+    }
+
+    @PostMapping("/{eventId}/notifications")
+    fun notifyUsersThatHaveNotResponded(
+        @PathVariable("eventId") eventId: Int,
+        authentication: Authentication,
+        req: HttpServletRequest
+    ): ResponseEntity<Any> {
+        val eventDto = eventService.getEvent(eventId)
+        if (accessController.isTeamAdmin(authentication, eventDto.teamId!!)) {
+            val toNotify = eventService.getMembersMailNotResponded(eventId)
+            mailService.sendMessage(
+                    to = toNotify,
+                    subject = "Répond!",
+                    text = "Merci d'indiquer ta disponibilité pour l'évènement ${eventDto.name} en suivant ce lien " +
+                            "${properties.allowedOrigins[0]}/events/$eventId")
+            return ResponseEntity.ok().build()
         }
         throw UserForbiddenException()
     }

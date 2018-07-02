@@ -163,6 +163,7 @@ open class EventService @Autowired constructor(
     open fun getMembersMailNotResponded(eventId: Int): List<String> {
         return eventRepository.getMembersThatHaveNotResponded(eventId)
                 .map { it.account.email }
+                .filter { it.isNotEmpty() }
                 .distinct()
     }
 }

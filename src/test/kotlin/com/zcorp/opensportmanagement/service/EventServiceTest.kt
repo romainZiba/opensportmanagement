@@ -43,17 +43,15 @@ import java.util.Optional
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EventServiceTest {
     private val username = "foo"
-    private val username2 = "foo2"
-    private val username3 = "foo3"
     private val teamId = 5
     private val placeId = 1
     private val teamMemberId = 12
     private val teamMember2Id = 45
     private val teamMember3Id = 76
+    private val teamMember4Id = 127
     private val firstName = "firstname"
     private val lastName = "ln"
     private val password = "whatever"
-    private val email = "this@camail.com"
     private val phoneNumber = "55965"
     private val eventId = 7
     private val cancelledEventId = 17
@@ -65,7 +63,7 @@ class EventServiceTest {
     private val mockUser = Account(firstName = firstName,
             lastName = lastName,
             password = password,
-            email = email,
+            email = "this@camail.com",
             phoneNumber = phoneNumber,
             username = username)
     private val mockUser2 = Account(firstName = "second_firstName",
@@ -73,16 +71,23 @@ class EventServiceTest {
             password = password,
             email = "second_email@camail.com",
             phoneNumber = phoneNumber,
-            username = username2)
+            username = "foo2")
     private val mockUser3 = Account(firstName = "third_firstName",
             lastName = "third_lastName",
             password = password,
             email = "third_email@camail.com",
             phoneNumber = phoneNumber,
-            username = username3)
+            username = "foo3")
+    private val mockUser4 = Account(firstName = "fourth_firstName",
+            lastName = "fourth_lastName",
+            password = password,
+            email = "",
+            phoneNumber = phoneNumber,
+            username = "foo4")
     private val mockTeamMember = TeamMember(mutableSetOf(TeamMember.Role.ADMIN), mockTeam, "", teamMemberId)
     private val mockTeamMember2 = TeamMember(mutableSetOf(TeamMember.Role.ADMIN), mockTeam, "", teamMember2Id)
     private val mockTeamMember3 = TeamMember(mutableSetOf(TeamMember.Role.ADMIN), mockTeam, "", teamMember3Id)
+    private val mockTeamMember4 = TeamMember(mutableSetOf(TeamMember.Role.PLAYER), mockTeam, "", teamMember4Id)
 
     private val eventRepoMock: EventRepository = mock()
     private val placeRepoMock: PlaceRepository = mock()
@@ -104,6 +109,7 @@ class EventServiceTest {
         mockTeamMember.account = mockUser
         mockTeamMember2.account = mockUser2
         mockTeamMember3.account = mockUser3
+        mockTeamMember4.account = mockUser4
         mockEvent = Event.Builder()
                 .name("TheOne")
                 .fromDate(LocalDateTime.of(2018, 1, 31, 10, 0))
@@ -327,7 +333,8 @@ class EventServiceTest {
 
     @Test
     fun `get emails of members that have not responded yet`() {
-        whenever(eventRepoMock.getMembersThatHaveNotResponded(eventId)).thenReturn(listOf(mockTeamMember, mockTeamMember3))
+        whenever(eventRepoMock.getMembersThatHaveNotResponded(eventId))
+                .thenReturn(listOf(mockTeamMember, mockTeamMember3, mockTeamMember4))
         val emails = eventService.getMembersMailNotResponded(eventId)
         assert(emails).hasSize(2)
         assert(emails).containsExactly(mockTeamMember.account.email, mockTeamMember3.account.email)

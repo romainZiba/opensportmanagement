@@ -146,4 +146,17 @@ open class EventController @Autowired constructor(
         }
         throw UserForbiddenException()
     }
+
+    @PutMapping("/{eventId}/registrations")
+    fun changeRegistration(
+        @PathVariable("eventId") eventId: Int,
+        authentication: Authentication
+    ): ResponseEntity<Any> {
+        val event = eventService.getEvent(eventId)
+        if (accessController.isTeamAdmin(authentication, event.teamId!!)) {
+            eventService.openEvent(event._id)
+            return ResponseEntity.ok().build()
+        }
+        throw UserForbiddenException()
+    }
 }

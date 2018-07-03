@@ -16,6 +16,7 @@ data class EventDto(
     val presentMembers: List<TeamMemberDto>,
     val absentMembers: List<TeamMemberDto>,
     val waitingMembers: List<TeamMemberDto>,
+    val openForRegistration: Boolean,
     val cancelled: Boolean,
     @JsonIgnore val teamId: Int? = null,
     var localTeamName: String? = null,

@@ -66,7 +66,8 @@ class EventControllerTest {
                 absentMembers = listOf(),
                 waitingMembers = listOf(),
                 teamId = teamId,
-                cancelled = false
+                cancelled = false,
+                openForRegistration = true
         )
         val updatedEventDto = EventDto(
                 _id = eventId,
@@ -77,7 +78,8 @@ class EventControllerTest {
                 presentMembers = listOf(),
                 absentMembers = listOf(),
                 waitingMembers = listOf(),
-                cancelled = false
+                cancelled = false,
+                openForRegistration = true
         )
         whenever(accessController.isTeamAdmin(any(), any())).thenReturn(true)
         whenever(eventServiceMock.getEvent(eventId)).thenReturn(eventDto)
@@ -106,6 +108,7 @@ class EventControllerTest {
                                 "  \"visitorTeamScore\" : null,\n" +
                                 "  \"localTeamScore\" : null,\n" +
                                 "  \"done\" : null,\n" +
+                                "  \"openForRegistration\" : true,\n" +
                                 "  \"cancelled\" : false\n" +
                                 "}", true))
                 .andDo(MockMvcRestDocumentation.document("update_event", PayloadDocumentation.responseFields(
@@ -139,6 +142,8 @@ class EventControllerTest {
                                 .description("The score of the team which visits"),
                         PayloadDocumentation.fieldWithPath("done")
                                 .description("Whether or not the match has been done"),
+                        PayloadDocumentation.fieldWithPath("openForRegistration")
+                                .description("Event is open for registration or not"),
                         PayloadDocumentation.fieldWithPath("cancelled")
                                 .description("Event is cancelled or not"))))
     }
@@ -161,7 +166,8 @@ class EventControllerTest {
                 absentMembers = listOf(),
                 waitingMembers = listOf(),
                 teamId = teamId,
-                cancelled = false
+                cancelled = false,
+                openForRegistration = true
         )
         val cancelledDto = EventDto(
                 _id = eventId,
@@ -173,7 +179,8 @@ class EventControllerTest {
                 absentMembers = listOf(),
                 waitingMembers = listOf(),
                 teamId = teamId,
-                cancelled = true
+                cancelled = true,
+                openForRegistration = true
         )
         whenever(accessController.isTeamAdmin(any(), any())).thenReturn(true)
         whenever(eventServiceMock.getEvent(eventId)).thenReturn(eventDto)
@@ -200,6 +207,7 @@ class EventControllerTest {
                                 "  \"visitorTeamImgUrl\" : null,\n" +
                                 "  \"visitorTeamScore\" : null,\n" +
                                 "  \"localTeamScore\" : null,\n" +
+                                "  \"openForRegistration\" : true,\n" +
                                 "  \"done\" : null,\n" +
                                 "  \"cancelled\" : true\n" +
                                 "}", true))
@@ -234,6 +242,8 @@ class EventControllerTest {
                                 .description("The score of the team which visits"),
                         PayloadDocumentation.fieldWithPath("done")
                                 .description("Whether or not the match has been done"),
+                        PayloadDocumentation.fieldWithPath("openForRegistration")
+                                .description("Event is open for registration or not"),
                         PayloadDocumentation.fieldWithPath("cancelled")
                                 .description("Event is cancelled or not"))))
     }

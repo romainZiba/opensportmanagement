@@ -9,7 +9,7 @@ import java.time.LocalDateTime
 
 interface EventRepository : JpaRepository<AbstractEvent, Int> {
     fun getEventById(id: Int): AbstractEvent?
-    fun getEventsByNotifiedFalseAndFromDateTimeBefore(fromDate: LocalDateTime): List<AbstractEvent>
+    fun findByOpenForRegistrationFalseAndFromDateTimeBefore(fromDate: LocalDateTime): List<AbstractEvent>
     @Query("SELECT m FROM TeamMember m, AbstractEvent ev " +
             " WHERE ev.id = :eventId " +
             " AND m.team.id = ev.team.id " +

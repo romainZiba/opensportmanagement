@@ -30,8 +30,8 @@ abstract class AbstractEvent protected constructor() {
     lateinit var place: Place
     var maxMembers = MAX_MEMBERS
 
-    @Column(name = "notified")
-    var notified: Boolean = false
+    @Column(name = "registration_open")
+    var openForRegistration: Boolean = false
 
     @Column(name = "cancelled")
     var cancelled: Boolean = false

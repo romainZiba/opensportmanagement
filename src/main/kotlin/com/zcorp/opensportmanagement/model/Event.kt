@@ -35,7 +35,8 @@ class Event private constructor(builder: Builder) : AbstractEvent() {
                         .filter { it.status == MemberResponse.Status.WAITING }
                         .map { it.teamMember.toDto() }.toList(),
                 teamId = team.id,
-                cancelled = this.cancelled)
+                cancelled = this.cancelled,
+                openForRegistration = this.openForRegistration)
     }
 
     class Builder {

@@ -54,7 +54,8 @@ class Match private constructor(builder: Builder) : AbstractEvent() {
                         .filter { it.status == MemberResponse.Status.WAITING }
                         .map { it.teamMember.toDto() }.toList(),
                 teamId = team.id,
-                cancelled = this.cancelled)
+                cancelled = this.cancelled,
+                openForRegistration = this.openForRegistration)
         eventDto.isDone = this.isDone
         if (this.isTeamLocal) {
             eventDto.localTeamName = this.team.name

@@ -5,7 +5,9 @@ import assertk.assertAll
 import assertk.assertions.containsExactly
 import assertk.assertions.hasSize
 import assertk.assertions.isEqualTo
+import assertk.assertions.isFalse
 import assertk.assertions.isInstanceOf
+import assertk.assertions.isTrue
 import assertk.assertions.message
 import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.argumentCaptor
@@ -137,7 +139,10 @@ class EventServiceTest {
                 memberResponseRepoMock,
                 emailServiceMock)
         mockEvent.cancelled = false
+        mockEvent.openForRegistration = false
+
         cancelledMockEvent.cancelled = true
+        cancelledMockEvent.openForRegistration = false
         mockEvent.maxMembers = 20
         cancelledMockEvent.maxMembers = 20
         mockEvent.membersResponse.clear()
@@ -236,6 +241,7 @@ class EventServiceTest {
 
     @Test
     fun `user trying to participate to a future event should add him in the present members`() {
+        mockEvent.openForRegistration = true
         whenever(teamMemberRepoMock.findByUsername(username, teamId)).thenReturn(mockTeamMember)
         whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
         whenever(eventRepoMock.save(mockEvent)).thenReturn(mockEvent)
@@ -254,6 +260,7 @@ class EventServiceTest {
     @Test
     fun `user trying to participate to a future event already full should add him in the waiting members`() {
         mockEvent.maxMembers = 0
+        mockEvent.openForRegistration = true
         whenever(teamMemberRepoMock.findByUsername(username, teamId)).thenReturn(mockTeamMember)
         whenever(eventRepoMock.findById(any())).thenReturn(Optional.of(mockEvent))
         whenever(eventRepoMock.save(mockEvent)).thenReturn(mockEvent)
@@ -272,6 +279,7 @@ class EventServiceTest {
     @Test
     fun `user withdrawing from an event already full should add him in the absent members and first waiting member should be present`() {
         mockEvent.maxMembers = 1
+        mockEvent.openForRegistration = true
         mockEvent.membersResponse.add(MemberResponse(mockEvent, mockTeamMember, MemberResponse.Status.PRESENT, LocalDateTime.of(2018, 1, 1, 1, 0)))
         mockEvent.membersResponse.add(MemberResponse(mockEvent, mockTeamMember2, MemberResponse.Status.WAITING, LocalDateTime.of(2018, 1, 2, 1, 0)))
         mockEvent.membersResponse.add(MemberResponse(mockEvent, mockTeamMember3, MemberResponse.Status.WAITING, LocalDateTime.of(2018, 1, 1, 1, 0)))
@@ -338,6 +346,39 @@ class EventServiceTest {
         val emails = eventService.getMembersMailNotResponded(eventId)
         assert(emails).hasSize(2)
         assert(emails).containsExactly(mockTeamMember.account.email, mockTeamMember3.account.email)
+    }
+
+    @Test
+    fun `open events should return non cancelled events`() {
+        val comparedDate = LocalDateTime.of(2018, 1, 1, 0, 0)
+        whenever(eventRepoMock.findByOpenForRegistrationFalseAndFromDateTimeBefore(comparedDate))
+                .thenReturn(listOf(mockEvent, cancelledMockEvent))
+        whenever(eventRepoMock.getMembersThatHaveNotResponded(mockEvent.id))
+                .thenReturn(listOf(mockTeamMember))
+        eventService.openEvents(comparedDate)
+        argumentCaptor<List<String>>().apply {
+            verify(emailServiceMock, times(1)).sendMessage(capture(), any(), any())
+            assert(allValues).hasSize(1)
+            assert(firstValue).containsExactly(mockTeamMember.account.email)
+        }
+        assert(mockEvent.openForRegistration).isTrue()
+        assert(cancelledMockEvent.openForRegistration).isFalse()
+    }
+
+    @Test
+    fun `open events should return no events`() {
+        val comparedDate = LocalDateTime.of(2018, 1, 1, 0, 0)
+        mockEvent.cancelled = true
+        whenever(eventRepoMock.findByOpenForRegistrationFalseAndFromDateTimeBefore(comparedDate))
+                .thenReturn(listOf(mockEvent, cancelledMockEvent))
+        whenever(eventRepoMock.getMembersThatHaveNotResponded(mockEvent.id))
+                .thenReturn(listOf(mockTeamMember))
+        eventService.openEvents(comparedDate)
+        argumentCaptor<List<String>>().apply {
+            verify(emailServiceMock, times(0)).sendMessage(capture(), any(), any())
+        }
+        assert(mockEvent.openForRegistration).isFalse()
+        assert(cancelledMockEvent.openForRegistration).isFalse()
     }
 
     @Nested

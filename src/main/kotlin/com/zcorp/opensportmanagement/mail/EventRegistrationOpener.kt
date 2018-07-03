@@ -8,14 +8,12 @@ import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 
 @Component
-class EventInvitationsTask @Autowired constructor(
+class EventRegistrationOpener @Autowired constructor(
     private val eventService: EventService,
     private val properties: NotificationsProperties
 ) {
     @Scheduled(fixedRate = 30000, initialDelay = 10000)
-    fun sendEmailInvitations() {
-        if (properties.enabled) {
-            eventService.notifyEvents(LocalDateTime.now().plusDays(properties.daysBefore))
-        }
+    fun openEventsForRegistration() {
+        eventService.openEvents(LocalDateTime.now().plusDays(properties.daysBefore))
     }
 }

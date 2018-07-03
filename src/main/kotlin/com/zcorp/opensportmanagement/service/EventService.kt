@@ -33,16 +33,28 @@ open class EventService @Autowired constructor(
     }
 
     @Transactional
-    open fun notifyEvents(comparedDate: LocalDateTime): Int {
-        val events = eventRepository.getEventsByNotifiedFalseAndFromDateTimeBefore(comparedDate)
+    open fun openEvents(comparedDate: LocalDateTime) {
+        eventRepository.findByOpenForRegistrationFalseAndFromDateTimeBefore(comparedDate)
                 .filter { event -> !event.cancelled }
-        for (event in events) {
-            val noResponseMembers = eventRepository.getMembersThatHaveNotResponded(event.id)
-            val teamMembersToNotify = noResponseMembers.map { it.account.email }.toList()
-            emailService.sendMessage(teamMembersToNotify, "L'évènement ${event.name} approche!", "Inscris toi donc")
-            event.notified = true
+                .forEach {
+                    val noResponseMembers = eventRepository.getMembersThatHaveNotResponded(it.id)
+                    val teamMembersToNotify = noResponseMembers.map { it.account.email }.toList()
+                    emailService.sendMessage(teamMembersToNotify, "L'évènement ${it.name} approche!", "Inscris toi donc")
+                    it.openForRegistration = true
+                }
+    }
+
+    @Transactional
+    open fun openEvent(eventId: Int) {
+        val event = eventRepository.getEventById(eventId) ?: throw NotFoundException("Event $eventId does not exist")
+        when {
+            event.cancelled -> throw NotPossibleException("Event $eventId is already cancelled")
+            event.openForRegistration -> throw NotPossibleException("Event $eventId is already open for registration")
         }
-        return events.size
+        val noResponseMembers = eventRepository.getMembersThatHaveNotResponded(event.id)
+        val teamMembersToNotify = noResponseMembers.map { it.account.email }.toList()
+        emailService.sendMessage(teamMembersToNotify, "L'évènement ${event.name} approche!", "Inscris toi donc")
+        event.openForRegistration = true
     }
 
     @Transactional
@@ -104,7 +116,7 @@ open class EventService @Autowired constructor(
                 throw SubscriptionNotPermittedException("Event $eventId is cancelled")
             event.fromDateTime.isBefore(now) ->
                 throw SubscriptionNotPermittedException("Event $eventId has already occurred")
-            event.fromDateTime.isAfter(now.plusDays(properties.daysBefore)) ->
+            !event.openForRegistration ->
                 throw SubscriptionNotPermittedException("Event $eventId is not open for subscriptions yet")
         }
         val eventFull = event.isFull()

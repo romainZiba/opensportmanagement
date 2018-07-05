@@ -9,6 +9,7 @@ import com.zcorp.opensportmanagement.security.AccessController
 import com.zcorp.opensportmanagement.service.EmailService
 import com.zcorp.opensportmanagement.service.EventService
 import com.zcorp.opensportmanagement.service.MessagingService
+import com.zcorp.opensportmanagement.service.NotPossibleException
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.rest.webmvc.RepositoryRestController
@@ -134,6 +135,7 @@ open class EventController @Autowired constructor(
     ): ResponseEntity<Any> {
         val eventDto = eventService.getEvent(eventId)
         if (accessController.isTeamAdmin(authentication, eventDto.teamId!!)) {
+            if (!eventDto.openForRegistration) throw NotPossibleException("Event $eventId is not open for registration")
             val toNotify = eventService.getMembersMailNotResponded(eventId)
             if (toNotify.isNotEmpty()) {
                 mailService.sendMessage(

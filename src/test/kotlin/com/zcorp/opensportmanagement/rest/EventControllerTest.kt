@@ -2,12 +2,15 @@ package com.zcorp.opensportmanagement.rest
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.nhaarman.mockito_kotlin.any
+import com.nhaarman.mockito_kotlin.reset
 import com.nhaarman.mockito_kotlin.whenever
 import com.zcorp.opensportmanagement.dto.EventDto
 import com.zcorp.opensportmanagement.dto.EventModificationDto
 import com.zcorp.opensportmanagement.security.AccessController
 import com.zcorp.opensportmanagement.service.EventService
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs
@@ -31,6 +34,7 @@ import java.time.LocalDateTime
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @AutoConfigureRestDocs
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EventControllerTest {
 
     @Autowired
@@ -41,14 +45,20 @@ class EventControllerTest {
     @MockBean
     private lateinit var accessController: AccessController
 
+    private val fromDateTime = LocalDateTime.of(2018, 1, 1, 1, 0)
+    private val toDateTime = LocalDateTime.of(2018, 1, 1, 2, 0)
+    private val placeId = 1
+    private val eventId = 58
+    private val teamId = 10
+
+    @BeforeEach
+    fun init() {
+        reset(eventServiceMock, accessController)
+    }
+
     @Test
     @WithMockUser("foo")
     fun `Update event should return a response with status 'OK'`() {
-        val fromDateTime = LocalDateTime.of(2018, 1, 1, 1, 0)
-        val toDateTime = LocalDateTime.of(2018, 1, 1, 2, 0)
-        val placeId = 1
-        val eventId = 58
-        val teamId = 10
         val modificationDto = EventModificationDto(
                 fromDate = fromDateTime.toLocalDate(),
                 toDate = toDateTime.toLocalDate(),
@@ -151,11 +161,6 @@ class EventControllerTest {
     @Test
     @WithMockUser("foo")
     fun `Cancel event should return a response with status 'OK'`() {
-        val fromDateTime = LocalDateTime.of(2018, 1, 1, 1, 0)
-        val toDateTime = LocalDateTime.of(2018, 1, 1, 2, 0)
-        val placeId = 1
-        val eventId = 58
-        val teamId = 10
         val eventDto = EventDto(
                 _id = eventId,
                 name = "event",
@@ -246,5 +251,30 @@ class EventControllerTest {
                                 .description("Event is open for registration or not"),
                         PayloadDocumentation.fieldWithPath("cancelled")
                                 .description("Event is cancelled or not"))))
+    }
+
+    @Test
+    @WithMockUser("foo")
+    fun `notify users that have not responsded while event is closed should not be possible`() {
+        val eventDto = EventDto(
+                _id = eventId,
+                name = "event",
+                fromDateTime = fromDateTime,
+                toDateTime = toDateTime,
+                placeId = placeId,
+                presentMembers = listOf(),
+                absentMembers = listOf(),
+                waitingMembers = listOf(),
+                teamId = teamId,
+                cancelled = false,
+                openForRegistration = false
+        )
+        whenever(accessController.isTeamAdmin(any(), any())).thenReturn(true)
+        whenever(eventServiceMock.getEvent(eventId)).thenReturn(eventDto)
+        this.mockMvc.perform(
+                put("/events/$eventId/notifications")
+                        .contentType(APPLICATION_JSON)
+                        .characterEncoding("UTF-8"))
+                .andExpect(status().isBadRequest)
     }
 }

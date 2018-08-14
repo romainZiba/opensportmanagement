@@ -10,8 +10,10 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
+import org.springframework.data.rest.core.annotation.RepositoryRestResource
 import java.time.LocalDateTime
 
+@RepositoryRestResource(exported = false)
 interface TeamRepository : JpaRepository<Team, Int> {
     fun findByIdIn(ids: List<Int>): List<Team>
 

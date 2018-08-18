@@ -81,6 +81,10 @@ jobs:
             command: |
               scp -r build/libs/opensportmanagement-1.0-SNAPSHOT.jar $SSH_USER@$SSH_HOST:~/opensportmanagement/opensportmanagement.jar
         - run:
+            name: Stop previous spring screen if it exists
+            command: |
+              ssh $SSH_USER@$SSH_HOST "if ! screen -list | grep -q "spring"; then screen -S spring -X quit fi "
+        - run:
             name: Execution
             command: |
               ssh $SSH_USER@$SSH_HOST "screen -dmS spring java -jar ~/opensportmanagement/opensportmanagement.jar"

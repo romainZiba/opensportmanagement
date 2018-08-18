@@ -83,7 +83,7 @@ jobs:
         - run:
             name: Stop previous spring screen if it exists
             command: |
-              ssh $SSH_USER@$SSH_HOST "if ! screen -list | grep -q "spring"; then screen -S spring -X quit fi "
+              ssh $SSH_USER@$SSH_HOST "if screen -list | grep -q spring; then screen -S spring -X quit; fi"
         - run:
             name: Execution
             command: |

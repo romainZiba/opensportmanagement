@@ -6,8 +6,6 @@ import com.nhaarman.mockito_kotlin.reset
 import com.nhaarman.mockito_kotlin.whenever
 import com.zcorp.opensportmanagement.dto.EventDto
 import com.zcorp.opensportmanagement.dto.EventModificationDto
-import com.zcorp.opensportmanagement.model.Place
-import com.zcorp.opensportmanagement.model.Team
 import com.zcorp.opensportmanagement.security.AccessController
 import com.zcorp.opensportmanagement.service.EventService
 import org.junit.jupiter.api.BeforeEach
@@ -113,6 +111,7 @@ class EventControllerTest {
                                 "  \"fromDateTime\" : \"2018-01-01T01:00:00\",\n" +
                                 "  \"toDateTime\" : \"2018-01-01T02:00:00\",\n" +
                                 "  \"placeId\" : $placeId,\n" +
+                                "  \"placeName\" : $placeName,\n" +
                                 "  \"presentMembers\" : [ ],\n" +
                                 "  \"absentMembers\" : [ ],\n" +
                                 "  \"waitingMembers\" : [ ],\n" +
@@ -137,6 +136,8 @@ class EventControllerTest {
                                 .description("The date when the event ends"),
                         PayloadDocumentation.fieldWithPath("placeId")
                                 .description("The identifier of the place where the event takes place"),
+                        PayloadDocumentation.fieldWithPath("placeName")
+                                .description("The name of the place where the event takes place"),
                         PayloadDocumentation.fieldWithPath("presentMembers")
                                 .description("The members who are present"),
                         PayloadDocumentation.fieldWithPath("absentMembers")
@@ -210,6 +211,7 @@ class EventControllerTest {
                                 "  \"fromDateTime\" : \"2018-01-01T01:00:00\",\n" +
                                 "  \"toDateTime\" : \"2018-01-01T02:00:00\",\n" +
                                 "  \"placeId\" : $placeId,\n" +
+                                "  \"placeName\" : $placeName,\n" +
                                 "  \"presentMembers\" : [ ],\n" +
                                 "  \"absentMembers\" : [ ],\n" +
                                 "  \"waitingMembers\" : [ ],\n" +
@@ -234,6 +236,8 @@ class EventControllerTest {
                                 .description("The date when the event ends"),
                         PayloadDocumentation.fieldWithPath("placeId")
                                 .description("The identifier of the place where the event takes place"),
+                        PayloadDocumentation.fieldWithPath("placeName")
+                                .description("The name of the place where the event takes place"),
                         PayloadDocumentation.fieldWithPath("presentMembers")
                                 .description("The members who are present"),
                         PayloadDocumentation.fieldWithPath("absentMembers")

@@ -6,6 +6,8 @@ import com.nhaarman.mockito_kotlin.reset
 import com.nhaarman.mockito_kotlin.whenever
 import com.zcorp.opensportmanagement.dto.EventDto
 import com.zcorp.opensportmanagement.dto.EventModificationDto
+import com.zcorp.opensportmanagement.model.Place
+import com.zcorp.opensportmanagement.model.Team
 import com.zcorp.opensportmanagement.security.AccessController
 import com.zcorp.opensportmanagement.service.EventService
 import org.junit.jupiter.api.BeforeEach
@@ -49,6 +51,7 @@ class EventControllerTest {
     private val toDateTime = LocalDateTime.of(2018, 1, 1, 2, 0)
     private val placeId = 1
     private val eventId = 58
+    private val placeName = "place"
     private val teamId = 10
 
     @BeforeEach
@@ -72,6 +75,7 @@ class EventControllerTest {
                 fromDateTime = fromDateTime.minusDays(1),
                 toDateTime = toDateTime.minusDays(1),
                 placeId = placeId,
+                placeName = placeName,
                 presentMembers = listOf(),
                 absentMembers = listOf(),
                 waitingMembers = listOf(),
@@ -85,6 +89,7 @@ class EventControllerTest {
                 fromDateTime = fromDateTime,
                 toDateTime = toDateTime,
                 placeId = placeId,
+                placeName = placeName,
                 presentMembers = listOf(),
                 absentMembers = listOf(),
                 waitingMembers = listOf(),
@@ -167,6 +172,7 @@ class EventControllerTest {
                 fromDateTime = fromDateTime,
                 toDateTime = toDateTime,
                 placeId = placeId,
+                placeName = placeName,
                 presentMembers = listOf(),
                 absentMembers = listOf(),
                 waitingMembers = listOf(),
@@ -180,6 +186,7 @@ class EventControllerTest {
                 fromDateTime = fromDateTime,
                 toDateTime = toDateTime,
                 placeId = placeId,
+                placeName = placeName,
                 presentMembers = listOf(),
                 absentMembers = listOf(),
                 waitingMembers = listOf(),
@@ -262,6 +269,7 @@ class EventControllerTest {
                 fromDateTime = fromDateTime,
                 toDateTime = toDateTime,
                 placeId = placeId,
+                placeName = placeName,
                 presentMembers = listOf(),
                 absentMembers = listOf(),
                 waitingMembers = listOf(),

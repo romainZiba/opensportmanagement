@@ -25,6 +25,7 @@ class Event private constructor(builder: Builder) : AbstractEvent() {
                 fromDateTime = this.fromDateTime,
                 toDateTime = this.toDateTime,
                 placeId = this.place.id!!,
+                placeName = this.place.name,
                 presentMembers = this.membersResponse
                         .filter { it.status == MemberResponse.Status.PRESENT }
                         .map { it.teamMember.toDto() }.toList(),

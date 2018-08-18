@@ -13,6 +13,7 @@ data class EventDto(
     val fromDateTime: LocalDateTime,
     val toDateTime: LocalDateTime?,
     val placeId: Int,
+    val placeName: String,
     val presentMembers: List<TeamMemberDto>,
     val absentMembers: List<TeamMemberDto>,
     val waitingMembers: List<TeamMemberDto>,

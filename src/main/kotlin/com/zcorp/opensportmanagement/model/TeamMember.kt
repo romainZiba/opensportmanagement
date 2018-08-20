@@ -17,7 +17,7 @@ import javax.persistence.UniqueConstraint
 data class TeamMember(
     @ElementCollection val roles: MutableSet<Role>,
     @ManyToOne @JoinColumn(name = "TEAM_ID") val team: Team,
-    var licenseNumber: String = "",
+    var licenceNumber: String = "",
     @Id @GeneratedValue @Column(name = "member_id") val id: Int? = null
 ) {
 
@@ -30,7 +30,7 @@ data class TeamMember(
     }
 
     fun toDto(): TeamMemberDto {
-        return TeamMemberDto(account.username, account.firstName, account.lastName, roles, licenseNumber, account.email,
+        return TeamMemberDto(account.username, account.firstName, account.lastName, roles, licenceNumber, account.email,
                 account.phoneNumber, team.id!!, account.confirmationId, id!!)
     }
 }

@@ -22,6 +22,7 @@ import com.zcorp.opensportmanagement.repository.PlaceRepository
 import com.zcorp.opensportmanagement.repository.SeasonRepository
 import com.zcorp.opensportmanagement.repository.TeamMemberRepository
 import com.zcorp.opensportmanagement.repository.TeamRepository
+import com.zcorp.opensportmanagement.rest.EntityAlreadyExistsException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -151,7 +152,7 @@ open class TeamService @Autowired constructor(
     @Transactional
     open fun updateProfile(dto: TeamMemberUpdateDto, teamId: Int, name: String): TeamMemberDto {
         val teamMember = teamRepository.getTeamMemberByUserName(teamId, name) ?: throw NotFoundException("Team member $name does not exist")
-        teamMember.licenseNumber = dto.licenseNumber
+        teamMember.licenceNumber = dto.licenceNumber
         return teamMemberRepository.save(teamMember).toDto()
     }
 
@@ -167,7 +168,11 @@ open class TeamService @Autowired constructor(
                 email = teamMemberDto.email,
                 phoneNumber = teamMemberDto.phoneNumber)
         val user = accountRepository.findByEmailIgnoreCase(teamMemberDto.email) ?: accountRepository.save(userToSave)
-        val teamMember = TeamMember(teamMemberDto.roles.toMutableSet(), team)
+        val teamMember = TeamMember(teamMemberDto.roles.toMutableSet(), team, teamMemberDto.licenceNumber)
+        val userTeams = user.getMemberOf().map { it.team.id }
+        if (userTeams.contains(teamId)) {
+            throw EntityAlreadyExistsException("User ${user.username} is already member of team $teamId")
+        }
         user.addTeamMember(teamMember)
         val savedUser = accountRepository.save(user)
         emailService.sendMessage(listOf(savedUser.email),

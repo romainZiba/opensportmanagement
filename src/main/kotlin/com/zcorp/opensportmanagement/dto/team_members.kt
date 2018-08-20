@@ -8,7 +8,7 @@ data class TeamMemberDto(
     val firstName: String,
     val lastName: String,
     val roles: Set<TeamMember.Role>,
-    val licenseNumber: String,
+    val licenceNumber: String,
     val email: String,
     val phoneNumber: String?,
     @JsonIgnore val teamId: Int,
@@ -21,7 +21,8 @@ data class TeamMemberCreationDto(
     val lastName: String,
     val roles: Set<TeamMember.Role>,
     val email: String,
-    val phoneNumber: String = ""
+    val phoneNumber: String = "",
+    val licenceNumber: String = ""
 )
 
-data class TeamMemberUpdateDto(val licenseNumber: String)
+data class TeamMemberUpdateDto(val licenceNumber: String)

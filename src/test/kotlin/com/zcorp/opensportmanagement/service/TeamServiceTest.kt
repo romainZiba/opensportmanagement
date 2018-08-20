@@ -22,6 +22,7 @@ import com.zcorp.opensportmanagement.repository.PlaceRepository
 import com.zcorp.opensportmanagement.repository.SeasonRepository
 import com.zcorp.opensportmanagement.repository.TeamMemberRepository
 import com.zcorp.opensportmanagement.repository.TeamRepository
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.util.Optional
 
@@ -33,7 +34,7 @@ class TeamServiceTest {
     private val teamMemberRepoMock: TeamMemberRepository = mock()
     private val placeRepoMock: PlaceRepository = mock()
     private val emailServiceMock: EmailService = mock()
-    private val osmPropertiesMock: OsmProperties = mock()
+    private val osmPropertiesMock: OsmProperties = OsmProperties(listOf("pouet"))
     private val teamService: TeamService = TeamService(
             teamRepository = teamRepoMock,
             teamMemberRepository = teamMemberRepoMock,
@@ -88,39 +89,42 @@ class TeamServiceTest {
         assert(savedPlace).isEqualTo(mockPlaces[0].toDto())
     }
 
-    @Test
-    fun `create place with a not existing team should fail`() {
-        whenever(teamRepoMock.findById(teamIds[0])).thenReturn(Optional.empty())
-        val placeDto = PlaceDto("place", "address", "city", PlaceType.STADIUM)
-        assert {
-            teamService.createPlace(placeDto, teamIds[0])
-        }.thrownError { isInstanceOf(NotFoundException::class) }
-    }
+    @Nested
+    inner class ErrorCases {
+        @Test
+        fun `create place with a not existing team should fail`() {
+            whenever(teamRepoMock.findById(teamIds[0])).thenReturn(Optional.empty())
+            val placeDto = PlaceDto("place", "address", "city", PlaceType.STADIUM)
+            assert {
+                teamService.createPlace(placeDto, teamIds[0])
+            }.thrownError { isInstanceOf(NotFoundException::class) }
+        }
 
-    @Test
-    fun `create place with an empty name should fail`() {
-        whenever(teamRepoMock.findById(teamIds[0])).thenReturn(Optional.of(mockTeams[0]))
-        val placeDto = PlaceDto("", "address", "city", PlaceType.STADIUM)
-        assert {
-            teamService.createPlace(placeDto, teamIds[0])
-        }.thrownError { isInstanceOf(BadParameterException::class) }
-    }
+        @Test
+        fun `create place with an empty name should fail`() {
+            whenever(teamRepoMock.findById(teamIds[0])).thenReturn(Optional.of(mockTeams[0]))
+            val placeDto = PlaceDto("", "address", "city", PlaceType.STADIUM)
+            assert {
+                teamService.createPlace(placeDto, teamIds[0])
+            }.thrownError { isInstanceOf(BadParameterException::class) }
+        }
 
-    @Test
-    fun `create place with an empty address should fail`() {
-        whenever(teamRepoMock.findById(teamIds[0])).thenReturn(Optional.of(mockTeams[0]))
-        val placeDto = PlaceDto("name", "", "city", PlaceType.STADIUM)
-        assert {
-            teamService.createPlace(placeDto, teamIds[0])
-        }.thrownError { isInstanceOf(BadParameterException::class) }
-    }
+        @Test
+        fun `create place with an empty address should fail`() {
+            whenever(teamRepoMock.findById(teamIds[0])).thenReturn(Optional.of(mockTeams[0]))
+            val placeDto = PlaceDto("name", "", "city", PlaceType.STADIUM)
+            assert {
+                teamService.createPlace(placeDto, teamIds[0])
+            }.thrownError { isInstanceOf(BadParameterException::class) }
+        }
 
-    @Test
-    fun `create place with an empty city should fail`() {
-        whenever(teamRepoMock.findById(teamIds[0])).thenReturn(Optional.of(mockTeams[0]))
-        val placeDto = PlaceDto("name", "address", "", PlaceType.STADIUM)
-        assert {
-            teamService.createPlace(placeDto, teamIds[0])
-        }.thrownError { isInstanceOf(BadParameterException::class) }
+        @Test
+        fun `create place with an empty city should fail`() {
+            whenever(teamRepoMock.findById(teamIds[0])).thenReturn(Optional.of(mockTeams[0]))
+            val placeDto = PlaceDto("name", "address", "", PlaceType.STADIUM)
+            assert {
+                teamService.createPlace(placeDto, teamIds[0])
+            }.thrownError { isInstanceOf(BadParameterException::class) }
+        }
     }
 }

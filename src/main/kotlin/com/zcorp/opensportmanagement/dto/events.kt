@@ -1,6 +1,5 @@
 package com.zcorp.opensportmanagement.dto
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import com.zcorp.opensportmanagement.model.AbstractEvent
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -19,7 +18,7 @@ data class EventDto(
     val waitingMembers: List<TeamMemberDto>,
     val openForRegistration: Boolean,
     val cancelled: Boolean,
-    @JsonIgnore val teamId: Int? = null,
+    val teamId: Int,
     var localTeamName: String? = null,
     var visitorTeamName: String? = null,
     var localTeamImgUrl: String? = null,

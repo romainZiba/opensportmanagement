@@ -43,7 +43,7 @@ open class EventController @Autowired constructor(
         authentication: Authentication
     ): ResponseEntity<EventDto> {
         val eventDto = eventService.getEvent(eventId)
-        if (accessController.isAccountAllowedToAccessTeam(authentication, eventDto.teamId!!)) {
+        if (accessController.isAccountAllowedToAccessTeam(authentication, eventDto.teamId)) {
             return ResponseEntity.ok(eventDto)
         }
         throw UserForbiddenException()
@@ -55,7 +55,7 @@ open class EventController @Autowired constructor(
         authentication: Authentication
     ): ResponseEntity<Any> {
         val eventDto = eventService.getEvent(eventId)
-        if (accessController.isTeamAdmin(authentication, eventDto.teamId!!)) {
+        if (accessController.isTeamAdmin(authentication, eventDto.teamId)) {
             eventService.deleteEvent(eventId)
             return ResponseEntity.noContent().build()
         }
@@ -69,7 +69,7 @@ open class EventController @Autowired constructor(
         authentication: Authentication
     ): ResponseEntity<EventDto> {
         val eventDto = eventService.getEvent(eventId)
-        if (accessController.isTeamAdmin(authentication, eventDto.teamId!!)) {
+        if (accessController.isTeamAdmin(authentication, eventDto.teamId)) {
             val dto = eventService.updateEvent(eventId, eventModifDto, LocalDateTime.now())
             return ResponseEntity.ok(dto)
         }
@@ -83,7 +83,7 @@ open class EventController @Autowired constructor(
         authentication: Authentication
     ): ResponseEntity<EventDto> {
         val eventDto = eventService.getEvent(eventId)
-        if (accessController.isAccountAllowedToAccessTeam(authentication, eventDto.teamId!!)) {
+        if (accessController.isAccountAllowedToAccessTeam(authentication, eventDto.teamId)) {
             val dto = eventService.participate(authentication.name, eventId, present, LocalDateTime.now())
             return ResponseEntity.ok(dto)
         }
@@ -96,7 +96,7 @@ open class EventController @Autowired constructor(
         authentication: Authentication
     ): ResponseEntity<EventDto> {
         val eventDto = eventService.getEvent(eventId)
-        if (accessController.isTeamAdmin(authentication, eventDto.teamId!!)) {
+        if (accessController.isTeamAdmin(authentication, eventDto.teamId)) {
             val updatedDto = eventService.cancelEvent(eventId, LocalDateTime.now())
             return ResponseEntity.ok(updatedDto)
         }
@@ -109,7 +109,7 @@ open class EventController @Autowired constructor(
         authentication: Authentication
     ): ResponseEntity<List<MessageDto>> {
         val eventDto = eventService.getEvent(eventId)
-        if (accessController.isAccountAllowedToAccessTeam(authentication, eventDto.teamId!!)) {
+        if (accessController.isAccountAllowedToAccessTeam(authentication, eventDto.teamId)) {
             return ResponseEntity.ok(messagingService.getMessagesFromEvent(eventId))
         }
         throw UserForbiddenException()
@@ -122,7 +122,7 @@ open class EventController @Autowired constructor(
         authentication: Authentication
     ): ResponseEntity<MessageDto> {
         val eventDto = eventService.getEvent(eventId)
-        if (accessController.isAccountAllowedToAccessTeam(authentication, eventDto.teamId!!)) {
+        if (accessController.isAccountAllowedToAccessTeam(authentication, eventDto.teamId)) {
             return ResponseEntity.ok(messagingService.createMessageInEvent(messageDto, authentication.name, eventDto))
         }
         throw UserForbiddenException()
@@ -134,7 +134,7 @@ open class EventController @Autowired constructor(
         authentication: Authentication
     ): ResponseEntity<Any> {
         val eventDto = eventService.getEvent(eventId)
-        if (accessController.isTeamAdmin(authentication, eventDto.teamId!!)) {
+        if (accessController.isTeamAdmin(authentication, eventDto.teamId)) {
             if (!eventDto.openForRegistration) throw NotPossibleException("Event $eventId is not open for registration")
             val toNotify = eventService.getMembersMailNotResponded(eventId)
             if (toNotify.isNotEmpty()) {
@@ -155,7 +155,7 @@ open class EventController @Autowired constructor(
         authentication: Authentication
     ): ResponseEntity<Any> {
         val event = eventService.getEvent(eventId)
-        if (accessController.isTeamAdmin(authentication, event.teamId!!)) {
+        if (accessController.isTeamAdmin(authentication, event.teamId)) {
             eventService.openEvent(event._id)
             return ResponseEntity.ok().build()
         }

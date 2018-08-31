@@ -92,7 +92,8 @@ class EventControllerTest {
                 absentMembers = listOf(),
                 waitingMembers = listOf(),
                 cancelled = false,
-                openForRegistration = true
+                openForRegistration = true,
+                teamId = teamId
         )
         whenever(accessController.isTeamAdmin(any(), any())).thenReturn(true)
         whenever(eventServiceMock.getEvent(eventId)).thenReturn(eventDto)
@@ -123,6 +124,7 @@ class EventControllerTest {
                                 "  \"localTeamScore\" : null,\n" +
                                 "  \"done\" : null,\n" +
                                 "  \"openForRegistration\" : true,\n" +
+                                "  \"teamId\" : 10,\n" +
                                 "  \"cancelled\" : false\n" +
                                 "}", true))
                 .andDo(MockMvcRestDocumentation.document("update_event", PayloadDocumentation.responseFields(
@@ -160,6 +162,8 @@ class EventControllerTest {
                                 .description("Whether or not the match has been done"),
                         PayloadDocumentation.fieldWithPath("openForRegistration")
                                 .description("Event is open for registration or not"),
+                        PayloadDocumentation.fieldWithPath("teamId")
+                                .description("Id of the team"),
                         PayloadDocumentation.fieldWithPath("cancelled")
                                 .description("Event is cancelled or not"))))
     }
@@ -223,6 +227,7 @@ class EventControllerTest {
                                 "  \"localTeamScore\" : null,\n" +
                                 "  \"openForRegistration\" : true,\n" +
                                 "  \"done\" : null,\n" +
+                                "  \"teamId\" : 10,\n" +
                                 "  \"cancelled\" : true\n" +
                                 "}", true))
                 .andDo(MockMvcRestDocumentation.document("update_event", PayloadDocumentation.responseFields(
@@ -260,6 +265,8 @@ class EventControllerTest {
                                 .description("Whether or not the match has been done"),
                         PayloadDocumentation.fieldWithPath("openForRegistration")
                                 .description("Event is open for registration or not"),
+                        PayloadDocumentation.fieldWithPath("teamId")
+                                .description("Id of the team"),
                         PayloadDocumentation.fieldWithPath("cancelled")
                                 .description("Event is cancelled or not"))))
     }

@@ -11,7 +11,7 @@ data class TeamMemberDto(
     val licenceNumber: String,
     val email: String,
     val phoneNumber: String?,
-    @JsonIgnore val teamId: Int,
+    val teamId: Int,
     @JsonIgnore val confirmationId: String? = null,
     val _id: Int
 )

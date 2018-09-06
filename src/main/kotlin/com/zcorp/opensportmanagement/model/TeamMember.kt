@@ -17,14 +17,10 @@ import javax.persistence.UniqueConstraint
 data class TeamMember(
     @ElementCollection val roles: MutableSet<Role>,
     @ManyToOne @JoinColumn(name = "TEAM_ID") val team: Team,
+    @ManyToOne @JoinColumn(name = "ACCOUNT_USERNAME", nullable = false) val account: Account,
     var licenceNumber: String = "",
     @Id @GeneratedValue @Column(name = "member_id") val id: Int? = null
 ) {
-
-    @ManyToOne
-    @JoinColumn(name = "ACCOUNT_USERNAME", nullable = false)
-    lateinit var account: Account
-
     enum class Role {
         PLAYER, COACH, ADMIN
     }

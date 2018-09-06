@@ -64,6 +64,16 @@ class TeamControllerTest {
     private val mockPlacesDto = listOf(PlaceDto("name", "address", "city", PlaceType.STADIUM, teamId, 1))
     private val mockGlobalAdmin = Account("foo", "foo", "password", "foo",
             "0", false, true)
+    private val mockAccount = Account(
+            firstName = "first",
+            username = "ff",
+            password = "password",
+            globalAdmin = false,
+            temporary = false,
+            phoneNumber = "",
+            lastName = "last",
+            email = "fl@t.fr"
+    )
 
     @Test
     fun `Get teams when unauthenticated should return FORBIDDEN`() {
@@ -95,7 +105,7 @@ class TeamControllerTest {
         val savedTeam = TeamDto("The team", Team.Sport.BASKETBALL, Team.Gender.BOTH, Team.AgeGroup.ADULTS, "", 2)
         whenever(accountServiceMock.findByUsername(any())).thenReturn(mockGlobalAdmin.toDto())
         whenever(teamServiceMock.createTeam(any(), any())).thenReturn(savedTeam)
-        val teamMembers = setOf(TeamMember(mutableSetOf(TeamMember.Role.ADMIN), mockTeam, "AAA", 1))
+        val teamMembers = setOf(TeamMember(mutableSetOf(TeamMember.Role.ADMIN), mockTeam, mockAccount, "1"))
         whenever(accountServiceMock.getTeamsAndRoles(any())).thenReturn(teamMembers)
         this.mockMvc.perform(post("/teams")
                 .contentType(MediaType.APPLICATION_JSON)

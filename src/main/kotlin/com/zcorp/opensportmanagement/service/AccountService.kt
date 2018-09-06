@@ -6,6 +6,7 @@ import com.zcorp.opensportmanagement.dto.AccountUpdateDto
 import com.zcorp.opensportmanagement.model.Account
 import com.zcorp.opensportmanagement.model.TeamMember
 import com.zcorp.opensportmanagement.repository.AccountRepository
+import com.zcorp.opensportmanagement.repository.TeamMemberRepository
 import com.zcorp.opensportmanagement.repository.TeamRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
@@ -16,6 +17,7 @@ import javax.transaction.Transactional
 open class AccountService @Autowired constructor(
     private val teamRepository: TeamRepository,
     private val accountRepository: AccountRepository,
+    private val teamMemberRepository: TeamMemberRepository,
     private val bCryptPasswordEncoder: BCryptPasswordEncoder
 ) {
 
@@ -46,9 +48,9 @@ open class AccountService @Autowired constructor(
         val user = accountRepository.findByUsername(userId) ?: throw NotFoundException("Account $userId does not exist")
         val team = teamRepository.findById(teamId)
                 .orElseThrow { NotFoundException("Team $teamId does not exist") }
-        val member = TeamMember(mutableSetOf(TeamMember.Role.PLAYER), team)
-        user.addTeamMember(member)
-        return accountRepository.save(user).toDto()
+        val member = TeamMember(mutableSetOf(TeamMember.Role.PLAYER), team, user)
+        val savedMember = teamMemberRepository.save(member)
+        return savedMember.account.toDto()
     }
 
     // TODO: leave team
@@ -71,8 +73,8 @@ open class AccountService @Autowired constructor(
     }
 
     @Transactional
-    open fun getTeamsAndRoles(username: String): Set<TeamMember>? {
-        return accountRepository.findByUsername(username)?.getMemberOf()
+    open fun getTeamsAndRoles(username: String): Set<TeamMember> {
+        return teamMemberRepository.findMemberOfByUsername(username).toSet()
     }
 
     @Transactional

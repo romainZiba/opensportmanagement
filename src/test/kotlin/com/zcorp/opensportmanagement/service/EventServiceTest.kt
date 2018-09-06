@@ -86,10 +86,10 @@ class EventServiceTest {
             email = "",
             phoneNumber = phoneNumber,
             username = "foo4")
-    private val mockTeamMember = TeamMember(mutableSetOf(TeamMember.Role.ADMIN), mockTeam, "", teamMemberId)
-    private val mockTeamMember2 = TeamMember(mutableSetOf(TeamMember.Role.ADMIN), mockTeam, "", teamMember2Id)
-    private val mockTeamMember3 = TeamMember(mutableSetOf(TeamMember.Role.ADMIN), mockTeam, "", teamMember3Id)
-    private val mockTeamMember4 = TeamMember(mutableSetOf(TeamMember.Role.PLAYER), mockTeam, "", teamMember4Id)
+    private val mockTeamMember = TeamMember(mutableSetOf(TeamMember.Role.ADMIN), mockTeam, mockUser, "", teamMemberId)
+    private val mockTeamMember2 = TeamMember(mutableSetOf(TeamMember.Role.ADMIN), mockTeam, mockUser2, "", teamMember2Id)
+    private val mockTeamMember3 = TeamMember(mutableSetOf(TeamMember.Role.ADMIN), mockTeam, mockUser3, "", teamMember3Id)
+    private val mockTeamMember4 = TeamMember(mutableSetOf(TeamMember.Role.PLAYER), mockTeam, mockUser4, "", teamMember4Id)
 
     private val eventRepoMock: EventRepository = mock()
     private val placeRepoMock: PlaceRepository = mock()
@@ -108,10 +108,6 @@ class EventServiceTest {
     )
 
     init {
-        mockTeamMember.account = mockUser
-        mockTeamMember2.account = mockUser2
-        mockTeamMember3.account = mockUser3
-        mockTeamMember4.account = mockUser4
         mockEvent = Event.Builder()
                 .name("TheOne")
                 .fromDate(LocalDateTime.of(2018, 1, 31, 10, 0))

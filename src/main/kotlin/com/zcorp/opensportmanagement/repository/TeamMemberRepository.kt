@@ -16,4 +16,10 @@ interface TeamMemberRepository : JpaRepository<TeamMember, Int> {
         @Param("username") username: String,
         @Param("teamId") teamId: Int
     ): TeamMember?
+
+    @Query("SELECT teamMember FROM TeamMember teamMember " +
+            " WHERE teamMember.account.username = :username ")
+    fun findMemberOfByUsername(
+        @Param("username") username: String
+    ): List<TeamMember>
 }

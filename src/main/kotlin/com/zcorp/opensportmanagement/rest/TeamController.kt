@@ -67,7 +67,7 @@ open class TeamController @Autowired constructor(
         if (user.globalAdmin) {
             val savedTeam = teamService.createTeam(teamDto, username)
             val authorities = accountService.getTeamsAndRoles(username)
-                    ?.mapTo(LinkedList<GrantedAuthority>()) { OpenGrantedAuthority(it.team.id!!, it.roles) }
+                    .mapTo(LinkedList<GrantedAuthority>()) { OpenGrantedAuthority(it.team.id!!, it.roles) }
             val copyAuthentication = UsernamePasswordAuthenticationToken(
                     authentication.principal, authentication.credentials, authorities)
             val newCookie = JWTUtils.getAccessCookie(copyAuthentication)

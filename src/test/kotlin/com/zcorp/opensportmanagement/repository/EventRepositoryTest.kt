@@ -55,10 +55,8 @@ open class EventRepositoryTest {
         val savedAccount2 = entityManager.persist(account2)
 
         // Given team members
-        val teamMember1 = TeamMember(mutableSetOf(), savedTeam, "")
-        val teamMember2 = TeamMember(mutableSetOf(), savedTeam, "")
-        teamMember1.account = savedAccount1
-        teamMember2.account = savedAccount2
+        val teamMember1 = TeamMember(mutableSetOf(), savedTeam, savedAccount1)
+        val teamMember2 = TeamMember(mutableSetOf(), savedTeam, savedAccount2)
         savedTeamMember1 = entityManager.persist(teamMember1)
         savedTeamMember2 = entityManager.persist(teamMember2)
 

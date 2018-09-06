@@ -67,9 +67,8 @@ open class TeamService @Autowired constructor(
         val user = accountRepository.findByUsername(creatorUsername) ?: throw NotFoundException("Account $creatorUsername does not exist")
         var team = Team(teamDto.name, teamDto.sport, teamDto.genderKind, teamDto.ageGroup, teamDto.imgUrl)
         team = teamRepository.save(team)
-        val teamMember = TeamMember(mutableSetOf(TeamMember.Role.ADMIN), team)
-        user.addTeamMember(teamMember)
-        accountRepository.save(user)
+        val teamMember = TeamMember(mutableSetOf(TeamMember.Role.ADMIN), team, user)
+        teamMemberRepository.save(teamMember)
         return team.toDto()
     }
 
@@ -167,20 +166,17 @@ open class TeamService @Autowired constructor(
                 password = bCryptPasswordEncoder.encode(UUID.randomUUID().toString()),
                 email = teamMemberDto.email,
                 phoneNumber = teamMemberDto.phoneNumber)
-        val user = accountRepository.findByEmailIgnoreCase(teamMemberDto.email) ?: accountRepository.save(userToSave)
-        val teamMember = TeamMember(teamMemberDto.roles.toMutableSet(), team, teamMemberDto.licenceNumber)
-        val userTeams = user.getMemberOf().map { it.team.id }
-        if (userTeams.contains(teamId)) {
-            throw EntityAlreadyExistsException("User ${user.username} is already member of team $teamId")
-        }
-        user.addTeamMember(teamMember)
-        val savedUser = accountRepository.save(user)
-        emailService.sendMessage(listOf(savedUser.email),
+        val userInDb = accountRepository.findByEmailIgnoreCase(teamMemberDto.email) ?: accountRepository.save(userToSave)
+        val membersOfTeamIds = teamMemberRepository.findMemberOfByUsername(userInDb.username).map { it.team.id }
+        if (membersOfTeamIds.contains(teamId)) throw EntityAlreadyExistsException("User ${userInDb.username} is already member of team $teamId")
+        val teamMember = TeamMember(teamMemberDto.roles.toMutableSet(), team, userInDb, teamMemberDto.licenceNumber)
+        val teamMemberInDb = teamMemberRepository.save(teamMember)
+        emailService.sendMessage(listOf(userInDb.email),
                 "Rejoignez l'équipe ${team.name}",
                 "Vous êtes invités à rejoindre l'équipe ${team.name}. \n\n " +
                         "Veuillez confirmer votre inscription en suivant ce lien: " +
-                        "${properties.allowedOrigins[0]}/confirmation?id=${savedUser.confirmationId}\n " +
+                        "${properties.allowedOrigins[0]}/confirmation?id=${userInDb.confirmationId}\n " +
                         "Vous serez alors invité à modifier votre mot de passe.")
-        return savedUser.getMemberOf().first { it.team.id == teamId }.toDto()
+        return teamMemberInDb.toDto()
     }
 }

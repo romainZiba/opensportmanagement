@@ -1,6 +1,7 @@
 package com.zcorp.opensportmanagement.security
 
 import com.zcorp.opensportmanagement.repository.AccountRepository
+import com.zcorp.opensportmanagement.repository.TeamMemberRepository
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.User
@@ -13,7 +14,10 @@ import java.util.LinkedList
 
 @Service
 @Qualifier("osm_user_details")
-open class UserDetailsServiceImpl(private val accountRepository: AccountRepository) : UserDetailsService {
+open class UserDetailsServiceImpl(
+    private val accountRepository: AccountRepository,
+    private val teamMemberRepository: TeamMemberRepository
+) : UserDetailsService {
     @Transactional(readOnly = true)
     @Throws(UsernameNotFoundException::class)
     override fun loadUserByUsername(username: String): UserDetails {
@@ -23,6 +27,7 @@ open class UserDetailsServiceImpl(private val accountRepository: AccountReposito
         }
         return User(user.username,
                 user.password,
-                user.getMemberOf().mapTo(LinkedList<GrantedAuthority>()) { OpenGrantedAuthority(it.team.id!!, it.roles) })
+                teamMemberRepository.findMemberOfByUsername(user.username)
+                        .mapTo(LinkedList<GrantedAuthority>()) { OpenGrantedAuthority(it.team.id!!, it.roles) })
     }
 }

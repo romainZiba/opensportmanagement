@@ -25,4 +25,10 @@ data class TeamMemberCreationDto(
     val licenceNumber: String = ""
 )
 
-data class TeamMemberUpdateDto(val licenceNumber: String)
+data class TeamMemberUpdateDto(
+    val firstName: String,
+    val lastName: String,
+    val licenceNumber: String,
+    val email: String,
+    val phoneNumber: String
+)

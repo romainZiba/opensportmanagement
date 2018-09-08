@@ -152,6 +152,10 @@ open class TeamService @Autowired constructor(
     open fun updateProfile(dto: TeamMemberUpdateDto, teamId: Int, name: String): TeamMemberDto {
         val teamMember = teamRepository.getTeamMemberByUserName(teamId, name) ?: throw NotFoundException("Team member $name does not exist")
         teamMember.licenceNumber = dto.licenceNumber
+        teamMember.account.firstName = dto.firstName
+        teamMember.account.lastName = dto.lastName
+        teamMember.account.email = dto.email
+        teamMember.account.phoneNumber = dto.phoneNumber
         return teamMemberRepository.save(teamMember).toDto()
     }
 

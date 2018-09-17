@@ -5,6 +5,8 @@ import javax.persistence.ElementCollection
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.Column
+import javax.persistence.EnumType
+import javax.persistence.Enumerated
 import javax.persistence.Id
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
@@ -15,7 +17,7 @@ import javax.persistence.UniqueConstraint
 @Table(name = "team_member",
         uniqueConstraints = [(UniqueConstraint(columnNames = arrayOf("ACCOUNT_USERNAME", "TEAM_ID")))])
 data class TeamMember(
-    @ElementCollection val roles: MutableSet<Role>,
+    @ElementCollection @Enumerated(EnumType.STRING) val roles: MutableSet<Role>,
     @ManyToOne @JoinColumn(name = "TEAM_ID") val team: Team,
     @ManyToOne @JoinColumn(name = "ACCOUNT_USERNAME", nullable = false) val account: Account,
     var licenceNumber: String = "",
